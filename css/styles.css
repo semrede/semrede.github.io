@@ -113,6 +113,24 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
 .venue p { margin: 0 0 18px; color: var(--yellow); text-transform: uppercase; font-size: 12px; }
 .venue span { color: #c8cabf; max-width: 450px; font-size: 12px; }
 
+.showcase { padding-block: 110px; border-top: 1px solid #34403a; }
+.showcase-inner {
+  border: 2px solid var(--yellow); padding: 55px;
+  background: radial-gradient(circle at 90% 10%, #3a2f14, transparent 35%), linear-gradient(150deg, #16211d, #07100f 70%);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 45px 60px;
+}
+.showcase-inner h2 { margin: 0; font: 800 clamp(48px, 7vw, 90px)/.82 var(--display); text-transform: uppercase; letter-spacing: -.03em; }
+.showcase-inner h2 em { color: var(--yellow); font-style: normal; }
+.showcase-lead { margin: 0; grid-column: 2; color: #c3c5b9; font-size: 14px; max-width: 460px; }
+.showcase-list { grid-column: 1 / -1; list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.showcase-list li { display: flex; gap: 18px; padding: 22px; border: 1px solid #34403a; background: #0a1513; }
+.showcase-list .icon { margin: 0 0 8px; color: var(--orange); font: 700 40px/1 var(--display); }
+.showcase-list li:nth-child(2) .icon { color: var(--green); }
+.showcase-list h3 { margin: 0 0 8px; font: 700 22px/.95 var(--display); text-transform: uppercase; }
+.showcase-list p { margin: 0; color: #9ea59e; font-size: 11px; }
+.showcase-inner .big-link { justify-self: start; grid-column: 1; color: var(--yellow); border-color: var(--yellow); }
+.showcase-inner .big-link:hover { background: var(--yellow); color: var(--ink); }
+
 .closing { text-align: center; padding-block: 130px; border-top: 1px solid #34403a; }
 .closing h2 span { color: var(--teal); }
 .big-link { display: inline-block; margin-top: 35px; padding: 14px 24px; border: 2px solid var(--teal); color: var(--teal); font-weight: 700; transition: background .2s, color .2s; }
@@ -132,6 +150,11 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
   .feature-grid article:nth-child(2) { border-right: 0; }
   .feature-grid article:nth-child(-n+2) { border-bottom: 1px solid #34403a; }
   .venues { grid-template-columns: 1fr; padding-block: 75px; }
+  .showcase { padding-block: 75px; }
+  .showcase-inner { grid-template-columns: 1fr; padding: 32px; gap: 25px; }
+  .showcase-lead { grid-column: 1; }
+  .showcase-list { grid-template-columns: 1fr; }
+  .showcase-inner .big-link { grid-column: 1; }
   .site-footer { flex-direction: column; }
 }
 
