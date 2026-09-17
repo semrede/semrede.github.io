@@ -157,8 +157,9 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
 .music-art img { position: relative; z-index: 1; width: 100%; aspect-ratio: 1; object-fit: cover; display: block; filter: contrast(1.1) saturate(1.15); border: 2px solid var(--yellow); }
 .music-copy h2 { margin: 0 0 20px; font: 800 clamp(48px, 7vw, 80px)/.82 var(--display); text-transform: uppercase; letter-spacing: -.03em; }
 .music-copy h2 em { color: var(--green); font-style: normal; }
-.music-copy p { color: #c3c5b9; font-size: 14px; max-width: 460px; margin: 0 0 30px; }
-.music-copy .big-link { color: var(--green); border-color: var(--green); }
+.music-copy p { color: #c3c5b9; font-size: 13px; line-height: 1.7; max-width: 520px; margin: 0 0 18px; }
+.music-copy p strong { color: var(--yellow); font-weight: 700; }
+.music-copy .big-link { margin-top: 8px; color: var(--green); border-color: var(--green); }
 .music-copy .big-link:hover { background: var(--green); color: var(--ink); }
 
 .closing { text-align: center; padding-block: 130px; border-top: 1px solid #34403a; }
