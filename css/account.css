@@ -1,0 +1,75 @@
+/* Account corner in the header, the /login page and the /messages page. */
+
+.account-bar { display: flex; align-items: center; gap: 14px; margin-left: 8px; }
+.acct-btn {
+  padding: 7px 14px; border: 2px solid var(--yellow); color: var(--yellow);
+  font: 700 11px var(--mono); letter-spacing: .12em; text-transform: uppercase;
+  transition: background .2s, color .2s;
+}
+.acct-btn:hover { background: var(--yellow); color: var(--ink); }
+.acct-mail { position: relative; display: grid; place-items: center; color: var(--teal); }
+.acct-mail:hover { color: var(--yellow); }
+.acct-badge {
+  position: absolute; top: -7px; right: -9px; min-width: 17px; height: 17px; padding: 0 4px;
+  display: grid; place-items: center; border-radius: 9px; background: var(--orange); color: var(--ink);
+  font: 700 10px/1 var(--mono);
+}
+.acct-chip { display: flex; align-items: center; gap: 8px; max-width: 190px; }
+.acct-chip .avatar { width: 30px; height: 30px; font-size: 12px; }
+.acct-name { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--paper); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acct-chip:hover .acct-name { color: var(--yellow); }
+
+/* login page */
+.account-main { padding-bottom: 70px; }
+.account-grid { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.account-grid .side-card { margin: 0; }
+.go-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 18px; }
+
+/* messages */
+.dm-shell {
+  display: grid; grid-template-columns: 320px minmax(0, 1fr);
+  border: 2px solid var(--teal); background: linear-gradient(160deg, #0b1716, #050a09 70%);
+  height: min(74vh, 760px); min-height: 460px; overflow: hidden;
+}
+.dm-list-pane { display: flex; flex-direction: column; border-right: 1px solid #1f3a37; min-width: 0; }
+.dm-thread-pane { display: flex; flex-direction: column; min-width: 0; }
+.dm-list { flex: 1; overflow-y: auto; }
+.dm-row {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  border-bottom: 1px solid #16211f; min-width: 0;
+}
+.dm-row:hover { background: #0c1817; }
+.dm-row.active { background: #0f2220; border-left: 3px solid var(--teal); padding-left: 11px; }
+.dm-row-main { flex: 1; min-width: 0; }
+.dm-row-main strong { display: block; font: 700 17px/1.1 var(--display); text-transform: uppercase; color: var(--paper); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dm-snippet { display: block; margin-top: 3px; color: #7d877f; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dm-row.unread .dm-row-main strong { color: var(--yellow); }
+.dm-row-side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.dm-row-side time { color: #6d766f; font-size: 10px; white-space: nowrap; }
+.dm-unread { min-width: 18px; padding: 1px 5px; border-radius: 9px; background: var(--orange); color: var(--ink); font: 700 10px/1.6 var(--mono); text-align: center; }
+
+.dm-new { padding: 12px 14px; border-top: 1px solid #1f3a37; background: #07100f; }
+.dm-new label { display: block; margin-bottom: 6px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
+.dm-new input { width: 100%; padding: 9px 11px; background: #0d1918; border: 1px solid #2a3f3c; color: var(--paper); font: 12px var(--mono); }
+.dm-new input:focus { outline: none; border-color: var(--teal); }
+.dm-new .form-error { margin-top: 6px; }
+
+.dm-messages { flex: 1; overflow-y: auto; padding: 12px 18px 16px; }
+.dm-messages .msg { max-width: none; }
+.dm-back { display: none; }
+.dm-thread-pane .room-bar { gap: 10px; }
+
+@media (max-width: 900px) {
+  .account-grid { grid-template-columns: 1fr; }
+  .dm-shell { grid-template-columns: 1fr; height: 70vh; height: 70svh; }
+  .dm-list-pane { border-right: 0; }
+  .dm-shell.thread-open .dm-list-pane { display: none; }
+  .dm-shell:not(.thread-open) .dm-thread-pane { display: none; }
+  .dm-back { display: inline-block; margin: 0 4px 0 0; }
+}
+
+@media (max-width: 800px) {
+  .account-bar { gap: 10px; margin-left: 4px; }
+  .acct-name { display: none; }
+  .acct-btn { padding: 6px 10px; }
+}

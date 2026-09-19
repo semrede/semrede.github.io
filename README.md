@@ -10,7 +10,9 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `chat/index.html`, `js/chat.js`, `css/chat.css`: the chat room, served at /chat
 - `forum/index.html`, `js/forum.js`, `css/forum.css`: the forum, served at /forum
 - `js/nostr-config.js`: relays, admin key, room id, forum categories
-- `js/nostr-login.js`, `js/identity-ui.js`, `js/nostr-common.js`: login and the shared relay, profile and mute-list code
+- `login/index.html`, `js/login-page.js`: log in, register, or manage your account, at /login
+- `messages/index.html`, `js/messages.js`, `js/dm.js`: private messages, at /messages
+- `js/nostr-login.js`, `js/identity-ui.js`, `js/nostr-common.js`, `js/account-bar.js`: login, the header account corner, and the shared relay, profile and mute-list code
 - `js/vendor/nostr.bundle.js`: nostr-tools 2.25.2, vendored so the site has no runtime CDN dependency
 - `tools/nostr-admin.mjs`: room and moderation tool (node, run by hand)
 - `css/styles.css`: styles and theme variables
@@ -45,6 +47,36 @@ The relay list matters: many public relays reject unknown keys, which would
 block everyone who creates an account on the site. Every relay above was
 checked to accept a brand-new key. The same list appears in `js/chat.js` and in
 `tools/nostr-admin.mjs`, and both must be changed together.
+
+## Account and login
+
+The header has a "Log in" button on the right. It leads to `/login`, the only
+page with the login options: a NIP-07 extension, a new key made in the browser,
+or an nsec you paste. Once logged in, the same page shows the account: display
+name, key backup and log out. The chat, the forum and the messages page only
+link to it, so there is one place to learn how accounts work.
+
+A page can send someone to `/login?next=/chat` to bring them back afterwards.
+
+## Messages
+
+`/messages` is one to one messaging, encrypted with NIP-17: the chat message
+(kind 14) is sealed (kind 13) and gift wrapped (kind 1059) with a throwaway
+key, so relays see only who receives it. Encryption uses NIP-44 through
+`window.nostr`, so extensions sign and decrypt without exposing the key; an
+extension without NIP-44 support cannot be used here and the page says so.
+
+Every message is wrapped twice, once for the other person and once for the
+sender, which is what lets both sides read the conversation later. Messages
+also work with other NIP-17 clients (tested against nostr-tools).
+
+The organizers' key is pinned at the top of the inbox, so anyone can write to
+them, and the envelope in the header shows the unread count. Read state is a
+timestamp per conversation in localStorage, so it is per browser.
+
+Limitation: messages go to the site's relay list, not to a recipient's own
+NIP-17 inbox relays (kind 10050). For people using the site that is the same
+list, but someone who only reads on other relays may not see a message.
 
 ## Forum
 

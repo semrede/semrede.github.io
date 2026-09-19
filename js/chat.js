@@ -19,7 +19,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var els = {
     messages: $('messages'), list: $('message-list'), empty: $('chat-empty'), older: $('load-older'),
-    composer: $('composer'), input: $('chat-input'), send: $('send-btn'),
+    composer: $('composer'), input: $('chat-input'), send: $('send-btn'), locked: $('composer-locked'),
     relayDots: $('relay-dots'), relayCount: $('relay-count'), error: $('me-error')
   };
 
@@ -223,12 +223,27 @@
       autosize();
       return publishSigned(ev);
     }).catch(function (err) {
-      window.SemRedeIdentity.showError(els.error, err && err.message ? err.message : 'Could not sign the message');
+      showError(err && err.message ? err.message : 'Could not sign the message');
     }).finally(function () {
       sending = false;
       els.send.disabled = false;
       els.input.focus();
     });
+  }
+
+  // The login cards live on /login now; here we only open or close the composer.
+  function onLoginChange() {
+    var loggedIn = !!auth.pubkey;
+    els.composer.hidden = !loggedIn;
+    els.locked.hidden = loggedIn;
+    queueRender(true);
+  }
+
+  function showError(msg) {
+    if (!els.error) return;
+    els.error.textContent = msg;
+    clearTimeout(els.error._t);
+    els.error._t = setTimeout(function () { els.error.textContent = ''; }, 6000);
   }
 
   function autosize() {
@@ -244,7 +259,9 @@
     });
     els.older.addEventListener('click', loadOlder);
 
-    window.SemRedeIdentity.onChange(function () { queueRender(true); });
+    document.addEventListener('semrede-login', onLoginChange);
+    document.addEventListener('semrede-logout', onLoginChange);
+    auth.ready.then(onLoginChange);
     net.onProfile(function () { queueRender(false); });
     net.onMuteChange(function () { queueRender(false); });
   }
@@ -252,6 +269,7 @@
   // ---------- start ----------
 
   wireUi();
+  onLoginChange();
   subscribeRoom();
   net.relayStatus(els.relayDots, els.relayCount);
 })();

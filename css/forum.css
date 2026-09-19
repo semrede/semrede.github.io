@@ -1,6 +1,6 @@
 /* SemRede forum. Uses the tokens in styles.css and the cards in chat.css. */
 
-.forum-shell { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+.forum-shell { display: grid; grid-template-columns: minmax(0, 1fr); }
 .forum-main { border: 2px solid var(--teal); background: linear-gradient(160deg, #0b1716, #050a09 70%); }
 .forum-bar { border-bottom: 1px solid #1f3a37; }
 .forum-view { padding: 22px 24px 30px; }
@@ -76,10 +76,6 @@
 .new-thread label, .reply-form label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
 .new-thread .big-btn, .reply-form .big-btn { width: auto; align-self: flex-start; padding: 10px 22px; }
 #new-toggle { width: auto; padding: 10px 22px; margin-bottom: 8px; }
-
-@media (max-width: 900px) {
-  .forum-shell { grid-template-columns: 1fr; }
-}
 
 @media (max-width: 800px) {
   .forum-view { padding: 18px 14px 24px; }

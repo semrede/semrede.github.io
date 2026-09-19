@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/chat.css">
   <link rel="stylesheet" href="/css/forum.css">
+  <link rel="stylesheet" href="/css/account.css">
 </head>
 <body class="chat-body forum-body">
   <div class="scanlines" aria-hidden="true"></div>
@@ -98,7 +99,7 @@
           <p class="cat-intro" id="cat-about"></p>
 
           <button type="button" class="big-btn btn-teal" id="new-toggle" hidden>Start a thread</button>
-          <p class="muted-note" id="new-locked">Log in below to start a thread.</p>
+          <p class="muted-note" id="new-locked"><a class="text-btn" href="/login">Log in</a> to start a thread.</p>
           <form id="new-thread" class="new-thread stack" hidden>
             <label for="new-title">Title</label>
             <input id="new-title" type="text" maxlength="120" placeholder="What is this about?" required>
@@ -123,83 +124,10 @@
             <textarea id="reply-body" rows="4" maxlength="8000" placeholder="Your reply" required></textarea>
             <button type="submit" class="big-btn btn-teal">Post reply</button>
           </form>
-          <p class="muted-note" id="reply-locked">Log in below to reply.</p>
+          <p class="muted-note" id="reply-locked"><a class="text-btn" href="/login">Log in</a> to reply.</p>
         </section>
       </div>
 
-      <aside class="chat-side" id="join">
-        <div class="side-card" id="login-card">
-          <h2>Post as <em>you</em></h2>
-
-          <button class="big-btn btn-teal" id="btn-extension" type="button">Log in with extension</button>
-          <p class="hint" id="extension-hint">Uses your NOSTR browser extension (Alby, nos2x, Nostr Connect). Your key never touches this site.</p>
-
-          <div class="divider"><span>or</span></div>
-
-          <form id="create-form" class="stack">
-            <label for="new-name">Pick a name</label>
-            <input id="new-name" type="text" maxlength="32" autocomplete="nickname" placeholder="e.g. Maria from Porto" required>
-            <button class="big-btn btn-orange" type="submit">Create account</button>
-            <p class="hint">A new key is made in your browser and kept on this device. You can back it up afterwards.</p>
-          </form>
-
-          <details class="import">
-            <summary>I already have a key (nsec)</summary>
-            <form id="import-form" class="stack">
-              <input id="import-key" type="password" autocomplete="off" spellcheck="false" placeholder="nsec1...">
-              <button class="big-btn btn-yellow" type="submit">Log in with key</button>
-              <p class="hint">Stored only in this browser. An extension is safer if you use this key elsewhere.</p>
-            </form>
-          </details>
-          <p class="form-error" id="login-error" role="alert"></p>
-        </div>
-
-        <div class="side-card" id="me-card" hidden>
-          <div class="me-head">
-            <span class="avatar avatar-lg" id="me-avatar"></span>
-            <div>
-              <strong id="me-name"></strong>
-              <span class="callsign" id="me-callsign"></span>
-            </div>
-          </div>
-
-          <div class="backup" id="backup-box" hidden>
-            <strong>Save your key</strong>
-            <p>This account lives only in this browser. Copy your secret key somewhere safe, or you lose the account when the browser data is cleared. Never share it.</p>
-            <div class="key-row">
-              <code id="nsec-value">nsec hidden</code>
-              <button type="button" class="text-btn" id="nsec-reveal">Show</button>
-              <button type="button" class="text-btn" id="nsec-copy">Copy</button>
-            </div>
-          </div>
-
-          <form id="name-form" class="stack">
-            <label for="me-name-input">Display name</label>
-            <div class="inline-row">
-              <input id="me-name-input" type="text" maxlength="32" autocomplete="nickname">
-              <button type="submit" class="small-btn">Save</button>
-            </div>
-          </form>
-
-          <div class="key-row">
-            <span class="hint">Public key</span>
-            <code id="npub-value"></code>
-            <button type="button" class="text-btn" id="npub-copy">Copy</button>
-          </div>
-
-          <button type="button" class="text-btn logout" id="btn-logout">Log out</button>
-          <p class="form-error" id="me-error" role="alert"></p>
-        </div>
-
-        <div class="side-note">
-          <strong>How the forum works</strong>
-          <ul>
-            <li>Threads live on NOSTR relays, not on this site, so they outlast the event and any one server.</li>
-            <li>Anyone can read. To post you need a key: your extension, or one made here in a click.</li>
-            <li>Same account as the chat. If you logged in there, you are logged in here.</li>
-          </ul>
-        </div>
-      </aside>
     </div>
   </main>
 
@@ -213,7 +141,8 @@
   <script src="/js/nostr-config.js"></script>
   <script src="/js/nostr-login.js"></script>
   <script src="/js/nostr-common.js"></script>
-  <script src="/js/identity-ui.js"></script>
+  <script src="/js/dm.js"></script>
+  <script src="/js/account-bar.js"></script>
   <script src="/js/forum.js"></script>
 </body>
 </html>

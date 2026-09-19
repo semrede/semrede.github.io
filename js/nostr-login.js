@@ -65,12 +65,21 @@
     setTimeout(function () { detectExtension(attempts - 1, callback); }, 200);
   }
 
-  // NIP-07 compatible signer backed by a local key, so the chat always calls window.nostr.signEvent.
+  // NIP-07 compatible signer backed by a local key, so the rest of the site always
+  // goes through window.nostr, whether the key lives in an extension or here.
   function installPolyfill(pubkeyHex, privkeyHex) {
     var sk = hexToBytes(privkeyHex);
     window.nostr = {
       _semredePolyfill: true,
       getPublicKey: function () { return Promise.resolve(pubkeyHex); },
+      nip44: {
+        encrypt: function (peer, plaintext) {
+          return Promise.resolve(NT.nip44.encrypt(plaintext, NT.nip44.getConversationKey(sk, peer)));
+        },
+        decrypt: function (peer, ciphertext) {
+          return Promise.resolve(NT.nip44.decrypt(ciphertext, NT.nip44.getConversationKey(sk, peer)));
+        }
+      },
       signEvent: function (event) {
         var template = {
           kind: event.kind,
@@ -102,6 +111,22 @@
     signEvent: function (template) {
       if (!api.pubkey || !window.nostr) return Promise.reject(new Error('Not logged in'));
       return window.nostr.signEvent(template);
+    },
+
+    // NIP-44 is needed for private messages. Local keys always have it; an
+    // extension may not, and then the messages page says so.
+    canEncrypt: function () {
+      return !!(window.nostr && window.nostr.nip44 && window.nostr.nip44.encrypt);
+    },
+
+    encryptFor: function (peerPubkey, plaintext) {
+      if (!api.canEncrypt()) return Promise.reject(new Error('This login cannot encrypt messages'));
+      return Promise.resolve(window.nostr.nip44.encrypt(peerPubkey, plaintext));
+    },
+
+    decryptFrom: function (peerPubkey, ciphertext) {
+      if (!api.canEncrypt()) return Promise.reject(new Error('This login cannot read encrypted messages'));
+      return Promise.resolve(window.nostr.nip44.decrypt(peerPubkey, ciphertext));
     },
 
     loginWithExtension: function () {

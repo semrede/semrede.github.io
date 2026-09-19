@@ -482,6 +482,18 @@
     if (els.replyLocked) els.replyLocked.hidden = loggedIn;
   }
 
+  function onLoginChange() {
+    updateComposerVisibility();
+    queueRender();
+  }
+
+  function showError(el, msg) {
+    if (!el) return;
+    el.textContent = msg;
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.textContent = ''; }, 6000);
+  }
+
   function wire() {
     window.addEventListener('hashchange', applyRoute);
 
@@ -494,13 +506,13 @@
       e.preventDefault();
       var title = els.newTitle.value.replace(/\s+/g, ' ').trim();
       var body = els.newBody.value.trim();
-      if (title.length < 4) return window.SemRedeIdentity.showError(els.newError, 'Give the thread a title of at least 4 characters.');
-      if (!body) return window.SemRedeIdentity.showError(els.newError, 'Write something in the body.');
+      if (title.length < 4) return showError(els.newError, 'Give the thread a title of at least 4 characters.');
+      if (!body) return showError(els.newError, 'Write something in the body.');
       var btn = els.newForm.querySelector('button[type=submit]');
       btn.disabled = true;
       postThread(title.slice(0, TITLE_MAX), body.slice(0, BODY_MAX), route.slug)
         .then(function () { els.newForm.reset(); els.newForm.hidden = true; })
-        .catch(function (err) { window.SemRedeIdentity.showError(els.newError, err.message || 'Could not post the thread.'); })
+        .catch(function (err) { showError(els.newError, err.message || 'Could not post the thread.'); })
         .finally(function () { btn.disabled = false; });
     });
 
@@ -516,7 +528,9 @@
         .finally(function () { btn.disabled = false; });
     });
 
-    window.SemRedeIdentity.onChange(function () { updateComposerVisibility(); queueRender(); });
+    document.addEventListener('semrede-login', onLoginChange);
+    document.addEventListener('semrede-logout', onLoginChange);
+    auth.ready.then(onLoginChange);
     net.onProfile(function () { queueRender(); });
     net.onMuteChange(function () { queueRender(); });
   }

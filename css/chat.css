@@ -12,7 +12,8 @@
 .chat-intro p + p { margin-top: 12px; }
 .chat-intro a { color: var(--yellow); border-bottom: 1px dashed currentColor; }
 
-.chat-shell { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+/* The login cards moved to /login, so the room now uses the full width. */
+.chat-shell { display: grid; grid-template-columns: minmax(0, 1fr); }
 
 /* ---- room ---- */
 .chat-room {
@@ -137,7 +138,6 @@
 [hidden] { display: none !important; }
 
 @media (max-width: 900px) {
-  .chat-shell { grid-template-columns: 1fr; }
   /* Leave the login card in reach on a phone, and follow the visible viewport
      so the composer is not hidden behind the browser bars. */
   .chat-room { height: 64vh; height: 64svh; min-height: 360px; }

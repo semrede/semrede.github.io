@@ -3,12 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SemRede Chat</title>
-  <meta name="description" content="The open chat room of SemRede 2026 in Coimbra. Log in with your NOSTR extension or create an account in one click.">
-  <meta property="og:title" content="SemRede Chat">
-  <meta property="og:description" content="The open chat room of SemRede 2026, October 19 to 24, Coimbra. Runs on NOSTR.">
-  <meta property="og:image" content="https://semrede.com/img/hero-landscape.jpg">
-  <meta property="og:url" content="https://semrede.com/chat">
+  <title>SemRede Messages</title>
+  <meta name="description" content="Private messages between people at SemRede, encrypted end to end over NOSTR.">
+  <meta name="robots" content="noindex">
   <meta name="theme-color" content="#030706">
   <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,50 +55,60 @@
       <span class="wordmark">SemRede</span>
     </a>
     <nav>
-      <a href="/#about">About</a>
-      <a href="/#themes">Themes</a>
-      <a href="/#week">The week</a>
+      <a class="nav-chat" href="/chat">Chat</a>
       <a class="nav-chat" href="/forum">Forum</a>
-      <a class="nav-cta" href="/chat" aria-current="page">Chat</a>
     </nav>
   </header>
 
-  <main class="container chat-main">
+  <main class="container account-main">
     <section class="chat-intro">
-      <div class="section-kicker">05 / Chat</div>
-      <h1>Chat</h1>
+      <div class="section-kicker">08 / Messages</div>
+      <h1>Messages</h1>
     </section>
 
-    <div class="chat-shell">
-      <section class="chat-room" aria-label="SemRede 2026 chat room">
-        <header class="room-bar">
+    <div class="dm-shell" id="dm-shell">
+      <section class="dm-list-pane">
+        <div class="room-bar">
           <svg class="room-mark" width="34" height="34" aria-hidden="true"><use href="#sun-mark"/></svg>
           <div class="room-title">
-            <strong>SemRede 2026</strong>
-            <span>Coimbra / Oct 19 to 24</span>
+            <strong>Inbox</strong>
+            <span id="dm-count">private and encrypted</span>
           </div>
-          <div class="relay-status" id="relay-status" title="Connected NOSTR relays">
+          <div class="relay-status" title="Connected NOSTR relays">
             <span class="relay-dots" id="relay-dots"></span>
-            <span id="relay-count">connecting</span>
           </div>
-        </header>
-
-        <div class="messages" id="messages" aria-live="polite">
-          <button class="load-older" id="load-older" type="button" hidden>Load older messages</button>
-          <div id="message-list"></div>
-          <p class="chat-empty" id="chat-empty">Tuning in to the relays...</p>
         </div>
-
-        <form class="composer" id="composer" hidden>
-          <textarea id="chat-input" rows="1" maxlength="2000" placeholder="Write a message" aria-label="Message"></textarea>
-          <button type="submit" class="send-btn" id="send-btn">Send</button>
+        <div class="dm-list" id="dm-list"></div>
+        <form class="dm-new" id="dm-new">
+          <label for="dm-to">Write to someone</label>
+          <div class="inline-row">
+            <input id="dm-to" type="text" placeholder="npub1... or X1ABCD" autocomplete="off" spellcheck="false">
+            <button type="submit" class="small-btn">Open</button>
+          </div>
+          <p class="form-error" id="dm-new-error" role="alert"></p>
         </form>
-        <div class="composer-locked" id="composer-locked">
-          <span>Log in to write in the room.</span>
+      </section>
+
+      <section class="dm-thread-pane" id="dm-thread-pane">
+        <div class="room-bar">
+          <a class="back-link dm-back" href="#/">Inbox</a>
+          <div class="room-title">
+            <strong id="dm-peer-name">Pick a conversation</strong>
+            <span id="dm-peer-key"></span>
+          </div>
+        </div>
+        <div class="dm-messages" id="dm-messages">
+          <p class="muted-note" id="dm-empty">Your messages stay between you and the other person. The organizers can also write to you here.</p>
+        </div>
+        <form class="composer" id="dm-composer" hidden>
+          <textarea id="dm-input" rows="1" maxlength="4000" placeholder="Write a message" aria-label="Message"></textarea>
+          <button type="submit" class="send-btn" id="dm-send">Send</button>
+        </form>
+        <div class="composer-locked" id="dm-locked">
+          <span id="dm-locked-text">Log in to read and write messages.</span>
           <a href="/login" class="text-btn">Log in</a>
         </div>
       </section>
-
     </div>
   </main>
 
@@ -117,6 +124,6 @@
   <script src="/js/nostr-common.js"></script>
   <script src="/js/dm.js"></script>
   <script src="/js/account-bar.js"></script>
-  <script src="/js/chat.js"></script>
+  <script src="/js/messages.js"></script>
 </body>
 </html>
