@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SemRede Chat</title>
+  <meta name="description" content="The open chat room of SemRede 2026 in Coimbra. Log in with your NOSTR extension or create an account in one click.">
+  <meta property="og:title" content="SemRede Chat">
+  <meta property="og:description" content="The open chat room of SemRede 2026, October 19 to 24, Coimbra. Runs on NOSTR.">
+  <meta property="og:image" content="https://semrede.com/img/hero-landscape.jpg">
+  <meta property="og:url" content="https://semrede.com/chat.html">
+  <meta name="theme-color" content="#030706">
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,800;1,900&family=Kalam:wght@700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/chat.css">
+</head>
+<body class="chat-body">
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="sun-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffb52e"/>
+        <stop offset=".45" stop-color="#ff6a1f"/>
+        <stop offset=".75" stop-color="#ef3b35"/>
+        <stop offset="1" stop-color="#c8235e"/>
+      </linearGradient>
+      <mask id="sun-cut">
+        <circle cx="32" cy="32" r="30" fill="#fff"/>
+        <g fill="#000">
+          <rect x="0" y="43" width="64" height="1.6"/>
+          <rect x="0" y="48" width="64" height="2.1"/>
+          <rect x="0" y="53" width="64" height="2.6"/>
+          <rect x="0" y="58" width="64" height="3.2"/>
+        </g>
+        <g fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M27.8 21.8a6 6 0 0 1 8.4 0"/>
+          <path d="M24.2 18.2a11 11 0 0 1 15.6 0"/>
+          <path d="M20.7 14.7a16 16 0 0 1 22.6 0"/>
+          <path d="M32 29L24.5 63M32 29l7.5 34"/>
+          <path d="M29.8 39h4.4M27.6 49h8.8M25.4 59h13.2M29.8 39l6.6 10M27.6 49l11 10"/>
+        </g>
+        <circle cx="32" cy="26" r="2.6" fill="#000"/>
+      </mask>
+      <symbol id="sun-mark" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="30" fill="url(#sun-grad)" mask="url(#sun-cut)"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <header class="site-header container">
+    <a class="brand" href="index.html" aria-label="SemRede home">
+      <svg class="brand-mark" width="46" height="46" aria-hidden="true"><use href="#sun-mark"/></svg>
+      <span class="wordmark">SemRede</span>
+    </a>
+    <nav>
+      <a href="index.html#about">About</a>
+      <a href="index.html#themes">Themes</a>
+      <a href="index.html#week">The week</a>
+      <a href="index.html#music">Music</a>
+      <a class="nav-cta" href="chat.html" aria-current="page">Chat</a>
+    </nav>
+  </header>
+
+  <main class="container chat-main">
+    <section class="chat-intro">
+      <div class="section-kicker">05 / Chat</div>
+      <h1>Talk to the <em>community</em></h1>
+      <p>One open room for everyone coming to SemRede 2026: questions, rides to Coimbra, projects you want to show, frequencies to meet on. It runs on <a href="https://nostr.com" target="_blank" rel="noopener">NOSTR</a>, so there is no signup form and no company in the middle.</p>
+    </section>
+
+    <div class="chat-shell">
+      <section class="chat-room" aria-label="SemRede 2026 chat room">
+        <header class="room-bar">
+          <svg class="room-mark" width="34" height="34" aria-hidden="true"><use href="#sun-mark"/></svg>
+          <div class="room-title">
+            <strong>SemRede 2026</strong>
+            <span>Coimbra / Oct 19 to 24</span>
+          </div>
+          <div class="relay-status" id="relay-status" title="Connected NOSTR relays">
+            <span class="relay-dots" id="relay-dots"></span>
+            <span id="relay-count">connecting</span>
+          </div>
+        </header>
+
+        <div class="messages" id="messages" aria-live="polite">
+          <button class="load-older" id="load-older" type="button" hidden>Load older messages</button>
+          <div id="message-list"></div>
+          <p class="chat-empty" id="chat-empty">Tuning in to the relays...</p>
+        </div>
+
+        <form class="composer" id="composer" hidden>
+          <textarea id="chat-input" rows="1" maxlength="2000" placeholder="Write a message" aria-label="Message"></textarea>
+          <button type="submit" class="send-btn" id="send-btn">Send</button>
+        </form>
+        <div class="composer-locked" id="composer-locked">
+          <span>Log in to write in the room.</span>
+          <a href="#join" class="text-btn">Join</a>
+        </div>
+      </section>
+
+      <aside class="chat-side" id="join">
+        <div class="side-card" id="login-card">
+          <h2>Join the <em>room</em></h2>
+
+          <button class="big-btn btn-teal" id="btn-extension" type="button">Log in with extension</button>
+          <p class="hint" id="extension-hint">Uses your NOSTR browser extension (Alby, nos2x, Nostr Connect). Your key never touches this site.</p>
+
+          <div class="divider"><span>or</span></div>
+
+          <form id="create-form" class="stack">
+            <label for="new-name">Pick a name</label>
+            <input id="new-name" type="text" maxlength="32" autocomplete="nickname" placeholder="e.g. Maria from Porto" required>
+            <button class="big-btn btn-orange" type="submit">Create account</button>
+            <p class="hint">A new key is made in your browser and kept on this device. You can back it up afterwards.</p>
+          </form>
+
+          <details class="import">
+            <summary>I already have a key (nsec)</summary>
+            <form id="import-form" class="stack">
+              <input id="import-key" type="password" autocomplete="off" spellcheck="false" placeholder="nsec1...">
+              <button class="big-btn btn-yellow" type="submit">Log in with key</button>
+              <p class="hint">Stored only in this browser. An extension is safer if you use this key elsewhere.</p>
+            </form>
+          </details>
+          <p class="form-error" id="login-error" role="alert"></p>
+        </div>
+
+        <div class="side-card" id="me-card" hidden>
+          <div class="me-head">
+            <span class="avatar avatar-lg" id="me-avatar"></span>
+            <div>
+              <strong id="me-name"></strong>
+              <span class="callsign" id="me-callsign"></span>
+            </div>
+          </div>
+
+          <div class="backup" id="backup-box" hidden>
+            <strong>Save your key</strong>
+            <p>This account lives only in this browser. Copy your secret key somewhere safe, or you lose the account when the browser data is cleared. Never share it.</p>
+            <div class="key-row">
+              <code id="nsec-value">nsec hidden</code>
+              <button type="button" class="text-btn" id="nsec-reveal">Show</button>
+              <button type="button" class="text-btn" id="nsec-copy">Copy</button>
+            </div>
+          </div>
+
+          <form id="name-form" class="stack">
+            <label for="me-name-input">Display name</label>
+            <div class="inline-row">
+              <input id="me-name-input" type="text" maxlength="32" autocomplete="nickname">
+              <button type="submit" class="small-btn">Save</button>
+            </div>
+          </form>
+
+          <div class="key-row">
+            <span class="hint">Public key</span>
+            <code id="npub-value"></code>
+            <button type="button" class="text-btn" id="npub-copy">Copy</button>
+          </div>
+
+          <button type="button" class="text-btn logout" id="btn-logout">Log out</button>
+          <p class="form-error" id="me-error" role="alert"></p>
+        </div>
+
+        <div class="side-note">
+          <strong>Good to know</strong>
+          <ul>
+            <li>Messages are public and signed with your key. Anyone with a NOSTR client can read them.</li>
+            <li>The room is shared on several public relays, so it keeps working if one goes down.</li>
+            <li>Be kind. The organizers can hide accounts that spam or harass.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer container">
+    <span>Coimbra / Portugal</span>
+    <span>semrede.com</span>
+    <span>October 19 to 24, 2026</span>
+  </footer>
+
+  <script src="js/vendor/nostr.bundle.js"></script>
+  <script src="js/nostr-login.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>
