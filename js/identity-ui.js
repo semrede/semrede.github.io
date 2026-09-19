@@ -1,4 +1,4 @@
-/* The login card and the "this is you" card, shared by chat.html and forum.html.
+/* The login card and the "this is you" card, shared by /chat and /forum.
  * Expects the element ids used in both pages; missing elements are ignored.
  */
 (function () {

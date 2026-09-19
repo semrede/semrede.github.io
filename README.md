@@ -7,8 +7,8 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 ## Structure
 
 - `index.html`: single-page site
-- `chat.html`, `js/chat.js`, `css/chat.css`: the chat room
-- `forum.html`, `js/forum.js`, `css/forum.css`: the forum
+- `chat/index.html`, `js/chat.js`, `css/chat.css`: the chat room, served at /chat
+- `forum/index.html`, `js/forum.js`, `css/forum.css`: the forum, served at /forum
 - `js/nostr-config.js`: relays, admin key, room id, forum categories
 - `js/nostr-login.js`, `js/identity-ui.js`, `js/nostr-common.js`: login and the shared relay, profile and mute-list code
 - `js/vendor/nostr.bundle.js`: nostr-tools 2.25.2, vendored so the site has no runtime CDN dependency
@@ -27,7 +27,7 @@ python3 -m http.server 8000
 
 ## Chat
 
-`chat.html` is a chat room that runs entirely in the browser, on public NOSTR
+`/chat` is a chat room that runs entirely in the browser, on public NOSTR
 relays. There is no backend and nothing to host. Visitors log in with a NIP-07
 browser extension (Alby, nos2x) or create a key in one click; created keys are
 kept in that browser's localStorage.
@@ -48,7 +48,7 @@ checked to accept a brand-new key. The same list appears in `js/chat.js` and in
 
 ## Forum
 
-`forum.html` uses the same login and the same relays as the chat. Threads are
+`/forum` uses the same login and the same relays as the chat. Threads are
 NIP-7D events (kind 11) carrying a `title` tag, the `semrede` tag and one
 category tag such as `semrede-mesh`. Replies are NIP-22 comments (kind 1111)
 that point at the thread with an uppercase `E` tag and at their parent with a
