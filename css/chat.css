@@ -9,6 +9,7 @@
 .chat-intro h1 { margin: 14px 0 16px; font: 800 clamp(44px, 6vw, 76px)/.86 var(--display); text-transform: uppercase; letter-spacing: -.03em; }
 .chat-intro h1 em { color: var(--teal); font-style: normal; }
 .chat-intro p { margin: 0; color: #c3c5b9; font-size: 14px; }
+.chat-intro p + p { margin-top: 12px; }
 .chat-intro a { color: var(--yellow); border-bottom: 1px dashed currentColor; }
 
 .chat-shell { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
@@ -72,13 +73,13 @@
 .avatar-lg { width: 52px; height: 52px; font-size: 19px; }
 
 /* ---- composer ---- */
-.composer { display: flex; gap: 10px; padding: 12px 14px; border-top: 1px solid #1f3a37; background: #07100f; }
+.composer { display: flex; align-items: flex-end; gap: 10px; padding: 12px 14px; border-top: 1px solid #1f3a37; background: #07100f; }
 .composer textarea {
   flex: 1; resize: none; min-height: 44px; max-height: 160px; padding: 11px 13px;
   background: #0d1918; border: 1px solid #2a3f3c; color: var(--paper); font: 13px/1.5 var(--mono);
 }
 .composer textarea:focus { outline: none; border-color: var(--teal); }
-.send-btn { flex: none; padding: 0 20px; background: var(--teal); color: var(--ink); border: 0; font: 800 18px var(--display); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+.send-btn { flex: none; height: 44px; padding: 0 20px; background: var(--teal); color: var(--ink); border: 0; font: 800 18px var(--display); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
 .send-btn:hover { background: var(--yellow); }
 .send-btn:disabled { opacity: .5; cursor: wait; }
 .composer-locked { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-top: 1px solid #1f3a37; color: #8a938b; font-size: 12px; }
@@ -137,7 +138,9 @@
 
 @media (max-width: 900px) {
   .chat-shell { grid-template-columns: 1fr; }
-  .chat-room { height: 72vh; min-height: 420px; }
+  /* Leave the login card in reach on a phone, and follow the visible viewport
+     so the composer is not hidden behind the browser bars. */
+  .chat-room { height: 64vh; height: 64svh; min-height: 360px; }
 }
 
 @media (max-width: 800px) {
@@ -148,4 +151,10 @@
   .messages { padding: 8px 12px 14px; }
   .bubble { max-width: 86%; }
   .side-card { padding: 18px; }
+  .chat-intro h1 { font-size: clamp(38px, 11vw, 52px); }
+  .composer { padding: 10px; gap: 8px; }
+  .send-btn { padding: 0 16px; }
+  .composer-locked { padding: 12px 14px; }
+  .text-btn { font-size: 12px; }
+  .key-row { gap: 8px 12px; }
 }
