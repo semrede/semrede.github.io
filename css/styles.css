@@ -198,6 +198,7 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
   .site-header { min-height: 70px; }
   .brand .wordmark { font-size: 28px; }
   nav > a:not(.nav-cta):not(.nav-chat) { display: none; }
+  nav > a.nav-hide-sm { display: none; }
   nav { gap: 16px; }
   .chat-cta { padding-block: 75px; }
   .chat-cta-inner { grid-template-columns: 1fr; padding: 28px; }

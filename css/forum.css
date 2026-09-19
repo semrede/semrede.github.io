@@ -77,6 +77,11 @@
 .new-thread .big-btn, .reply-form .big-btn { width: auto; align-self: flex-start; padding: 10px 22px; }
 #new-toggle { width: auto; padding: 10px 22px; margin-bottom: 8px; }
 
+@media (orientation: landscape) and (max-height: 620px) {
+  .forum-view { padding: 14px 16px 20px; }
+  .forum-h2 { margin: 16px 0 10px; }
+}
+
 @media (max-width: 800px) {
   .forum-view { padding: 18px 14px 24px; }
   .cat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }

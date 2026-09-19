@@ -73,3 +73,13 @@
   .acct-name { display: none; }
   .acct-btn { padding: 6px 10px; }
 }
+
+/* Same idea as the chat: in landscape the inbox fills the visible viewport so
+   the message box is never pushed below the fold. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .account-main { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-bottom: 10px; }
+  .dm-shell { flex: 1; height: auto; min-height: 0; }
+  .dm-new { padding: 8px 12px; }
+  .dm-new label { margin-bottom: 4px; }
+  .dm-messages { padding: 8px 12px 10px; }
+}
