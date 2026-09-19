@@ -3,126 +3,212 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SemRede — Offgrid Communications, Communities & People</title>
+  <title>SemRede 2026: Offgrid Communications, Communities &amp; People</title>
+  <meta name="description" content="SemRede is a week-long event in Coimbra, Portugal, from October 19 to 24, 2026, about offgrid communications, self-sufficient living and thriving communities.">
+  <meta property="og:title" content="SemRede 2026, Coimbra">
+  <meta property="og:description" content="Offgrid communications, communities and people. October 19 to 24, 2026 at Eva Farm and Edifício Embaixada, Coimbra.">
+  <meta property="og:image" content="https://semrede.com/img/hero-landscape.jpg">
+  <meta property="og:url" content="https://semrede.com/">
+  <meta name="theme-color" content="#030706">
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,800;1,900&family=Kalam:wght@700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div class="scanlines" aria-hidden="true"></div>
 
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="sun-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffb52e"/>
+        <stop offset=".45" stop-color="#ff6a1f"/>
+        <stop offset=".75" stop-color="#ef3b35"/>
+        <stop offset="1" stop-color="#c8235e"/>
+      </linearGradient>
+      <mask id="sun-cut">
+        <circle cx="32" cy="32" r="30" fill="#fff"/>
+        <g fill="#000">
+          <rect x="0" y="43" width="64" height="1.6"/>
+          <rect x="0" y="48" width="64" height="2.1"/>
+          <rect x="0" y="53" width="64" height="2.6"/>
+          <rect x="0" y="58" width="64" height="3.2"/>
+        </g>
+        <g fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M27.8 21.8a6 6 0 0 1 8.4 0"/>
+          <path d="M24.2 18.2a11 11 0 0 1 15.6 0"/>
+          <path d="M20.7 14.7a16 16 0 0 1 22.6 0"/>
+          <path d="M32 29L24.5 63M32 29l7.5 34"/>
+          <path d="M29.8 39h4.4M27.6 49h8.8M25.4 59h13.2M29.8 39l6.6 10M27.6 49l11 10"/>
+        </g>
+        <circle cx="32" cy="26" r="2.6" fill="#000"/>
+      </mask>
+      <symbol id="sun-mark" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="30" fill="url(#sun-grad)" mask="url(#sun-cut)"/>
+      </symbol>
+    </defs>
+  </svg>
+
   <header class="site-header container">
-    <a class="brand" href="#">
-      <svg class="brand-mark" viewBox="0 0 48 48" width="48" height="48" fill="none" aria-hidden="true">
-  <path d="M24 6L10 44h28z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="miter"/>
-  <path d="M17 24h14M15 34h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="24" cy="6" r="2.5" fill="currentColor"/>
-  <path d="M15 6a9 9 0 0 1 18 0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M10 6a14 14 0 0 1 28 0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".5"/>
-  <path d="M5 6a19 19 0 0 1 38 0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".25"/>
-</svg>
-      <span>SemRede</span>
+    <a class="brand" href="#top" aria-label="SemRede home">
+      <svg class="brand-mark" width="46" height="46" aria-hidden="true"><use href="#sun-mark"/></svg>
+      <span class="wordmark">SemRede</span>
     </a>
     <nav>
       <a href="#about">About</a>
-      <a href="#program">Program</a>
-      <a href="#venues">Venues</a>
+      <a href="#themes">Themes</a>
+      <a href="#week">The week</a>
       <a href="#music">Music</a>
       <a class="nav-cta" href="#show">Show your project</a>
     </nav>
   </header>
 
-  <main>
+  <main id="top">
     <section class="hero container">
-      <div class="hero-copy">
-        <p class="eyebrow">OFFGRID COMMUNICATIONS · COMMUNITIES & PEOPLE</p>
-        <h1>Sem<span>Rede</span></h1>
-        <p class="hero-subtitle">Offgrid Communications,<br>Communities & People</p>
-        <div class="hero-rule"></div>
-        <p class="hero-intro">Connect. Share. Build. Live offgrid.</p>
+      <div class="hero-corners">
+        <span>Offgrid<br>communications</span>
+        <span>Communities<br>&amp; people</span>
       </div>
-      <div class="hero-art" aria-label="Retro landscape illustration">
-        <div class="sun"></div>
-        <div class="mountain mountain-a"></div>
-        <div class="mountain mountain-b"></div>
-        <div class="radio-tower">⌁</div>
-        <div class="horizon"></div>
+
+      <svg class="hero-mark" width="190" height="190" aria-hidden="true"><use href="#sun-mark"/></svg>
+      <h1 class="wordmark">SemRede</h1>
+      <p class="hero-subtitle">Offgrid Communications,<br>Communities &amp; People</p>
+
+      <div class="hero-sides">
+        <ul class="hero-verbs">
+          <li>Connect</li>
+          <li>Share</li>
+          <li>Build</li>
+          <li>Live offgrid</li>
+        </ul>
+        <p class="hero-note">Real connections.<br>Independent tech.<br>Stronger communities.<br>A more resilient tomorrow.</p>
+      </div>
+
+      <div class="hero-when">
+        <strong>October 19 to 24, 2026</strong>
+        <span>Coimbra / Portugal</span>
       </div>
     </section>
+
+    <figure class="landscape">
+      <img src="img/hero-landscape.jpg" alt="Illustration of a solar-powered radio mast above a valley at sunset, with Coimbra on the river" width="830" height="292">
+    </figure>
 
     <section id="about" class="intro container">
-      <div class="section-kicker">01 / THE IDEA</div>
+      <div class="section-kicker">01 / About</div>
       <div>
-        <h2>Real connections.<br><em>Independent tech.</em></h2>
-        <p>SemRede brings together people exploring resilient communications, self-sufficient living and thriving communities.</p>
+        <h2>A week in <em>Coimbra</em></h2>
+        <p>SemRede is a week-long event in Coimbra, bringing together people who care about offgrid communications, self-sufficient living and thriving communities.</p>
+        <p>Share knowledge, learn new skills, meet like-minded people and be part of a growing movement.</p>
+        <p class="aside">"Sem rede" is Portuguese for "no network": the moment your phone loses signal. This week is about what we can still do when that happens.</p>
       </div>
     </section>
 
-    <section id="program" class="feature-grid container">
-      <article><span class="icon">⌁</span><h3>Offgrid<br>Communications</h3><p>Radio, mesh, satellites, solar, and more.</p></article>
-      <article><span class="icon">✦</span><h3>Sustainable<br>Living</h3><p>Food, energy, water and self-reliance.</p></article>
-      <article><span class="icon">◎</span><h3>Communities</h3><p>Collaboration, projects and inspiration.</p></article>
-      <article><span class="icon">▣</span><h3>Workshops<br>& Talks</h3><p>Hands-on sessions and real-world knowledge.</p></article>
+    <section id="themes" class="feature-grid container">
+      <article class="c-yellow">
+        <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 20L16 44M24 20l8 24M19 36h10M21.5 28h5M21.5 28l6.5 8M19 36l11 8"/><circle cx="24" cy="17" r="2.5"/><path d="M17 12a10 10 0 0 1 14 0M12 7a17 17 0 0 1 24 0"/></svg>
+        <h3>Offgrid<br>communications</h3>
+        <p>Radio, mesh, satellites, solar, and more.</p>
+      </article>
+      <article class="c-green">
+        <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 44V24"/><path d="M24 26C24 14 32 8 43 8c0 12-8 18-19 18z"/><path d="M24 30C24 20 17 15 7 15c0 10 7 15 17 15z"/></svg>
+        <h3>Sustainable<br>living</h3>
+        <p>Food, energy, water, self-reliance.</p>
+      </article>
+      <article class="c-orange">
+        <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="12" r="5"/><path d="M15 32a9 9 0 0 1 18 0"/><circle cx="10" cy="20" r="4"/><path d="M3 36a7 7 0 0 1 12-5"/><circle cx="38" cy="20" r="4"/><path d="M45 36a7 7 0 0 0-12-5"/></svg>
+        <h3>Communities</h3>
+        <p>Collaboration, projects, inspiration.</p>
+      </article>
+      <article class="c-teal">
+        <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="10" width="32" height="22" rx="2"/><path d="M3 38h42"/><circle cx="24" cy="21" r="4"/><path d="M24 14v3M24 25v3M17 21h3M28 21h3"/></svg>
+        <h3>Workshops<br>&amp; talks</h3>
+        <p>Hands-on sessions, real-world knowledge.</p>
+      </article>
+      <article class="c-yellow">
+        <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 10L10 38h28z"/><path d="M20 38l4-8 4 8"/><path d="M5 30l3-8 3 8zM37 30l3-8 3 8zM8 30v8M40 30v8"/></svg>
+        <h3>People</h3>
+        <p>Connect with others who live (or dream of) offgrid life.</p>
+      </article>
     </section>
 
-    <section id="venues" class="venues container">
-      <div class="section-kicker">02 / THE WEEK</div>
-      <div class="venue venue-farm">
-        <div class="venue-meta">MON — FRI</div>
-        <h2>EVA FARM</h2>
-        <p>Coimbra · Portugal</p>
-        <span>A week of workshops, practical sessions, open discussions and community time.</span>
-      </div>
-      <div class="venue venue-city">
-        <div class="venue-meta">SATURDAY · OCT 25</div>
-        <h2>EDIFÍCIO<br>EMBAIXADA</h2>
-        <p>Coimbra · Portugal</p>
-        <span>Talks, demos, community fair, networking and celebration.</span>
-      </div>
+    <section id="week" class="venues container">
+      <div class="section-kicker">02 / The week</div>
+
+      <article class="venue venue-farm">
+        <img src="img/eva-farm.jpg" alt="Illustration of Eva Farm: wooden buildings, vegetable beds and solar panels" width="455" height="172" loading="lazy">
+        <div class="venue-body">
+          <div class="venue-meta">Monday to Friday / Oct 19 to 23</div>
+          <h2><small>at</small> Eva Farm</h2>
+          <p class="venue-place">Coimbra</p>
+          <p>A working farm and learning space for a regenerative future. Five days of hands-on sessions, talks and time together.</p>
+        </div>
+      </article>
+
+      <article class="venue venue-city">
+        <img src="img/embaixada.jpg" alt="Illustration of the Edifício Embaixada terrace above the old town of Coimbra at dusk" width="455" height="160" loading="lazy">
+        <div class="venue-body">
+          <div class="venue-meta">Saturday / Oct 24</div>
+          <h2><small>at</small> Edifício Embaixada</h2>
+          <p class="venue-place">Coimbra</p>
+          <p>One day, open to all: talks, demos, community fair, networking and celebration in the heart of Coimbra.</p>
+        </div>
+      </article>
     </section>
 
     <section id="show" class="showcase container">
-      <div class="section-kicker">03 / SHOW YOUR PROJECT</div>
+      <div class="section-kicker">03 / Show your project</div>
       <div class="showcase-inner">
-        <h2>Show your<br><em>project.</em></h2>
-        <p class="showcase-lead">Bring your project to SemRede and share it with the community during the event.</p>
+        <h2>Bring what<br><em>you built.</em></h2>
+        <p class="showcase-lead">Working on a radio, a mesh network, a solar setup, a garden, a community project? Bring it to SemRede and show it to people who care.</p>
         <ul class="showcase-list">
-          <li><span class="icon">▣</span><div><h3>Showcase table & space</h3><p>We provide a table and dedicated space for you to demo your project throughout the event.</p></div></li>
-          <li><span class="icon">◎</span><div><h3>Optional talk session</h3><p>If you wish, we hook you up with a talk slot to present your work to the whole community.</p></div></li>
+          <li>
+            <div>
+              <h3>A table and a place to demo</h3>
+              <p>You get a table and space to show your project during the event.</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <h3>A talk slot, if you want one</h3>
+              <p>Prefer to present? Tell us and we will find you a slot to speak to everyone.</p>
+            </div>
+          </li>
         </ul>
-        <a class="big-link" href="#show">Submit your project ↗</a>
+        <a class="big-link" href="mailto:hello@semrede.com?subject=SemRede%202026%3A%20my%20project">Email hello@semrede.com</a>
       </div>
     </section>
 
     <section id="music" class="music container">
-      <div class="section-kicker">04 / MUSIC</div>
+      <div class="section-kicker">04 / Music</div>
       <div class="music-inner">
         <div class="music-art">
-          <img src="https://feeds.fountain.fm/VUDmJJ8Eo1byHznQtHIn/files/COVER_ART---DEFAULT---3ad4a961-fbde-436c-bb94-650a7bac3cdb.jpg" alt="Haleen" width="400" height="400">
+          <img src="https://feeds.fountain.fm/VUDmJJ8Eo1byHznQtHIn/files/COVER_ART---DEFAULT---3ad4a961-fbde-436c-bb94-650a7bac3cdb.jpg" alt="Haleen cover art" width="400" height="400" loading="lazy">
         </div>
         <div class="music-copy">
           <h2>Invited artist<br><em>Haleen</em></h2>
-          <p>Haleen, a musical project by a Belgian couple based in off-grid Portugal, has crafted a distinctive genre inspired by their energy shift and consciousness transformation. Their music is described as mind-opening, hypnotic, and uplifting — providing courage and improving listeners' moods.</p>
-          <p><strong>Hans</strong> started his musical journey at a young age, transitioning from the metal scene to an acoustic guitar tuned to 432Hz. Embracing electronic music, he blended diverse genres, creating a unique symphony that transcends boundaries.</p>
-          <p><strong>Kath</strong> had a rapid shift in musical taste, moving from mainstream hits to Electronic Dance Music, influenced by artists resonating with powerful energy. Her evolving palette includes sounds from Sam Garrett, Mose, Peia, Yaima, and Ajeet, mirroring her inner transformation.</p>
-          <p>They actively perform live, connecting with audiences through their love and acceptance.</p>
-          <a class="big-link" href="https://fountain.fm/artist/o4G8mlecYblN9FSIxaiI" target="_blank" rel="noopener">Full discography ↗</a>
+          <p>Haleen, a musical project by a Belgian couple based in off-grid Portugal, has crafted a distinctive genre inspired by their energy shift and consciousness transformation. Their music is described as mind-opening, hypnotic and uplifting, giving listeners courage and lifting their mood.</p>
+          <p><strong>Hans</strong> started his musical journey at a young age, moving from the metal scene to an acoustic guitar tuned to 432Hz. Embracing electronic music, he blended diverse genres into a sound that crosses boundaries.</p>
+          <p><strong>Kath</strong> had a rapid shift in musical taste, moving from mainstream hits to Electronic Dance Music, influenced by artists with a powerful energy. Her palette includes sounds from Sam Garrett, Mose, Peia, Yaima and Ajeet, mirroring her inner transformation.</p>
+          <p>They perform live, connecting with audiences through love and acceptance.</p>
+          <a class="big-link" href="https://fountain.fm/artist/o4G8mlecYblN9FSIxaiI" target="_blank" rel="noopener">Listen on Fountain</a>
         </div>
       </div>
     </section>
 
     <section class="closing container">
-      <p class="eyebrow">OCTOBER 20 — 25, 2025 · COIMBRA, PORTUGAL</p>
-      <h2>Same spirit.<br><span>One community.</span></h2>
-      <a class="big-link" href="https://semrede.com">https://semrede.com ↗</a>
+      <svg class="closing-mark" width="80" height="80" aria-hidden="true"><use href="#sun-mark"/></svg>
+      <h2>See you in <span>Coimbra</span></h2>
+      <p class="closing-dates">Eva Farm, Oct 19 to 23 / Edifício Embaixada, Oct 24</p>
+      <p class="closing-verbs">Connect. Share. Build. Live offgrid.</p>
     </section>
   </main>
 
   <footer class="site-footer container">
-    <span>SEMREDE</span>
-    <span>COMMUNICATIONS / COMMUNITY / SUSTAINABILITY</span>
-    <span>© 2025</span>
+    <span>Coimbra / Portugal</span>
+    <span>semrede.com</span>
+    <span>October 19 to 24, 2026</span>
   </footer>
 </body>
 </html>
