@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SemRede Chat</title>
-  <meta name="description" content="The open chat room of SemRede 2026 in Coimbra. Log in with your NOSTR extension or create an account in one click.">
-  <meta property="og:title" content="SemRede Chat">
-  <meta property="og:description" content="The open chat room of SemRede 2026, October 19 to 24, Coimbra. Runs on NOSTR.">
+  <title>SemRede Forum</title>
+  <meta name="description" content="The SemRede forum: threads on tech, mesh and radio, energy, food, crypto, community, rides and more. Runs on NOSTR.">
+  <meta property="og:title" content="SemRede Forum">
+  <meta property="og:description" content="Threads that stay: tech, mesh and radio, energy, food, crypto, community, rides. Runs on NOSTR.">
   <meta property="og:image" content="https://semrede.com/img/hero-landscape.jpg">
-  <meta property="og:url" content="https://semrede.com/chat.html">
+  <meta property="og:url" content="https://semrede.com/forum.html">
   <meta name="theme-color" content="#030706">
   <link rel="icon" href="img/logo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,8 +16,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,800;1,900&family=Kalam:wght@700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/forum.css">
 </head>
-<body class="chat-body">
+<body class="chat-body forum-body">
   <div class="scanlines" aria-hidden="true"></div>
 
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -58,54 +59,79 @@
     </a>
     <nav>
       <a href="index.html#about">About</a>
-      <a href="index.html#themes">Themes</a>
       <a href="index.html#week">The week</a>
-      <a href="forum.html">Forum</a>
-      <a class="nav-cta" href="chat.html" aria-current="page">Chat</a>
+      <a class="nav-chat" href="chat.html">Chat</a>
+      <a class="nav-cta" href="forum.html" aria-current="page">Forum</a>
     </nav>
   </header>
 
   <main class="container chat-main">
     <section class="chat-intro">
-      <div class="section-kicker">05 / Chat</div>
-      <h1>Talk to the <em>community</em></h1>
-      <p>Say hello before October. Ask what to bring, sort out a ride to Coimbra, or agree on a frequency to meet on during the week.</p>
-      <p>The room uses <a href="https://nostr.com" target="_blank" rel="noopener">NOSTR</a>. Log in with the extension you already have, or make an account here and keep it.</p>
+      <div class="section-kicker">06 / Forum</div>
+      <h1>Things worth <em>keeping</em></h1>
+      <p>The chat scrolls away. Here the questions and answers stay, year after year: how someone fixed a charge controller, which antenna worked on that hill, who is looking for land.</p>
+      <p>Same login as the chat. Pick a category and start a thread.</p>
     </section>
 
-    <div class="chat-shell">
-      <section class="chat-room" aria-label="SemRede 2026 chat room">
-        <header class="room-bar">
+    <div class="forum-shell">
+      <div class="forum-main">
+        <div class="room-bar forum-bar">
           <svg class="room-mark" width="34" height="34" aria-hidden="true"><use href="#sun-mark"/></svg>
           <div class="room-title">
-            <strong>SemRede 2026</strong>
-            <span>Coimbra / Oct 19 to 24</span>
+            <strong>SemRede forum</strong>
+            <span>Open to everyone</span>
           </div>
-          <div class="relay-status" id="relay-status" title="Connected NOSTR relays">
+          <div class="relay-status" title="Connected NOSTR relays">
             <span class="relay-dots" id="relay-dots"></span>
             <span id="relay-count">connecting</span>
           </div>
-        </header>
-
-        <div class="messages" id="messages" aria-live="polite">
-          <button class="load-older" id="load-older" type="button" hidden>Load older messages</button>
-          <div id="message-list"></div>
-          <p class="chat-empty" id="chat-empty">Tuning in to the relays...</p>
         </div>
 
-        <form class="composer" id="composer" hidden>
-          <textarea id="chat-input" rows="1" maxlength="2000" placeholder="Write a message" aria-label="Message"></textarea>
-          <button type="submit" class="send-btn" id="send-btn">Send</button>
-        </form>
-        <div class="composer-locked" id="composer-locked">
-          <span>Log in to write in the room.</span>
-          <a href="#join" class="text-btn">Join</a>
-        </div>
-      </section>
+        <section id="view-index" class="forum-view">
+          <p class="muted-note" id="forum-loading">Reading the relays...</p>
+          <div class="cat-grid" id="category-grid"></div>
+          <h2 class="forum-h2">Latest activity</h2>
+          <div class="thread-list" id="latest-list"></div>
+        </section>
+
+        <section id="view-category" class="forum-view" hidden>
+          <a class="back-link" href="#/">Back to categories</a>
+          <h2 class="forum-h2" id="cat-name"></h2>
+          <p class="cat-intro" id="cat-about"></p>
+
+          <button type="button" class="big-btn btn-teal" id="new-toggle" hidden>Start a thread</button>
+          <p class="muted-note" id="new-locked">Log in below to start a thread.</p>
+          <form id="new-thread" class="new-thread stack" hidden>
+            <label for="new-title">Title</label>
+            <input id="new-title" type="text" maxlength="120" placeholder="What is this about?" required>
+            <label for="new-body">Message</label>
+            <textarea id="new-body" rows="6" maxlength="8000" placeholder="Details, questions, what you already tried." required></textarea>
+            <button type="submit" class="big-btn btn-orange">Post thread</button>
+            <p class="form-error" id="new-error" role="alert"></p>
+          </form>
+
+          <div class="thread-list" id="cat-threads"></div>
+          <p class="muted-note" id="cat-empty" hidden>No threads here yet.</p>
+        </section>
+
+        <section id="view-thread" class="forum-view" hidden>
+          <a class="back-link" id="thread-cat" href="#/">Back</a>
+          <h2 class="forum-h2 thread-h" id="thread-title"></h2>
+          <div id="thread-body"></div>
+          <div id="comments" class="comments"></div>
+
+          <form id="reply-form" class="reply-form stack" hidden>
+            <label for="reply-body">Reply to the thread</label>
+            <textarea id="reply-body" rows="4" maxlength="8000" placeholder="Your reply" required></textarea>
+            <button type="submit" class="big-btn btn-teal">Post reply</button>
+          </form>
+          <p class="muted-note" id="reply-locked">Log in below to reply.</p>
+        </section>
+      </div>
 
       <aside class="chat-side" id="join">
         <div class="side-card" id="login-card">
-          <h2>Join the <em>room</em></h2>
+          <h2>Post as <em>you</em></h2>
 
           <button class="big-btn btn-teal" id="btn-extension" type="button">Log in with extension</button>
           <p class="hint" id="extension-hint">Uses your NOSTR browser extension (Alby, nos2x, Nostr Connect). Your key never touches this site.</p>
@@ -168,11 +194,11 @@
         </div>
 
         <div class="side-note">
-          <strong>Before you post</strong>
+          <strong>How the forum works</strong>
           <ul>
-            <li>Everything here is public. Anyone with a NOSTR app can read the room, today or years from now.</li>
-            <li>The room sits on six relays at once, so it survives when one of them drops.</li>
-            <li>If someone spams or goes after people, we hide them from this page.</li>
+            <li>Threads live on NOSTR relays, not on this site, so they outlast the event and any one server.</li>
+            <li>Anyone can read. To post you need a key: your extension, or one made here in a click.</li>
+            <li>Same account as the chat. If you logged in there, you are logged in here.</li>
           </ul>
         </div>
       </aside>
@@ -190,6 +216,6 @@
   <script src="js/nostr-login.js"></script>
   <script src="js/nostr-common.js"></script>
   <script src="js/identity-ui.js"></script>
-  <script src="js/chat.js"></script>
+  <script src="js/forum.js"></script>
 </body>
 </html>

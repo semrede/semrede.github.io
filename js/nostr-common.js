@@ -1,0 +1,172 @@
+/* Pieces shared by chat.js and forum.js: the relay pool, profile lookups,
+ * the admin mute list, relay status dots and the text helpers.
+ */
+(function () {
+  'use strict';
+
+  var NT = window.NostrTools;
+  var cfg = window.SemRedeConfig;
+  var auth = window.SemRedeNostr;
+  var RELAYS = cfg.RELAYS;
+  var pool = new NT.SimplePool({ enablePing: true, enableReconnect: true });
+
+  // ---- profiles (kind 0) ----
+  var profiles = new Map();
+  var requested = new Set();
+  var batch = new Set();
+  var batchTimer = null;
+  var profileListeners = [];
+
+  function applyProfile(ev) {
+    var old = profiles.get(ev.pubkey);
+    if (old && old.created_at >= ev.created_at) return;
+    var data;
+    try { data = JSON.parse(ev.content) || {}; } catch (e) { return; }
+    var name = String(data.display_name || data.name || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+    var picture = typeof data.picture === 'string' && /^https:\/\//.test(data.picture) ? data.picture : '';
+    profiles.set(ev.pubkey, { name: name, picture: picture, created_at: ev.created_at, raw: data });
+    profileListeners.forEach(function (fn) { fn(ev.pubkey); });
+  }
+
+  function requestProfile(pubkey) {
+    if (requested.has(pubkey)) return;
+    requested.add(pubkey);
+    batch.add(pubkey);
+    clearTimeout(batchTimer);
+    batchTimer = setTimeout(function () {
+      var authors = Array.from(batch);
+      batch.clear();
+      if (!authors.length) return;
+      pool.subscribeManyEose(RELAYS, { kinds: [0], authors: authors }, { onevent: applyProfile });
+    }, 250);
+  }
+
+  // ---- admin mute list (NIP-51 kind 10000) ----
+  var muted = new Set();
+  var muteAt = 0;
+  var muteListeners = [];
+
+  function watchMuteList() {
+    pool.subscribeMany(RELAYS, { kinds: [10000], authors: [cfg.ADMIN_PUBKEY] }, {
+      onevent: function (ev) {
+        if (ev.created_at <= muteAt) return;
+        muteAt = ev.created_at;
+        muted = new Set(ev.tags.filter(function (t) { return t[0] === 'p'; }).map(function (t) { return t[1]; }));
+        muteListeners.forEach(function (fn) { fn(); });
+      }
+    });
+  }
+
+  // ---- text ----
+  function renderText(container, text) {
+    var re = /https?:\/\/[^\s<>"']+/g;
+    var last = 0, m;
+    while ((m = re.exec(text))) {
+      var url = m[0].replace(/[.,!?;:)\]]+$/, '');
+      if (m.index > last) container.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var a = document.createElement('a');
+      a.href = url;
+      a.textContent = url;
+      a.target = '_blank';
+      a.rel = 'noopener nofollow ugc';
+      container.appendChild(a);
+      last = m.index + url.length;
+    }
+    if (last < text.length) container.appendChild(document.createTextNode(text.slice(last)));
+  }
+
+  function timeLabel(ts) {
+    return new Date(ts * 1000).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function dayLabel(ts) {
+    var d = new Date(ts * 1000);
+    var today = new Date();
+    if (d.toDateString() === today.toDateString()) return 'Today';
+    if (d.toDateString() === new Date(Date.now() - 864e5).toDateString()) return 'Yesterday';
+    return d.toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long',
+      year: d.getFullYear() === today.getFullYear() ? undefined : 'numeric'
+    });
+  }
+
+  // "3 minutes ago", for lists where the exact minute does not matter.
+  function ago(ts) {
+    var s = Math.max(1, Math.floor(Date.now() / 1000 - ts));
+    var steps = [[60, 'second'], [60, 'minute'], [24, 'hour'], [7, 'day'], [4.34, 'week'], [12, 'month']];
+    var value = s, unit = 'second';
+    for (var i = 0; i < steps.length && value >= steps[i][0]; i++) {
+      value = value / steps[i][0];
+      unit = steps[i + 1] ? steps[i + 1][1] : 'year';
+    }
+    value = Math.floor(value);
+    return value + ' ' + unit + (value === 1 ? '' : 's') + ' ago';
+  }
+
+  // ---- people ----
+  function displayName(pubkey) {
+    var p = profiles.get(pubkey);
+    return (p && p.name) || auth.deriveCallsign(pubkey);
+  }
+
+  function colorFor(pubkey) {
+    var palette = ['var(--orange)', 'var(--yellow)', 'var(--teal)', 'var(--green)'];
+    return palette[parseInt(pubkey.slice(-2), 16) % palette.length];
+  }
+
+  function fillAvatar(el, pubkey) {
+    el.textContent = '';
+    el.style.setProperty('--avatar', colorFor(pubkey));
+    var p = profiles.get(pubkey);
+    var fallback = displayName(pubkey).replace(/^X1/, '').trim().slice(0, 2).toUpperCase();
+    if (p && p.picture) {
+      var img = document.createElement('img');
+      img.src = p.picture;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      img.onerror = function () { img.remove(); el.textContent = fallback; };
+      el.appendChild(img);
+    } else {
+      el.textContent = fallback;
+    }
+  }
+
+  // ---- relays ----
+  function relayStatus(dotsEl, countEl) {
+    function update() {
+      var status = pool.listConnectionStatus();
+      var up = 0;
+      dotsEl.textContent = '';
+      RELAYS.forEach(function (url) {
+        var ok = status.get(url) || status.get(url + '/');
+        if (ok) up++;
+        var dot = document.createElement('i');
+        dot.className = ok ? 'up' : 'down';
+        dot.title = url.replace('wss://', '') + (ok ? ' connected' : ' offline');
+        dotsEl.appendChild(dot);
+      });
+      if (countEl) countEl.textContent = up + '/' + RELAYS.length + ' relays';
+    }
+    update();
+    setInterval(update, 4000);
+  }
+
+  function publish(event) {
+    return Promise.allSettled(pool.publish(RELAYS, event)).then(function (results) {
+      return results.some(function (r) { return r.status === 'fulfilled'; });
+    });
+  }
+
+  window.SemRedeNet = {
+    pool: pool, RELAYS: RELAYS, publish: publish,
+    profiles: profiles, requestProfile: requestProfile, applyProfile: applyProfile,
+    onProfile: function (fn) { profileListeners.push(fn); },
+    isMuted: function (pubkey) { return muted.has(pubkey); },
+    onMuteChange: function (fn) { muteListeners.push(fn); },
+    watchMuteList: watchMuteList,
+    renderText: renderText, timeLabel: timeLabel, dayLabel: dayLabel, ago: ago,
+    displayName: displayName, colorFor: colorFor, fillAvatar: fillAvatar,
+    relayStatus: relayStatus
+  };
+})();

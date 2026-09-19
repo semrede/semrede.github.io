@@ -1,0 +1,98 @@
+/* SemRede forum. Uses the tokens in styles.css and the cards in chat.css. */
+
+.forum-shell { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+.forum-main { border: 2px solid var(--teal); background: linear-gradient(160deg, #0b1716, #050a09 70%); }
+.forum-bar { border-bottom: 1px solid #1f3a37; }
+.forum-view { padding: 22px 24px 30px; }
+.forum-h2 { margin: 26px 0 14px; font: 800 30px/1 var(--display); text-transform: uppercase; letter-spacing: -.01em; color: var(--paper); }
+.forum-view > .forum-h2:first-of-type { margin-top: 6px; }
+.muted-note { margin: 10px 0; color: #8a938b; font-size: 12px; }
+.back-link { display: inline-block; margin-bottom: 8px; color: var(--teal); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.back-link::before { content: "< "; }
+.back-link:hover { color: var(--yellow); }
+
+/* categories */
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.cat-card {
+  --tint: var(--teal);
+  display: flex; flex-direction: column; gap: 6px; padding: 16px 18px;
+  border: 1px solid #22302d; border-left: 4px solid var(--tint); background: #0a1413;
+  transition: border-color .2s, transform .2s, background .2s;
+}
+.cat-card:hover { border-color: var(--tint); background: #0d1b19; transform: translateY(-2px); }
+.cat-card h2 { margin: 0; font: 800 24px/1 var(--display); text-transform: uppercase; color: var(--tint); }
+.cat-card p { margin: 0; color: #c3c5b9; font-size: 12px; line-height: 1.5; }
+.cat-stat { color: #7d877f; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.cat-card.c-orange { --tint: var(--orange); }
+.cat-card.c-yellow { --tint: var(--yellow); }
+.cat-card.c-teal { --tint: var(--teal); }
+.cat-card.c-green { --tint: var(--green); }
+.cat-intro { margin: 0 0 18px; color: #c3c5b9; font-size: 13px; }
+
+/* thread lists */
+.thread-list { display: flex; flex-direction: column; }
+.thread-row {
+  display: flex; align-items: center; gap: 16px; padding: 14px 4px;
+  border-bottom: 1px solid #1c2b28; transition: background .15s;
+}
+.thread-row:hover { background: #0c1817; }
+.thread-row strong { display: block; font: 700 19px/1.15 var(--display); text-transform: uppercase; color: var(--paper); overflow-wrap: anywhere; }
+.thread-meta { margin-top: 4px; color: #7d877f; font-size: 11px; }
+.reply-count {
+  flex: none; min-width: 42px; padding: 6px 8px; text-align: center;
+  border: 1px solid #2a3f3c; color: var(--teal); font: 700 14px var(--mono);
+}
+
+/* thread view */
+.thread-h { margin: 6px 0 18px; font-size: clamp(26px, 3.4vw, 38px); line-height: .95; color: var(--teal); }
+.post { padding: 16px 0; border-bottom: 1px solid #1c2b28; }
+.post.root { border-bottom: 2px solid #22423f; }
+.author { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.author .avatar { width: 28px; height: 28px; font-size: 11px; }
+.author-name { font: 700 17px/1 var(--display); text-transform: uppercase; }
+.author time { color: #6d766f; font-size: 10px; }
+.author-extra { color: #6d766f; font-size: 10px; }
+.post-body { color: var(--paper); font-size: 13px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.post-body a { color: var(--teal); text-decoration: underline; text-underline-offset: 2px; }
+.post-actions { margin-top: 8px; }
+
+.comments { margin-top: 10px; }
+.comments-heading { margin: 22px 0 6px; font: 700 15px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--yellow); }
+.comment { position: relative; }
+.comment.depth-1 { margin-left: 18px; padding-left: 14px; border-left: 1px solid #22302d; }
+.comment.depth-2 { margin-left: 36px; padding-left: 14px; border-left: 1px solid #22302d; }
+.comment.depth-3 { margin-left: 54px; padding-left: 14px; border-left: 1px solid #22302d; }
+.comment.depth-4 { margin-left: 72px; padding-left: 14px; border-left: 1px solid #22302d; }
+
+.inline-reply { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 4px; }
+.inline-reply textarea, .new-thread textarea, .reply-form textarea, .new-thread input {
+  width: 100%; padding: 10px 12px; background: #0d1918; border: 1px solid #2a3f3c;
+  color: var(--paper); font: 13px/1.5 var(--mono); resize: vertical;
+}
+.inline-reply textarea:focus, .new-thread textarea:focus, .reply-form textarea:focus, .new-thread input:focus { outline: none; border-color: var(--teal); }
+.inline-reply .inline-row { justify-content: flex-start; align-items: center; gap: 12px; }
+
+.new-thread, .reply-form { gap: 8px; margin: 14px 0 22px; }
+.new-thread label, .reply-form label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
+.new-thread .big-btn, .reply-form .big-btn { width: auto; align-self: flex-start; padding: 10px 22px; }
+#new-toggle { width: auto; padding: 10px 22px; margin-bottom: 8px; }
+
+@media (max-width: 900px) {
+  .forum-shell { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 800px) {
+  .forum-view { padding: 18px 14px 24px; }
+  .cat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cat-card { padding: 12px 12px; }
+  .cat-card h2 { font-size: 19px; }
+  .cat-card p { display: none; }
+  .forum-h2 { font-size: 24px; }
+  .thread-row { gap: 10px; }
+  .thread-row strong { font-size: 17px; }
+  .reply-count { min-width: 36px; font-size: 13px; }
+  .comment.depth-1 { margin-left: 8px; padding-left: 10px; }
+  .comment.depth-2 { margin-left: 16px; padding-left: 10px; }
+  .comment.depth-3 { margin-left: 24px; padding-left: 10px; }
+  .comment.depth-4 { margin-left: 32px; padding-left: 10px; }
+}

@@ -1,112 +1,33 @@
-/* SemRede chat: one NIP-28 public channel on public NOSTR relays.
+/* SemRede chat: one NIP-28 public channel (kind 42) on public relays.
  * Rendering follows the geogram station chat (date separators, HH:MM, "Name X1ABCD");
  * the transport is relay subscriptions instead of the station REST API.
+ * Relays, profiles, mute list and text helpers live in js/nostr-common.js.
  */
 (function () {
   'use strict';
 
-  // ---- Configuration (room created with tools/nostr-admin.mjs create) ----
-  var CHANNEL_ID = 'e80c52b1d568d735530c5461d2386d2a28fcaa619f183101af66c973697ad7eb';
-  var ADMIN_PUBKEY = 'a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3';
-  var RELAYS = ['wss://relay.primal.net', 'wss://relay.damus.io', 'wss://relay.snort.social', 'wss://nostr-pub.wellorder.net', 'wss://purplerelay.com', 'wss://relay.piazza.today'];
+  var NT = window.NostrTools;
+  var net = window.SemRedeNet;
+  var auth = window.SemRedeNostr;
+  var pool = net.pool;
+  var RELAYS = net.RELAYS;
+  var CHANNEL_ID = window.SemRedeConfig.CHANNEL_ID;
   var PAGE_SIZE = 100;
   var MAX_LENGTH = 2000;
   var GROUP_WINDOW = 5 * 60;
 
-  var NT = window.NostrTools;
-  var auth = window.SemRedeNostr;
-  var pool = new NT.SimplePool({ enablePing: true, enableReconnect: true });
-
   var $ = function (id) { return document.getElementById(id); };
   var els = {
     messages: $('messages'), list: $('message-list'), empty: $('chat-empty'), older: $('load-older'),
-    composer: $('composer'), input: $('chat-input'), send: $('send-btn'), locked: $('composer-locked'),
-    relayDots: $('relay-dots'), relayCount: $('relay-count'),
-    loginCard: $('login-card'), meCard: $('me-card'), loginError: $('login-error'), meError: $('me-error'),
-    btnExtension: $('btn-extension'), extensionHint: $('extension-hint'),
-    createForm: $('create-form'), newName: $('new-name'), importForm: $('import-form'), importKey: $('import-key'),
-    meAvatar: $('me-avatar'), meName: $('me-name'), meCallsign: $('me-callsign'),
-    nameForm: $('name-form'), nameInput: $('me-name-input'),
-    backup: $('backup-box'), nsecValue: $('nsec-value'), nsecReveal: $('nsec-reveal'), nsecCopy: $('nsec-copy'),
-    npubValue: $('npub-value'), npubCopy: $('npub-copy'), logout: $('btn-logout')
+    composer: $('composer'), input: $('chat-input'), send: $('send-btn'),
+    relayDots: $('relay-dots'), relayCount: $('relay-count'), error: $('me-error')
   };
+
 
   var messages = new Map();      // id -> event
   var pending = new Map();       // id -> 'sending' | 'failed'
-  var profiles = new Map();      // pubkey -> {name, picture, created_at}
-  var profileRequested = new Set();
-  var muted = new Set();
-  var muteListAt = 0;
   var oldestSeen = null;
-  var ownProfileChecked = false;
   var initialLoaded = false;
-
-  // ---------- helpers ----------
-
-  function shortKey(s) { return s.slice(0, 10) + '...' + s.slice(-6); }
-
-  function displayName(pubkey) {
-    var p = profiles.get(pubkey);
-    return (p && p.name) || auth.deriveCallsign(pubkey);
-  }
-
-  function colorFor(pubkey) {
-    var palette = ['var(--orange)', 'var(--yellow)', 'var(--teal)', 'var(--green)'];
-    return palette[parseInt(pubkey.slice(-2), 16) % palette.length];
-  }
-
-  function fillAvatar(el, pubkey) {
-    el.textContent = '';
-    el.style.setProperty('--avatar', colorFor(pubkey));
-    var p = profiles.get(pubkey);
-    if (p && p.picture) {
-      var img = document.createElement('img');
-      img.src = p.picture;
-      img.alt = '';
-      img.loading = 'lazy';
-      img.referrerPolicy = 'no-referrer';
-      img.onerror = function () { img.remove(); el.textContent = initials(pubkey); };
-      el.appendChild(img);
-    } else {
-      el.textContent = initials(pubkey);
-    }
-  }
-
-  function initials(pubkey) {
-    var name = displayName(pubkey).replace(/^X1/, '');
-    return name.trim().slice(0, 2).toUpperCase();
-  }
-
-  function dayLabel(ts) {
-    var d = new Date(ts * 1000);
-    var today = new Date();
-    var yesterday = new Date(Date.now() - 864e5);
-    if (d.toDateString() === today.toDateString()) return 'Today';
-    if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
-    return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: d.getFullYear() === today.getFullYear() ? undefined : 'numeric' });
-  }
-
-  function timeLabel(ts) {
-    return new Date(ts * 1000).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  }
-
-  // Text with clickable links, built from nodes only (no HTML from other users).
-  function renderText(container, text) {
-    var re = /https?:\/\/[^\s<>"']+/g;
-    var last = 0, m;
-    while ((m = re.exec(text))) {
-      var url = m[0].replace(/[.,!?;:)\]]+$/, '');
-      if (m.index > last) container.appendChild(document.createTextNode(text.slice(last, m.index)));
-      var a = document.createElement('a');
-      a.href = url;
-      a.textContent = url;
-      a.target = '_blank';
-      a.rel = 'noopener nofollow ugc';
-      container.appendChild(a);
-      last = m.index + url.length;
-    }
-    if (last < text.length) container.appendChild(document.createTextNode(text.slice(last)));
-  }
 
   function isNearBottom() {
     var c = els.messages;
@@ -129,7 +50,7 @@
 
   function render() {
     var list = Array.from(messages.values())
-      .filter(function (e) { return !muted.has(e.pubkey); })
+      .filter(function (e) { return !net.isMuted(e.pubkey); })
       .sort(function (a, b) { return a.created_at - b.created_at || (a.id < b.id ? -1 : 1); });
 
     var frag = document.createDocumentFragment();
@@ -139,8 +60,9 @@
       if (day !== lastDay) {
         var sep = document.createElement('div');
         sep.className = 'day-sep';
-        sep.innerHTML = '<span></span>';
-        sep.firstChild.textContent = dayLabel(ev.created_at);
+        var label = document.createElement('span');
+        label.textContent = net.dayLabel(ev.created_at);
+        sep.appendChild(label);
         frag.appendChild(sep);
         lastDay = day;
         prev = null;
@@ -164,11 +86,11 @@
     var own = auth.pubkey === ev.pubkey;
     var row = document.createElement('article');
     row.className = 'msg' + (own ? ' own' : '') + (grouped ? ' grouped' : '');
-    row.style.setProperty('--who', colorFor(ev.pubkey));
+    row.style.setProperty('--who', net.colorFor(ev.pubkey));
 
     var avatar = document.createElement('span');
     avatar.className = 'avatar';
-    if (!grouped) fillAvatar(avatar, ev.pubkey);
+    if (!grouped) net.fillAvatar(avatar, ev.pubkey);
     row.appendChild(avatar);
 
     var bubble = document.createElement('div');
@@ -178,20 +100,20 @@
       meta.className = 'meta';
       var name = document.createElement('span');
       name.className = 'name';
-      name.textContent = displayName(ev.pubkey);
+      name.textContent = net.displayName(ev.pubkey);
       var cs = document.createElement('span');
       cs.className = 'callsign';
       cs.textContent = auth.deriveCallsign(ev.pubkey);
       cs.title = NT.nip19.npubEncode(ev.pubkey);
       var t = document.createElement('time');
       t.dateTime = new Date(ev.created_at * 1000).toISOString();
-      t.textContent = timeLabel(ev.created_at);
+      t.textContent = net.timeLabel(ev.created_at);
       meta.append(name, cs, t);
       bubble.appendChild(meta);
     }
     var text = document.createElement('div');
     text.className = 'text';
-    renderText(text, ev.content);
+    net.renderText(text, ev.content);
     bubble.appendChild(text);
 
     var state = pending.get(ev.id);
@@ -228,7 +150,7 @@
     if (messages.has(ev.id) || !isRoomMessage(ev)) return;
     messages.set(ev.id, ev);
     if (oldestSeen === null || ev.created_at < oldestSeen) oldestSeen = ev.created_at;
-    requestProfile(ev.pubkey);
+    net.requestProfile(ev.pubkey);
     queueRender(ev.pubkey === auth.pubkey);
   }
 
@@ -245,14 +167,7 @@
       onevent: addMessage,
       oneose: markLoaded
     });
-    pool.subscribeMany(RELAYS, { kinds: [10000], authors: [ADMIN_PUBKEY] }, {
-      onevent: function (ev) {
-        if (ev.created_at <= muteListAt) return;
-        muteListAt = ev.created_at;
-        muted = new Set(ev.tags.filter(function (t) { return t[0] === 'p'; }).map(function (t) { return t[1]; }));
-        queueRender(false);
-      }
-    });
+    net.watchMuteList();
   }
 
   function loadOlder() {
@@ -275,59 +190,11 @@
       });
   }
 
-  // Batch kind 0 lookups so a busy room does not open one subscription per author.
-  var profileBatch = new Set();
-  var profileTimer = null;
-  function requestProfile(pubkey) {
-    if (profileRequested.has(pubkey)) return;
-    profileRequested.add(pubkey);
-    profileBatch.add(pubkey);
-    clearTimeout(profileTimer);
-    profileTimer = setTimeout(flushProfiles, 250);
-  }
-
-  function flushProfiles() {
-    var authors = Array.from(profileBatch);
-    profileBatch.clear();
-    if (!authors.length) return;
-    pool.subscribeManyEose(RELAYS, { kinds: [0], authors: authors }, {
-      onevent: function (ev) { applyProfile(ev); }
-    });
-  }
-
-  function applyProfile(ev) {
-    var old = profiles.get(ev.pubkey);
-    if (old && old.created_at >= ev.created_at) return;
-    var data = {};
-    try { data = JSON.parse(ev.content) || {}; } catch (e) { return; }
-    var name = String(data.display_name || data.name || '').replace(/\s+/g, ' ').trim().slice(0, 40);
-    var picture = typeof data.picture === 'string' && /^https:\/\//.test(data.picture) ? data.picture : '';
-    profiles.set(ev.pubkey, { name: name, picture: picture, created_at: ev.created_at, raw: data });
-    if (ev.pubkey === auth.pubkey) showIdentity();
-    queueRender(false);
-  }
-
-  function updateRelayStatus() {
-    var status = pool.listConnectionStatus();
-    var up = 0;
-    els.relayDots.textContent = '';
-    RELAYS.forEach(function (url) {
-      var ok = status.get(url) || status.get(url + '/');
-      if (ok) up++;
-      var dot = document.createElement('i');
-      dot.className = ok ? 'up' : 'down';
-      dot.title = url.replace('wss://', '') + (ok ? ' connected' : ' offline');
-      els.relayDots.appendChild(dot);
-    });
-    els.relayCount.textContent = up + '/' + RELAYS.length + ' relays';
-  }
-
   function publishSigned(ev) {
     pending.set(ev.id, 'sending');
     messages.set(ev.id, ev);
     queueRender(true);
-    return Promise.allSettled(pool.publish(RELAYS, ev)).then(function (results) {
-      var ok = results.some(function (r) { return r.status === 'fulfilled'; });
+    return net.publish(ev).then(function (ok) {
       if (ok) pending.delete(ev.id);
       else pending.set(ev.id, 'failed');
       queueRender(false);
@@ -356,7 +223,7 @@
       autosize();
       return publishSigned(ev);
     }).catch(function (err) {
-      showError(els.meError, err && err.message ? err.message : 'Could not sign the message');
+      window.SemRedeIdentity.showError(els.error, err && err.message ? err.message : 'Could not sign the message');
     }).finally(function () {
       sending = false;
       els.send.disabled = false;
@@ -369,70 +236,6 @@
     els.input.style.height = Math.min(els.input.scrollHeight, 160) + 'px';
   }
 
-  // ---------- identity UI ----------
-
-  function showError(el, msg) {
-    el.textContent = msg;
-    clearTimeout(el._t);
-    el._t = setTimeout(function () { el.textContent = ''; }, 6000);
-  }
-
-  function showIdentity() {
-    var loggedIn = !!auth.pubkey;
-    els.loginCard.hidden = loggedIn;
-    els.meCard.hidden = !loggedIn;
-    els.composer.hidden = !loggedIn;
-    els.locked.hidden = loggedIn;
-    if (!loggedIn) return;
-    var p = profiles.get(auth.pubkey);
-    els.meName.textContent = displayName(auth.pubkey);
-    els.meCallsign.textContent = auth.callsign + (auth.mode === 'extension' ? ' / extension' : ' / this browser');
-    fillAvatar(els.meAvatar, auth.pubkey);
-    if (document.activeElement !== els.nameInput) els.nameInput.value = (p && p.name) || '';
-    els.npubValue.textContent = shortKey(auth.npub());
-    els.backup.hidden = auth.mode !== 'local';
-    els.nsecValue.textContent = 'nsec1' + '*'.repeat(12);
-    els.nsecValue.dataset.shown = '';
-    els.nsecReveal.textContent = 'Show';
-  }
-
-  // Publish kind 0, keeping fields an existing profile already has (picture, about, nip05...).
-  function saveName(name) {
-    if (!ownProfileChecked) return fetchOwnProfile().then(function () { return saveName(name); });
-    var p = profiles.get(auth.pubkey);
-    var data = Object.assign({}, (p && p.raw) || {});
-    data.name = name;
-    data.display_name = name;
-    return auth.signEvent({ kind: 0, created_at: Math.floor(Date.now() / 1000), tags: [], content: JSON.stringify(data) })
-      .then(function (ev) {
-        applyProfile(ev);
-        return Promise.allSettled(pool.publish(RELAYS, ev));
-      });
-  }
-
-  function fetchOwnProfile() {
-    return pool.get(RELAYS, { kinds: [0], authors: [auth.pubkey] }, { maxWait: 4000 }).then(function (ev) {
-      if (ev) applyProfile(ev);
-      ownProfileChecked = true;
-    });
-  }
-
-  function onLogin() {
-    ownProfileChecked = false;
-    profileRequested.add(auth.pubkey);
-    showIdentity();
-    queueRender(true);
-    fetchOwnProfile();
-  }
-
-  function copy(text, btn) {
-    navigator.clipboard.writeText(text).then(function () {
-      var old = btn.textContent;
-      btn.textContent = 'Copied';
-      setTimeout(function () { btn.textContent = old; }, 1500);
-    });
-  }
-
   function wireUi() {
     els.composer.addEventListener('submit', sendMessage);
     els.input.addEventListener('input', autosize);
@@ -441,70 +244,14 @@
     });
     els.older.addEventListener('click', loadOlder);
 
-    els.btnExtension.addEventListener('click', function () {
-      auth.loginWithExtension().catch(function (err) {
-        showError(els.loginError, err.message === 'No NOSTR extension found'
-          ? 'No NOSTR extension found in this browser. Create an account instead, or install Alby or nos2x.'
-          : 'The extension did not share a key.');
-      });
-    });
-
-    els.createForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var name = els.newName.value.replace(/\s+/g, ' ').trim();
-      if (name.length < 2) return showError(els.loginError, 'Pick a name with at least 2 characters.');
-      auth.createAccount().then(function () {
-        profiles.set(auth.pubkey, { name: name, picture: '', created_at: 0, raw: {} });
-        ownProfileChecked = true;
-        showIdentity();
-        return saveName(name);
-      });
-    });
-
-    els.importForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      try {
-        auth.importKey(els.importKey.value);
-        els.importKey.value = '';
-      } catch (err) {
-        showError(els.loginError, err.message);
-      }
-    });
-
-    els.nameForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var name = els.nameInput.value.replace(/\s+/g, ' ').trim();
-      if (name.length < 2) return showError(els.meError, 'Use at least 2 characters.');
-      saveName(name).then(function () { els.nameInput.blur(); showIdentity(); },
-        function () { showError(els.meError, 'Could not save the name.'); });
-    });
-
-    els.nsecReveal.addEventListener('click', function () {
-      var shown = els.nsecValue.dataset.shown === '1';
-      els.nsecValue.textContent = shown ? 'nsec1' + '*'.repeat(12) : auth.nsec();
-      els.nsecValue.dataset.shown = shown ? '' : '1';
-      els.nsecReveal.textContent = shown ? 'Show' : 'Hide';
-    });
-    els.nsecCopy.addEventListener('click', function () { copy(auth.nsec(), els.nsecCopy); });
-    els.npubCopy.addEventListener('click', function () { copy(auth.npub(), els.npubCopy); });
-    els.logout.addEventListener('click', function () {
-      if (auth.mode === 'local' && !confirm('This account only exists in this browser. Log out only if you saved your key. Log out?')) return;
-      auth.logout();
-    });
-
-    document.addEventListener('semrede-login', onLogin);
-    document.addEventListener('semrede-logout', function () { showIdentity(); queueRender(false); });
+    window.SemRedeIdentity.onChange(function () { queueRender(true); });
+    net.onProfile(function () { queueRender(false); });
+    net.onMuteChange(function () { queueRender(false); });
   }
 
   // ---------- start ----------
 
   wireUi();
-  showIdentity();
   subscribeRoom();
-  updateRelayStatus();
-  setInterval(updateRelayStatus, 4000);
-  auth.ready.then(function () {
-    els.extensionHint.classList.toggle('found', auth.extensionAvailable);
-    if (!auth.extensionAvailable) els.btnExtension.classList.add('muted');
-  });
+  net.relayStatus(els.relayDots, els.relayCount);
 })();

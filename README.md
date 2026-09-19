@@ -7,7 +7,10 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 ## Structure
 
 - `index.html`: single-page site
-- `chat.html`, `js/chat.js`, `js/nostr-login.js`, `css/chat.css`: the chat room
+- `chat.html`, `js/chat.js`, `css/chat.css`: the chat room
+- `forum.html`, `js/forum.js`, `css/forum.css`: the forum
+- `js/nostr-config.js`: relays, admin key, room id, forum categories
+- `js/nostr-login.js`, `js/identity-ui.js`, `js/nostr-common.js`: login and the shared relay, profile and mute-list code
 - `js/vendor/nostr.bundle.js`: nostr-tools 2.25.2, vendored so the site has no runtime CDN dependency
 - `tools/nostr-admin.mjs`: room and moderation tool (node, run by hand)
 - `css/styles.css`: styles and theme variables
@@ -43,9 +46,25 @@ block everyone who creates an account on the site. Every relay above was
 checked to accept a brand-new key. The same list appears in `js/chat.js` and in
 `tools/nostr-admin.mjs`, and both must be changed together.
 
+## Forum
+
+`forum.html` uses the same login and the same relays as the chat. Threads are
+NIP-7D events (kind 11) carrying a `title` tag, the `semrede` tag and one
+category tag such as `semrede-mesh`. Replies are NIP-22 comments (kind 1111)
+that point at the thread with an uppercase `E` tag and at their parent with a
+lowercase `e` tag, which is how the reply tree is rebuilt.
+
+Nothing is created in advance, so the categories carry over from year to year.
+They are listed in `js/nostr-config.js`; adding one is a line in `CATEGORIES`,
+and old threads keep working because each thread stores its own category tag.
+
+Routes are hash based: `#/` categories, `#/c/<slug>` one category, `#/t/<id>`
+one thread. A thread link can be shared and opens straight from the relays.
+
 ### Moderation
 
-Accounts on the admin mute list (NIP-51, kind 10000) are hidden on semrede.com.
+Accounts on the admin mute list (NIP-51, kind 10000) are hidden on semrede.com,
+in the chat and in the forum.
 They are not deleted from the relays, and other NOSTR clients still show them.
 
 ```bash
