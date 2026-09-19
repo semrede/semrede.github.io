@@ -5,7 +5,7 @@
 
 .chat-main { padding-bottom: 60px; }
 
-.chat-intro { padding: 50px 0 34px; max-width: 760px; }
+.chat-intro { padding: 42px 0 26px; max-width: 760px; }
 .chat-intro h1 { margin: 14px 0 16px; font: 800 clamp(44px, 6vw, 76px)/.86 var(--display); text-transform: uppercase; letter-spacing: -.03em; }
 .chat-intro h1 em { color: var(--teal); font-style: normal; }
 .chat-intro p { margin: 0; color: #c3c5b9; font-size: 14px; }
@@ -144,7 +144,7 @@
 }
 
 @media (max-width: 800px) {
-  .chat-intro { padding: 32px 0 24px; }
+  .chat-intro { padding: 26px 0 18px; }
   .room-bar { padding: 12px 14px; }
   .room-title strong { font-size: 22px; }
   .relay-status #relay-count { display: none; }
