@@ -4,11 +4,9 @@
 .loc-lead { margin: 12px 0 0; max-width: 680px; color: #c3c5b9; font-size: 14px; }
 
 .loc-card {
-  display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 0;
   margin-bottom: 22px; border: 2px solid var(--teal); background: linear-gradient(160deg, #0b1716, #07100f 70%);
   overflow: hidden;
 }
-.loc-card img { width: 100%; height: 100%; min-height: 220px; object-fit: cover; border-right: 2px solid var(--teal); }
 .loc-body { padding: 26px 30px 30px; }
 .loc-meta { color: var(--yellow); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; }
 .loc-card h2 { margin: 10px 0 6px; font: italic 900 clamp(34px, 4.4vw, 56px)/.9 var(--display); text-transform: uppercase; color: var(--teal); }
@@ -25,9 +23,9 @@
 .loc-address dd { margin: 0; color: var(--paper); }
 .loc-address a { color: var(--paper); }
 
-.sat { margin: 0 0 18px; }
+.sat { margin: 0 0 20px; }
 .sat a { position: relative; display: block; border: 1px solid #22302d; }
-.sat img { display: block; width: 100%; height: auto; filter: saturate(.85) contrast(1.05); }
+.sat img { display: block; width: 100%; height: auto; max-height: 380px; object-fit: cover; filter: saturate(.85) contrast(1.05); }
 .sat-pin {
   position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px;
   border: 3px solid var(--orange); border-radius: 50%; box-shadow: 0 0 0 2px rgba(3, 7, 6, .7), 0 0 14px rgba(255, 75, 31, .7);
@@ -42,7 +40,7 @@
 #embaixada h2 { color: var(--orange); }
 #embaixada .loc-place { color: var(--teal); }
 
-.loc-travel { grid-template-columns: minmax(0, 1fr); border-color: var(--yellow); }
+.loc-travel { border-color: var(--yellow); }
 .loc-travel h2 { color: var(--yellow); font-style: normal; }
 
 .loc-help { padding: 20px 24px; border: 1px solid #34403a; color: #9ea59e; font-size: 12px; }
@@ -51,7 +49,5 @@
 .loc-help p { margin: 0; line-height: 1.7; }
 
 @media (max-width: 900px) {
-  .loc-card { grid-template-columns: minmax(0, 1fr); }
-  .loc-card img { min-height: 0; aspect-ratio: 16 / 7; border-right: 0; border-bottom: 2px solid currentColor; }
   .loc-body { padding: 20px 18px 24px; }
 }
