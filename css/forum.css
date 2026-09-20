@@ -5,6 +5,7 @@
 .forum-bar { border-bottom: 1px solid #1f3a37; min-height: 0; padding: 10px 24px; }
 .forum-bar .room-title span { margin-top: 0; }
 .forum-view { padding: 22px 24px 30px; }
+.forum-main .room-note { padding: 8px 24px; }
 .forum-h2 { margin: 26px 0 14px; font: 800 30px/1 var(--display); text-transform: uppercase; letter-spacing: -.01em; color: var(--paper); }
 .forum-view > .forum-h2:first-of-type { margin-top: 6px; }
 .muted-note { margin: 10px 0; color: #8a938b; font-size: 12px; }
