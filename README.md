@@ -21,6 +21,8 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `tools/covers.mjs`: copies the album covers into `img/music/`
 - `tools/audio.mjs`, `files/music/`: the tracks themselves, as AAC
 - `crypto/index.html`, `css/crypto.css`: the CryptoEscudo page
+- `img/minerfan.png`, `img/xprs.png`, `img/gnpa.png`: the real project icons,
+  taken from each project's own repository
 - `fonts/`, `css/fonts.css`, `tools/fonts.mjs`: the self-hosted web fonts
 - `flyer/flyer.html`, `tools/flyer.mjs`: the printable flyer and its renderer
 - `tools/maps.sh`: refreshes the satellite views on /locations

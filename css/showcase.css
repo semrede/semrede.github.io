@@ -9,6 +9,8 @@
 
 .showcase-h2 { margin: 30px 0 16px; font: 800 26px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; color: var(--yellow); }
 
+.proj-head { display: flex; align-items: flex-start; gap: 18px; }
+.proj-icon { flex: none; width: 72px; height: 72px; padding: 8px; border: 1px solid #22302d; border-radius: 16px; background: #0a1413; object-fit: contain; }
 .proj h2 { font-style: normal; }
 .proj.green { border-color: var(--green); }
 .proj.green h2 { color: var(--green); }
@@ -21,4 +23,6 @@
 
 @media (max-width: 800px) {
   .propose-body { padding: 20px 18px 24px; }
+  .proj-head { gap: 14px; }
+  .proj-icon { width: 58px; height: 58px; padding: 6px; border-radius: 13px; }
 }
