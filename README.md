@@ -322,8 +322,10 @@ What still goes out, and why:
 
 ## CryptoEscudos
 
-The event is free, but the Saturday grill is paid in CryptoEscudo (CESC), a
-small scrypt coin people mine themselves before they travel. `/crypto`
+The event is free, but the Saturday grill is paid in CryptoEscudo (CESC), the
+oldest Portuguese cryptocurrency (launched 25 March 2014, scrypt, see
+[Wikipedia](https://pt.wikipedia.org/wiki/CryptoEscudo)), which people mine
+themselves before they travel. `/crypto`
 explains it: mine about 5000 CESC with
 [minerfan](https://x1watt.github.io/minerfan/) (one app carrying the miner, the
 node and the wallet, on Android, Linux, Windows and macOS), bring the wallet,
