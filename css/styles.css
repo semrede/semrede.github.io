@@ -106,7 +106,6 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
 .hero { position: relative; text-align: center; padding: 40px 0 30px; }
 .hero-corners { display: flex; justify-content: space-between; text-align: left; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; line-height: 1.4; }
 .hero-corners span:last-child { text-align: right; }
-.hero-mark { display: block; margin: 10px auto -40px; position: relative; z-index: 0; }
 .hero h1 { position: relative; z-index: 1; margin: 0; font-size: clamp(88px, 17vw, 210px); line-height: .95; }
 .hero h1.wordmark { filter: drop-shadow(5px 5px 0 #0b3d4a); }
 .hero-subtitle {
@@ -124,8 +123,13 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
 .hero-when strong { font: 800 clamp(26px, 3.4vw, 40px)/1 var(--display); color: var(--orange); text-transform: uppercase; letter-spacing: .02em; }
 .hero-when span { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--yellow); }
 
-.landscape { margin: 0 auto; max-width: 1180px; position: relative; }
-.landscape img { display: block; width: 100%; height: auto; max-height: 460px; object-fit: cover; mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 80%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 80%, transparent 100%); }
+/* The illustration sits where the big sun used to be, above the wordmark. */
+.hero-art { margin: 14px auto 6px; max-width: 900px; }
+.hero-art img {
+  display: block; width: 100%; height: auto; max-height: 250px; object-fit: cover;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 78%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 78%, transparent 100%);
+}
 
 .intro { display: grid; grid-template-columns: 1fr 2fr; gap: 60px; padding-block: 110px; border-top: 1px solid #34403a; }
 .section-kicker { color: var(--orange); font-size: 11px; letter-spacing: .18em; }
@@ -236,7 +240,7 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
   .register-inner { grid-template-columns: 1fr; padding: 28px; }
   .chat-cta-inner { grid-template-columns: 1fr; padding: 28px; }
   .hero-corners { font-size: 10px; }
-  .hero-mark { width: 130px; height: 130px; margin-bottom: -26px; }
+  .hero-art img { max-height: 170px; }
   .hero-sides { flex-direction: column; align-items: center; gap: 24px; }
   .hero-verbs { text-align: center; }
   .hero-verbs::after { margin-inline: auto; }

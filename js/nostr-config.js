@@ -29,18 +29,18 @@ window.SemRedeConfig = {
     {
       slug: 'eva',
       name: 'The week at Eva Farm',
-      dates: 'Monday to Friday, October 19 to 23',
+      dates: 'Monday to Friday, October 26 to 30',
       about: 'Five days of hands-on sessions, talks, meals and community time.',
       coord: '31922:a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3:semrede-2026-eva',
-      id: '8c8e5be3ead0ea5fc2c35794f9d38609650b9d4e05b6d0c72b3d2a34e4d2dd2e'
+      id: '2c01a19321604cc326770d2ea8a76d956631adafef4f3da58937fc03bc9bb276'
     },
     {
       slug: 'embaixada',
       name: 'Open day at Edif\u00edcio Embaixada',
-      dates: 'Saturday, October 24',
+      dates: 'Saturday, October 31',
       about: 'Talks, demos, community fair and the closing celebration, in the centre of Coimbra.',
       coord: '31922:a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3:semrede-2026-embaixada',
-      id: '1113be4c790aa549697f530dd666b804905b9e3417304110bb779f126d03fd6f'
+      id: '9efc9a1ecf299c5dc9647d071650c920486635c39a25f7c30021bb8b8cbb6c92'
     }
   ],
 

@@ -74,7 +74,7 @@ async function main() {
       kind: 40, tags: [],
       content: JSON.stringify({
         name: 'SemRede 2026',
-        about: 'Offgrid communications, communities & people. Coimbra, October 19 to 24, 2026.',
+        about: 'Offgrid communications, communities & people. Coimbra, October 26 to 31, 2026.',
         picture: SITE + '/img/logo.png',
         relays: RELAYS,
       }),
@@ -96,11 +96,11 @@ async function main() {
     const sk = loadKey();
     const parts = [
       { d: 'semrede-2026-eva', title: 'SemRede 2026: the week at Eva Farm',
-        start: '2026-10-19', end: '2026-10-24',
+        start: '2026-10-26', end: '2026-10-31',
         location: 'Eva Farm, Coimbra, Portugal',
         summary: 'Five days of hands-on sessions, talks and community time at Eva Farm. Free, registration helps us plan.' },
       { d: 'semrede-2026-embaixada', title: 'SemRede 2026: open day at Edificio Embaixada',
-        start: '2026-10-24', end: '2026-10-25',
+        start: '2026-10-31', end: '2026-11-01',
         location: 'Edificio Embaixada, Coimbra, Portugal',
         summary: 'One open day in the centre of Coimbra: talks, demos, community fair and celebration. Free, registration helps us plan.' },
     ];
