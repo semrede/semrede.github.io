@@ -20,6 +20,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `tools/music.mjs`: rebuilds the track list from the Fountain feeds
 - `tools/covers.mjs`: copies the album covers into `img/music/`
 - `tools/audio.mjs`, `files/music/`: the tracks themselves, as AAC
+- `crypto/index.html`, `css/crypto.css`: the CryptoEscudo page
 - `fonts/`, `css/fonts.css`, `tools/fonts.mjs`: the self-hosted web fonts
 - `flyer/flyer.html`, `tools/flyer.mjs`: the printable flyer and its renderer
 - `tools/maps.sh`: refreshes the satellite views on /locations
@@ -318,6 +319,19 @@ What still goes out, and why:
 - **Blossom servers**, when somebody uploads a picture, and whatever server
   hosts a picture posted by somebody else. Those images are loaded with
   `referrerpolicy="no-referrer"`.
+
+## CryptoEscudos
+
+The event is free, but the Saturday grill is paid in CryptoEscudo (CESC), a
+small scrypt coin people mine themselves before they travel. `/crypto`
+explains it: mine about 5000 CESC with
+[minerfan](https://x1watt.github.io/minerfan/) (one app carrying the miner, the
+node and the wallet, on Android, Linux, Windows and macOS), bring the wallet,
+pay at the grill.
+
+The page is linked from the home page (section 06), from the 17:00 grill entry
+on `/schedule` and from the lead on `/registration`. Questions belong in the
+Crypto category of the forum.
 
 ## Deploy
 
