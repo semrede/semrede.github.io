@@ -10,6 +10,8 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `chat/index.html`, `js/chat.js`, `css/chat.css`: the chat room, served at /chat
 - `forum/index.html`, `js/forum.js`, `css/forum.css`: the forum, served at /forum
 - `js/nostr-config.js`: relays, admin key, room id, forum categories
+- `admin/index.html`, `js/admin.js`, `js/moderation.js`: the moderation desk, at /admin
+- `js/blossom.js`: picture uploads to public media servers
 - `tools/maps.sh`: refreshes the satellite views on /locations
 - `registration/index.html`, `js/registration.js`, `js/rsvp-count.js`, `css/registration.css`: registration and the counters, at /registration
 - `locations/index.html`, `css/locations.css`: the venues and travel info, at /locations
@@ -51,6 +53,33 @@ The relay list matters: many public relays reject unknown keys, which would
 block everyone who creates an account on the site. Every relay above was
 checked to accept a brand-new key. The same list appears in `js/chat.js` and in
 `tools/nostr-admin.mjs`, and both must be changed together.
+
+## Moderation and /admin
+
+`/admin` is the moderation desk. It opens only for the admin key and the
+moderators it names; for everyone else there is nothing to do there. All of it
+is plain signed events, so there is no password and no server:
+
+| What | Event |
+|---|---|
+| Moderation team | kind 30000 people set, `d=semrede-moderators`, published by the admin key only |
+| Hidden accounts | each moderator's own kind 10000 mute list, merged |
+| Pinned and closed threads | kind 30078 app data, `d=semrede-forum-state`, one per moderator, merged |
+
+A thread is pinned or closed when any moderator says so, and each moderator can
+only undo their own decision. Pinned threads sort to the top of the lists and
+closed threads can be read but not answered. Moderators also get Pin and Close
+buttons on the thread itself. Hiding an account hides it in the chat, the forum
+and the registration counters; the events stay on the relays, so other NOSTR
+apps still show them.
+
+## Pictures in posts
+
+Pictures are uploaded to the same public Blossom servers as profile pictures
+(`js/blossom.js`) and travel as a link in the text, which is how NOSTR clients
+normally do it. The browser scales them to at most 1600px and re-encodes them as
+WebP first. Image links are rendered inline in the forum and the chat, and fall
+back to a plain link if the media server ever drops the file.
 
 ## Locations
 

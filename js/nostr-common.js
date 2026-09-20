@@ -41,35 +41,77 @@
     }, 250);
   }
 
-  // ---- admin mute list (NIP-51 kind 10000) ----
+  // ---- mute lists (NIP-51 kind 10000) of the admin and the moderators ----
   var muted = new Set();
-  var muteAt = 0;
   var muteListeners = [];
 
-  function watchMuteList() {
-    pool.subscribeMany(RELAYS, { kinds: [10000], authors: [cfg.ADMIN_PUBKEY] }, {
-      onevent: function (ev) {
-        if (ev.created_at <= muteAt) return;
-        muteAt = ev.created_at;
-        muted = new Set(ev.tags.filter(function (t) { return t[0] === 'p'; }).map(function (t) { return t[1]; }));
-        muteListeners.forEach(function (fn) { fn(); });
-      }
+  // Mute lists of the admin and of every moderator, merged: anyone on any of
+  // them is hidden on this site. Kept per author so removing someone from one
+  // list does not resurrect them on another.
+  var muteLists = new Map();   // pubkey -> {at, set}
+
+  function applyMuteEvent(ev) {
+    var current = muteLists.get(ev.pubkey);
+    if (current && current.at >= ev.created_at) return;
+    muteLists.set(ev.pubkey, {
+      at: ev.created_at,
+      set: new Set(ev.tags.filter(function (t) { return t[0] === 'p'; }).map(function (t) { return t[1]; }))
     });
+    muted = new Set();
+    muteLists.forEach(function (entry) { entry.set.forEach(function (pk) { muted.add(pk); }); });
+    muteListeners.forEach(function (fn) { fn(); });
+  }
+
+  function watchMuteList(authors) {
+    var list = authors && authors.length ? authors : [cfg.ADMIN_PUBKEY];
+    pool.subscribeMany(RELAYS, { kinds: [10000], authors: list }, { onevent: applyMuteEvent });
   }
 
   // ---- text ----
+  var IMAGE_RE = /\.(jpe?g|png|gif|webp|avif)(\?[^\s]*)?$/i;
+
+  function imageNode(url) {
+    var fig = document.createElement('figure');
+    fig.className = 'post-image';
+    var a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener nofollow ugc';
+    var img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+    img.onerror = function () {
+      // fall back to a plain link if the media server is gone
+      var link = document.createElement('a');
+      link.href = url;
+      link.textContent = url;
+      link.target = '_blank';
+      link.rel = 'noopener nofollow ugc';
+      fig.replaceWith(link);
+    };
+    a.appendChild(img);
+    fig.appendChild(a);
+    return fig;
+  }
+
   function renderText(container, text) {
     var re = /https?:\/\/[^\s<>"']+/g;
     var last = 0, m;
     while ((m = re.exec(text))) {
       var url = m[0].replace(/[.,!?;:)\]]+$/, '');
       if (m.index > last) container.appendChild(document.createTextNode(text.slice(last, m.index)));
-      var a = document.createElement('a');
-      a.href = url;
-      a.textContent = url;
-      a.target = '_blank';
-      a.rel = 'noopener nofollow ugc';
-      container.appendChild(a);
+      if (IMAGE_RE.test(url)) {
+        container.appendChild(imageNode(url));
+      } else {
+        var a = document.createElement('a');
+        a.href = url;
+        a.textContent = url;
+        a.target = '_blank';
+        a.rel = 'noopener nofollow ugc';
+        container.appendChild(a);
+      }
       last = m.index + url.length;
     }
     if (last < text.length) container.appendChild(document.createTextNode(text.slice(last)));
@@ -165,6 +207,8 @@
     isMuted: function (pubkey) { return muted.has(pubkey); },
     onMuteChange: function (fn) { muteListeners.push(fn); },
     watchMuteList: watchMuteList,
+    applyMuteEvent: applyMuteEvent,
+    mutedList: function () { return Array.from(muted); },
     renderText: renderText, timeLabel: timeLabel, dayLabel: dayLabel, ago: ago,
     displayName: displayName, colorFor: colorFor, fillAvatar: fillAvatar,
     relayStatus: relayStatus

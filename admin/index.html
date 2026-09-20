@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SemRede Admin</title>
+  <meta name="description" content="Moderation desk for SemRede: moderators, hidden accounts, pinned and closed threads.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#030706">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,800;1,900&family=Kalam:wght@700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/chat.css">
+  <link rel="stylesheet" href="/css/account.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="chat-body">
+  <div class="scanlines" aria-hidden="true"></div>
+
+
+  <header class="site-header container">
+    <a class="brand" href="/" aria-label="SemRede home">
+      <img class="brand-mark" src="/img/logo-mark.png" width="46" height="46" alt="">
+      <span class="wordmark">SemRede</span>
+    </a>
+    <nav>
+      <a href="/locations">Locations</a>
+      <a href="/registration">Register</a>
+      <a class="nav-chat" href="/chat">Chat</a>
+      <a class="nav-chat" href="/forum">Forum</a>
+    </nav>
+  </header>
+
+  <main class="container account-main login-main">
+    <section class="chat-intro">
+      <div class="section-kicker">11 / Admin</div>
+      <h1>Moderation</h1>
+      <p class="admin-lead" id="admin-role"></p>
+    </section>
+
+    <div class="side-card" id="admin-gate">
+      <h2>Only for <em>moderators</em></h2>
+      <p class="hint">This page is for the SemRede admin key and the moderators it names. Log in with that key to use it; everyone else sees nothing to do here.</p>
+      <p class="hint">Every action here is a signed NOSTR event. There is no password and no server: what you publish is what the site reads back.</p>
+      <a class="big-btn btn-teal" href="/login?next=/admin">Log in</a>
+    </div>
+
+    <div id="admin-desk" hidden>
+      <section class="admin-card" id="mod-section">
+        <div class="room-bar">
+          <div class="room-title"><strong>Moderation team</strong><span>Only the admin can change this</span></div>
+          <div class="relay-status" title="Connected NOSTR relays"><span class="relay-dots" id="relay-dots"></span></div>
+        </div>
+        <div class="admin-body">
+          <p class="hint">Moderators can hide accounts, pin threads and close threads. They cannot remove each other.</p>
+          <div id="mod-list"></div>
+          <form id="mod-form" class="admin-form">
+            <label for="mod-key">Add a moderator</label>
+            <div class="inline-row">
+              <input id="mod-key" type="text" placeholder="npub1..." autocomplete="off" spellcheck="false">
+              <button type="submit" class="small-btn">Add</button>
+            </div>
+            <p class="form-error" id="mod-error" role="alert"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="admin-card">
+        <div class="room-bar">
+          <div class="room-title"><strong>Hidden accounts</strong><span>Hidden in the chat, the forum and the counters</span></div>
+        </div>
+        <div class="admin-body">
+          <p class="hint">Hiding someone adds them to your own mute list. Their posts stay on the relays and other NOSTR apps still show them; this site does not.</p>
+          <div id="mute-list"></div>
+          <form id="mute-form" class="admin-form">
+            <label for="mute-key">Hide an account</label>
+            <div class="inline-row">
+              <input id="mute-key" type="text" placeholder="npub1..." autocomplete="off" spellcheck="false">
+              <button type="submit" class="small-btn">Hide</button>
+            </div>
+            <p class="form-error" id="mute-error" role="alert"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="admin-card">
+        <div class="room-bar">
+          <div class="room-title"><strong>Threads</strong><span>Pinned to the top, or closed to new replies</span></div>
+        </div>
+        <div class="admin-body">
+          <p class="hint">You can also pin and close from the thread itself; this is for when you have the link at hand.</p>
+          <form id="thread-form" class="admin-form">
+            <label for="thread-id">Thread link or id</label>
+            <div class="inline-row">
+              <input id="thread-id" type="text" placeholder="https://semrede.com/forum#/t/..." autocomplete="off" spellcheck="false">
+              <button type="submit" class="small-btn">Apply</button>
+            </div>
+            <div class="radio-row">
+              <label><input type="radio" name="thread-action" value="pin" checked> Pin it</label>
+              <label><input type="radio" name="thread-action" value="close"> Close it</label>
+            </div>
+            <p class="form-error" id="thread-error" role="alert"></p>
+          </form>
+
+          <h3 class="admin-h3">Pinned</h3>
+          <div id="pinned-list"></div>
+          <h3 class="admin-h3">Closed</h3>
+          <div id="closed-list"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer container">
+    <span>Coimbra / Portugal</span>
+    <span>semrede.com</span>
+    <span>October 26 to 31, 2026</span>
+  </footer>
+
+  <script src="/js/vendor/nostr.bundle.js"></script>
+  <script src="/js/nostr-config.js"></script>
+  <script src="/js/nostr-login.js"></script>
+  <script src="/js/nostr-common.js"></script>
+  <script src="/js/moderation.js"></script>
+  <script src="/js/dm.js"></script>
+  <script src="/js/account-bar.js"></script>
+  <script src="/js/nav-menu.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

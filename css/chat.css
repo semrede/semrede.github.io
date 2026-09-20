@@ -88,6 +88,15 @@
   background: #0d1918; border: 1px solid #2a3f3c; color: var(--paper); font: 13px/1.5 var(--mono);
 }
 .composer textarea:focus { outline: none; border-color: var(--teal); }
+.pic-btn {
+  flex: none; width: 44px; height: 44px; display: grid; place-items: center;
+  background: none; border: 1px solid #2a3f3c; color: var(--teal); cursor: pointer;
+}
+.pic-btn:hover { border-color: var(--teal); color: var(--yellow); }
+.pic-btn:disabled { opacity: .5; cursor: wait; }
+.text .post-image { margin: 8px 0 2px; }
+.text .post-image img { display: block; max-width: min(320px, 100%); max-height: 320px; border: 1px solid #1f3230; }
+
 .send-btn { flex: none; height: 44px; padding: 0 20px; background: var(--teal); color: var(--ink); border: 0; font: 800 18px var(--display); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
 .send-btn:hover { background: var(--yellow); }
 .send-btn:disabled { opacity: .5; cursor: wait; }

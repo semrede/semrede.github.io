@@ -251,6 +251,44 @@
     els.input.style.height = Math.min(els.input.scrollHeight, 160) + 'px';
   }
 
+  // Pictures go to a Blossom server and travel as a link in the message.
+  function addPictureButton() {
+    var blossom = window.SemRedeBlossom;
+    if (!blossom || !els.composer) return;
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.hidden = true;
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'pic-btn';
+    button.title = 'Add a picture';
+    button.setAttribute('aria-label', 'Add a picture');
+    button.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+      '<rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>' +
+      '<circle cx="8.5" cy="10" r="1.6" fill="currentColor"/>' +
+      '<path d="M5 17l4.5-5 3.5 4 2.5-2.5L19 17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+    button.addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      input.value = '';
+      if (!file || !auth.pubkey) return;
+      button.disabled = true;
+      showError('Uploading the picture...');
+      blossom.upload(file).then(function (result) {
+        var text = els.input.value.replace(/\s*$/, '');
+        els.input.value = (text ? text + ' ' : '') + result.url;
+        autosize();
+        els.input.focus();
+        showError('');
+      }).catch(function (err) {
+        showError(err.message || 'Upload failed');
+      }).finally(function () { button.disabled = false; });
+    });
+    els.composer.insertBefore(button, els.send);
+    els.composer.appendChild(input);
+  }
+
   function wireUi() {
     els.composer.addEventListener('submit', sendMessage);
     els.input.addEventListener('input', autosize);
@@ -269,6 +307,7 @@
   // ---------- start ----------
 
   wireUi();
+  addPictureButton();
   onLoginChange();
   subscribeRoom();
   net.relayStatus(els.relayDots, els.relayCount);

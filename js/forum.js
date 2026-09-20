@@ -15,6 +15,8 @@
   var cfg = window.SemRedeConfig;
   var net = window.SemRedeNet;
   var auth = window.SemRedeNostr;
+  var mod = window.SemRedeMod;
+  var blossom = window.SemRedeBlossom;
   var pool = net.pool;
   var RELAYS = net.RELAYS;
   var TAG = cfg.FORUM_TAG;
@@ -130,6 +132,7 @@
     } else {
       list.sort(function (a, b) { return lastActivity(b) - lastActivity(a); });
     }
+    list.sort(function (a, b) { return (mod.isPinned(b.id) ? 1 : 0) - (mod.isPinned(a.id) ? 1 : 0); });
     return list;
   }
 
@@ -171,6 +174,79 @@
       wrap.appendChild(extra);
     }
     net.requestProfile(ev.pubkey);
+    return wrap;
+  }
+
+  // Pictures travel as a URL in the text, the usual way on NOSTR. The file goes
+  // to a Blossom server and the link is appended to whatever is being written.
+  function pictureButton(textarea, onMeta) {
+    var wrap = document.createElement('span');
+    wrap.className = 'pic-btn-wrap';
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.hidden = true;
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'text-btn';
+    button.textContent = 'Add a picture';
+    var status = document.createElement('span');
+    status.className = 'pic-status';
+
+    button.addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      button.disabled = true;
+      status.textContent = 'Uploading...';
+      blossom.upload(file).then(function (result) {
+        var text = textarea.value.replace(/\s*$/, '');
+        textarea.value = (text ? text + '\n\n' : '') + result.url + '\n';
+        textarea.dispatchEvent(new Event('input'));
+        textarea.focus();
+        status.textContent = '';
+        if (onMeta) onMeta(result);
+      }).catch(function (err) {
+        status.textContent = err.message || 'Upload failed';
+      }).finally(function () {
+        button.disabled = false;
+      });
+    });
+
+    wrap.append(button, input, status);
+    return wrap;
+  }
+
+  function badge(text, kind) {
+    var b = document.createElement('span');
+    b.className = 'thread-badge ' + kind;
+    b.textContent = text;
+    return b;
+  }
+
+  function moderatorActions(ev) {
+    var wrap = document.createElement('span');
+    wrap.className = 'mod-actions';
+    if (!mod.isModerator(auth.pubkey)) return wrap;
+    var pin = document.createElement('button');
+    pin.type = 'button';
+    pin.className = 'text-btn';
+    pin.textContent = mod.isPinned(ev.id) ? 'Unpin' : 'Pin';
+    pin.addEventListener('click', function () {
+      pin.disabled = true;
+      mod.setPinned(ev.id, !mod.isPinned(ev.id)).finally(function () { pin.disabled = false; queueRender(); });
+    });
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'text-btn';
+    close.textContent = mod.isClosed(ev.id) ? 'Reopen' : 'Close';
+    close.title = 'A closed thread can be read but not answered';
+    close.addEventListener('click', function () {
+      close.disabled = true;
+      mod.setClosed(ev.id, !mod.isClosed(ev.id)).finally(function () { close.disabled = false; queueRender(); });
+    });
+    wrap.append(pin, close);
     return wrap;
   }
 
@@ -268,7 +344,9 @@
     row.href = '#/t/' + ev.id;
     var main = document.createElement('div');
     var title = document.createElement('strong');
-    title.textContent = threadTitle(ev);
+    title.textContent = threadTitle(latest(ev));
+    if (mod.isPinned(ev.id)) title.prepend(badge('Pinned', 'pinned'));
+    if (mod.isClosed(ev.id)) title.append(badge('Closed', 'closed'));
     main.appendChild(title);
     var meta = document.createElement('div');
     meta.className = 'thread-meta';
@@ -279,8 +357,6 @@
     }
     meta.textContent = bits.join(' / ');
     main.appendChild(meta);
-    var title2 = main.querySelector('strong');
-    if (title2) title2.textContent = threadTitle(latest(ev));
     var count = document.createElement('span');
     count.className = 'reply-count';
     count.textContent = replyCount(ev.id);
@@ -322,7 +398,9 @@
       return;
     }
     var cat = catBySlug(threadCategory(ev));
-    els.threadTitle.textContent = threadTitle(ev);
+    els.threadTitle.textContent = threadTitle(latest(ev));
+    if (mod.isPinned(ev.id)) els.threadTitle.prepend(badge('Pinned', 'pinned'));
+    if (mod.isClosed(ev.id)) els.threadTitle.append(badge('Closed', 'closed'));
     els.threadCat.textContent = cat ? cat.name : 'Forum';
     els.threadCat.href = cat ? '#/c/' + cat.slug : '#/';
 
@@ -332,7 +410,7 @@
     post.append(authorLine(ev, isEdited(ev) ? 'edited' : ''), bodyNode(shown.content));
     var actions = document.createElement('div');
     actions.className = 'post-actions';
-    actions.append(voteButton(ev), ownerActions(ev, function () { openEditor(post, ev, true); }));
+    actions.append(voteButton(ev), ownerActions(ev, function () { openEditor(post, ev, true); }), moderatorActions(ev));
     post.appendChild(actions);
     els.threadBody.appendChild(post);
 
@@ -386,10 +464,10 @@
     reply.className = 'text-btn';
     reply.textContent = 'Reply';
     reply.addEventListener('click', function () {
-      if (!auth.pubkey) return go('#/t/' + root.id, '#join');
+      if (!auth.pubkey) { location.href = '/login?next=/forum'; return; }
       openInlineReply(wrap, ev, root);
     });
-    actions.appendChild(reply);
+    if (!mod.isClosed(root.id)) actions.appendChild(reply);
     actions.appendChild(ownerActions(ev, function () { openEditor(wrap, ev, false); }));
     wrap.appendChild(actions);
     return wrap;
@@ -414,7 +492,7 @@
     cancel.className = 'text-btn';
     cancel.textContent = 'Cancel';
     cancel.addEventListener('click', function () { form.remove(); });
-    row.append(send, cancel);
+    row.append(send, cancel, pictureButton(area));
     form.append(area, row);
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -734,11 +812,23 @@
 
   function updateComposerVisibility() {
     var loggedIn = !!auth.pubkey;
+    var threadClosed = route.view === 'thread' && route.id && mod.isClosed(route.id);
     if (els.newToggle) els.newToggle.hidden = !loggedIn;
     if (els.newLocked) els.newLocked.hidden = loggedIn;
     if (els.newForm && !loggedIn) els.newForm.hidden = true;
-    if (els.replyForm) els.replyForm.hidden = !loggedIn;
-    if (els.replyLocked) els.replyLocked.hidden = loggedIn;
+    if (els.replyForm) els.replyForm.hidden = !loggedIn || threadClosed;
+    if (els.replyLocked) {
+      els.replyLocked.hidden = loggedIn && !threadClosed;
+      if (threadClosed) els.replyLocked.textContent = 'This thread is closed. You can read it, but not answer.';
+      else if (!loggedIn) {
+        els.replyLocked.textContent = '';
+        var link = document.createElement('a');
+        link.className = 'text-btn';
+        link.href = '/login?next=/forum';
+        link.textContent = 'Log in';
+        els.replyLocked.append(link, document.createTextNode(' to reply.'));
+      }
+    }
   }
 
   function onLoginChange() {
@@ -755,6 +845,9 @@
 
   function wire() {
     window.addEventListener('hashchange', applyRoute);
+    if (els.newBody) els.newForm.insertBefore(pictureButton(els.newBody), els.newForm.querySelector('button[type=submit]'));
+    if (els.replyBody) els.replyForm.insertBefore(pictureButton(els.replyBody), els.replyForm.querySelector('button[type=submit]'));
+    mod.onChange(function () { updateComposerVisibility(); queueRender(); });
 
     if (els.sortRecent) els.sortRecent.addEventListener('click', function () { sortBy = 'recent'; render(); });
     if (els.sortTop) els.sortTop.addEventListener('click', function () { sortBy = 'top'; render(); });
@@ -799,6 +892,7 @@
 
   wire();
   applyRoute();
+  mod.watch();
   watchForum();
   net.relayStatus(els.relayDots, els.relayCount);
 })();
