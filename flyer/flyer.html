@@ -126,5 +126,10 @@
       <span>October 26 to 31, 2026</span>
     </div>
   </div>
+  <script>
+    // tools/flyer.mjs renders the print version with ?scale=3
+    var m = /scale=(\d+(?:\.\d+)?)/.exec(location.search);
+    if (m) document.body.style.zoom = m[1];
+  </script>
 </body>
 </html>

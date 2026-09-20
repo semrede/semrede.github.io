@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Share SemRede</title>
+  <meta name="description" content="Take the flyer, print it, post it. SemRede runs on word of mouth.">
+  <meta property="og:title" content="Share SemRede">
+  <meta property="og:description" content="The flyer to download, and the quickest ways to pass it on.">
+  <meta property="og:image" content="https://semrede.com/files/semrede-2026-flyer.png">
+  <meta property="og:url" content="https://semrede.com/share">
+  <meta name="theme-color" content="#030706">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,800;1,900&family=Kalam:wght@700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/account.css">
+  <link rel="stylesheet" href="/css/locations.css">
+  <link rel="stylesheet" href="/css/share.css">
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+
+
+  <header class="site-header container">
+    <a class="brand" href="/" aria-label="SemRede home">
+      <img class="brand-mark" src="/img/logo-mark.png" width="46" height="46" alt="">
+      <span class="wordmark">SemRede</span>
+    </a>
+    <nav>
+      <a href="/#about">About</a>
+      <a href="/#week">The week</a>
+      <a href="/chat">Chat</a>
+      <a href="/forum">Forum</a>
+      <a href="/schedule">Schedule</a>
+      <a href="/registration">Register</a>
+      <a class="nav-cta" href="/locations">Locations</a>
+      <div class="account-bar"><a class="acct-btn" href="/login">Log in</a></div>
+    </nav>
+  </header>
+
+  <main class="container loc-main">
+    <section class="chat-intro">
+      <div class="section-kicker">14 / Share</div>
+      <h1>Bring someone</h1>
+      <p class="loc-lead">Nobody is buying advertising for this. SemRede fills up because people tell the people they know. Take the flyer, print it, put it on a wall, send it to the friend who keeps talking about leaving the city.</p>
+    </section>
+
+    <div class="share-grid">
+      <figure class="flyer-box">
+        <img src="/img/flyer-preview.jpg" alt="The SemRede 2026 flyer" width="620" height="930" loading="lazy">
+        <figcaption>
+          <a class="big-btn btn-teal" href="/files/semrede-2026-flyer.png" download>Download the flyer</a>
+          <a class="text-btn" href="/files/semrede-2026-flyer-print.png" download>Print version, 3072 x 4608</a>
+        </figcaption>
+      </figure>
+
+      <div class="share-actions">
+        <section class="share-card">
+          <h2>Send it to someone</h2>
+          <label for="share-message">The message, change it as you like</label>
+          <textarea id="share-message" rows="5">SemRede 2026: offgrid communications, communities and people. October 26 to 31 in Coimbra, Portugal. Free, but register so they know how many to cook for. https://semrede.com</textarea>
+          <div class="share-row">
+            <button type="button" class="small-btn" id="copy-text">Copy the message</button>
+            <button type="button" class="text-btn" id="copy-link">Copy the link</button>
+            <button type="button" class="text-btn" id="share-native" hidden>Share from this phone</button>
+          </div>
+          <p class="share-status" id="share-status" role="status"></p>
+        </section>
+
+        <section class="share-card">
+          <h2>Straight to a network</h2>
+          <div class="share-links">
+          <a class="share-btn" href="https://t.me/share/url?url=https%3A//semrede.com&text=SemRede%202026%3A%20offgrid%20communications%2C%20communities%20and%20people.%20October%2026%20to%2031%20in%20Coimbra%2C%20Portugal.%20Free%2C%20but%20register%20so%20they%20know%20how%20many%20to%20cook%20for.%20https%3A//semrede.com" target="_blank" rel="noopener">Telegram</a>
+          <a class="share-btn" href="https://wa.me/?text=SemRede%202026%3A%20offgrid%20communications%2C%20communities%20and%20people.%20October%2026%20to%2031%20in%20Coimbra%2C%20Portugal.%20Free%2C%20but%20register%20so%20they%20know%20how%20many%20to%20cook%20for.%20https%3A//semrede.com" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="share-btn" href="https://toot.kytta.dev/?text=SemRede%202026%3A%20offgrid%20communications%2C%20communities%20and%20people.%20October%2026%20to%2031%20in%20Coimbra%2C%20Portugal.%20Free%2C%20but%20register%20so%20they%20know%20how%20many%20to%20cook%20for.%20https%3A//semrede.com" target="_blank" rel="noopener">Mastodon</a>
+          <a class="share-btn" href="https://www.reddit.com/submit?url=https%3A//semrede.com&title=SemRede%202026%2C%20Coimbra%3A%20offgrid%20communications%2C%20communities%20and%20people" target="_blank" rel="noopener">Reddit</a>
+          <a class="share-btn" href="https://twitter.com/intent/tweet?text=SemRede%202026%3A%20offgrid%20communications%2C%20communities%20and%20people.%20October%2026%20to%2031%20in%20Coimbra%2C%20Portugal.%20Free%2C%20but%20register%20so%20they%20know%20how%20many%20to%20cook%20for.%20https%3A//semrede.com" target="_blank" rel="noopener">X</a>
+          <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=https%3A//semrede.com" target="_blank" rel="noopener">Facebook</a>
+          <a class="share-btn" href="mailto:?subject=SemRede%202026%2C%20Coimbra&body=SemRede%202026%3A%20offgrid%20communications%2C%20communities%20and%20people.%20October%2026%20to%2031%20in%20Coimbra%2C%20Portugal.%20Free%2C%20but%20register%20so%20they%20know%20how%20many%20to%20cook%20for.%20https%3A//semrede.com" target="_blank" rel="noopener">Email</a>
+          </div>
+          <p class="hint">These open the network with the message ready. Nothing is loaded from them on this page, so they only see you when you click.</p>
+        </section>
+
+        <section class="share-card">
+          <h2>Post it on NOSTR</h2>
+          <p class="hint">Uses the same account as the chat and the forum, and posts the flyer with the message above to your own followers.</p>
+          <button type="button" class="big-btn btn-orange" id="share-nostr">Post it on NOSTR</button>
+          <p class="hint" id="nostr-note"></p>
+        </section>
+      </div>
+    </div>
+
+    <section class="loc-help">
+      <strong>Putting it on a wall</strong>
+      <p>The print version is A4 at 300dpi. A cafe, a hackerspace, a climbing gym, a repair shop, the board at your university: ask first, then put it up. If you hang one somewhere, tell us in the <a href="/chat">chat</a>, it is good to know where people hear about us.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer container">
+    <span>Coimbra / Portugal</span>
+    <span><a href="/share">Share the flyer</a> / <a href="/privacy">Privacy</a></span>
+    <span>October 26 to 31, 2026</span>
+  </footer>
+
+  <script src="/js/vendor/nostr.bundle.js"></script>
+  <script src="/js/nostr-config.js"></script>
+  <script src="/js/nostr-login.js"></script>
+  <script src="/js/nostr-common.js"></script>
+  <script src="/js/dm.js"></script>
+  <script src="/js/account-bar.js"></script>
+  <script src="/js/nav-menu.js"></script>
+  <script src="/js/share.js"></script>
+</body>
+</html>

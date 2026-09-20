@@ -12,8 +12,15 @@
   var nav = document.querySelector('.site-header nav');
   if (!nav) return;
 
-  var bar = document.createElement('div');
-  bar.className = 'account-bar';
+  // A page may already carry a static bar (the marketing pages do); reuse it.
+  var bar = nav.querySelector('.account-bar');
+  var isNew = !bar;
+  if (isNew) {
+    bar = document.createElement('div');
+    bar.className = 'account-bar';
+  } else {
+    bar.textContent = '';
+  }
 
   var login = document.createElement('a');
   login.className = 'acct-btn';
@@ -43,7 +50,7 @@
   chip.append(chipAvatar, chipName);
 
   bar.append(login, mail, chip);
-  nav.appendChild(bar);
+  if (isNew) nav.appendChild(bar);
 
   function refresh() {
     var loggedIn = !!auth.pubkey;

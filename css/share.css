@@ -1,0 +1,40 @@
+/* /share: the flyer and the ways to pass it on. */
+
+.share-grid { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 24px; align-items: start; }
+.flyer-box { margin: 0; padding: 18px; border: 2px solid var(--teal); background: #0a1413; }
+.flyer-box img { display: block; width: 100%; height: auto; border: 1px solid #22302d; }
+.flyer-box figcaption { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 16px; text-align: center; }
+.flyer-box .big-btn { width: auto; padding: 11px 20px; white-space: nowrap; }
+
+.share-actions { display: flex; flex-direction: column; gap: 18px; }
+.share-card { padding: 22px 24px; border: 1px solid #34403a; background: linear-gradient(160deg, #0b1716, #07100f 70%); }
+.share-card h2 { margin: 0 0 12px; font: 800 28px/1 var(--display); text-transform: uppercase; color: var(--paper); }
+.share-card label { display: block; margin-bottom: 8px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
+.share-card textarea {
+  width: 100%; padding: 12px; background: #0d1918; border: 1px solid #2a3f3c;
+  color: var(--paper); font: 13px/1.6 var(--mono); resize: vertical;
+}
+.share-card textarea:focus { outline: none; border-color: var(--teal); }
+.share-card .hint { margin: 10px 0 0; }
+.share-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 12px; }
+.share-status { margin: 8px 0 0; min-height: 1em; font-size: 12px; color: #8a938b; }
+.share-status.ok { color: var(--green); }
+.share-status.bad { color: var(--orange); }
+
+.share-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.share-btn {
+  padding: 10px 16px; border: 1px solid #34403a; color: var(--paper);
+  font: 700 12px var(--mono); letter-spacing: .1em; text-transform: uppercase;
+  transition: border-color .2s, color .2s;
+}
+.share-btn:hover { border-color: var(--teal); color: var(--teal); }
+.share-card .big-btn { width: auto; padding: 11px 20px; }
+
+@media (max-width: 900px) {
+  .share-grid { grid-template-columns: minmax(0, 1fr); }
+  .flyer-box { max-width: 420px; margin: 0 auto; }
+}
+
+@media (max-width: 800px) {
+  .share-card { padding: 18px 16px; }
+}

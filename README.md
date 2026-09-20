@@ -10,6 +10,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `chat/index.html`, `js/chat.js`, `css/chat.css`: the chat room, served at /chat
 - `forum/index.html`, `js/forum.js`, `css/forum.css`: the forum, served at /forum
 - `js/nostr-config.js`: relays, admin key, room id, forum categories
+- `share/index.html`, `js/share.js`, `css/share.css`: the flyer and the ways to pass it on, at /share
 - `schedule/index.html`, `css/schedule.css`: the week and the Saturday, at /schedule
 - `privacy/index.html`, `css/privacy.css`: pictures and privacy, at /privacy
 - `tools/no-photo-clip.py`, `files/semrede-no-photo-clip.stl`: the printable X clip
@@ -128,8 +129,10 @@ python3 -m http.server 8782 &
 node tools/flyer.mjs http://localhost:8782/flyer/flyer.html flyer-drafts/semrede-2026-flyer.png
 ```
 
-The result is A4 at 150dpi. Older flyers stay where they are; nothing is
-overwritten.
+`SCALE=3` renders the print version (3072 x 4608, A4 at 300dpi). Both sizes are
+published under `files/` and offered on `/share`; older flyers stay where they
+are, nothing is overwritten. The two artwork bands come from the first flyer, a
+1024px image, so they are soft at print size while the text stays sharp.
 
 ## Locations
 
