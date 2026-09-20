@@ -10,6 +10,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `chat/index.html`, `js/chat.js`, `css/chat.css`: the chat room, served at /chat
 - `forum/index.html`, `js/forum.js`, `css/forum.css`: the forum, served at /forum
 - `js/nostr-config.js`: relays, admin key, room id, forum categories
+- `schedule/index.html`, `css/schedule.css`: the week and the Saturday, at /schedule
 - `privacy/index.html`, `css/privacy.css`: pictures and privacy, at /privacy
 - `tools/no-photo-clip.py`, `files/semrede-no-photo-clip.stl`: the printable X clip
 - `admin/index.html`, `js/admin.js`, `js/moderation.js`: the moderation desk, at /admin
