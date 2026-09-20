@@ -11,37 +11,42 @@
 <style>
   :root { --paper: #eee7d1; --orange: #ff4b1f; --yellow: #ffd23f; --teal: #11d8d0; --mono: "Space Mono", monospace; }
   * { margin: 0; box-sizing: border-box; }
-  body { width: 1024px; height: 1536px; background: #0a0806; color: var(--paper); font-family: var(--mono); overflow: hidden; }
+  body { width: 1024px; height: 1536px; background: #0a0806; color: var(--paper); font-family: var(--mono); overflow: hidden; display: flex; flex-direction: column; }
+  .venues { flex: 1; }
   .band { display: block; width: 1024px; }
 
-  .venues { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 8px 26px 0; }
-  .venue { border: 3px solid var(--teal); border-radius: 4px; overflow: hidden; background: #0b1413; display: flex; flex-direction: column; }
+  .venues { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 6px 26px 0; }
+  .venue {
+    border: 3px solid var(--teal); border-radius: 4px; overflow: hidden;
+    background: #0b1413; display: flex; flex-direction: column;
+  }
   .venue.city { border-color: var(--orange); }
-  .venue-body { padding: 14px 18px 10px; }
-  .venue-when { display: flex; align-items: center; gap: 8px; font: 700 17px var(--display, "Barlow Condensed"); letter-spacing: .06em; text-transform: uppercase; color: var(--teal); font-family: "Barlow Condensed", sans-serif; }
+  /* both boxes keep the same shape, so the photos line up whatever the text says */
+  .venue-body { padding: 14px 20px 12px; height: 218px; }
+  .venue-when { display: flex; align-items: center; gap: 9px; font: 700 23px/1 "Barlow Condensed", sans-serif; letter-spacing: .05em; text-transform: uppercase; color: var(--teal); }
   .venue.city .venue-when { color: var(--orange); }
-  .venue-when svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }
-  .venue h2 { margin: 4px 0 12px; font: 700 34px/1 "Kalam", cursive; letter-spacing: .01em; color: var(--teal); }
+  .venue-when svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; }
+  .venue h2 { margin: 4px 0 10px; font: 700 46px/1 "Kalam", cursive; color: var(--teal); }
   .venue.city h2 { color: var(--orange); }
-  .venue h2 small { font-size: .62em; opacity: .9; }
-  .place { display: flex; align-items: flex-start; gap: 8px; }
-  .place svg { flex: none; width: 18px; height: 22px; fill: currentColor; color: var(--teal); }
+  .venue h2 small { font-size: .6em; opacity: .9; }
+  .place { display: flex; align-items: flex-start; gap: 9px; }
+  .place svg { flex: none; width: 21px; height: 26px; fill: currentColor; color: var(--teal); }
   .venue.city .place svg { color: var(--orange); }
-  .place strong { display: block; font: 700 19px/1.2 "Barlow Condensed", sans-serif; letter-spacing: .04em; color: var(--teal); }
+  .place strong { display: block; font: 700 25px/1 "Barlow Condensed", sans-serif; letter-spacing: .04em; color: var(--teal); }
   .venue.city .place strong { color: var(--orange); }
-  .place p { margin-top: 3px; font-size: 12.5px; line-height: 1.45; color: var(--paper); }
-  .place .addr { margin-top: 5px; font-size: 11.5px; color: #b9bdb0; }
-  .venue img { display: block; width: 100%; height: 178px; object-fit: cover; margin-top: 10px; }
+  .place p { margin-top: 5px; font-size: 16px; line-height: 1.35; color: var(--paper); }
+  .place .addr { margin-top: 6px; font-size: 15px; line-height: 1.3; color: var(--yellow); }
+  .venue img { display: block; width: 100%; height: 140px; object-fit: cover; }
 
-  .foot { padding: 16px 26px 0; }
+  .foot { padding: 14px 26px 0; }
   .foot-top { display: flex; align-items: center; gap: 18px; }
   .stripes { flex: 1 1 0; min-width: 60px; display: flex; flex-direction: column; gap: 5px; }
   .stripes i { display: block; width: 100%; height: 4px; border-radius: 2px; }
   .stripes i:nth-child(1) { background: var(--orange); }
   .stripes i:nth-child(2) { background: var(--yellow); }
   .stripes i:nth-child(3) { background: var(--teal); }
-  .url { font: 700 46px/1 "Kalam", cursive; color: var(--teal); white-space: nowrap; }
-  .foot-line { display: flex; justify-content: space-between; margin-top: 14px; font-size: 14px; letter-spacing: .22em; text-transform: uppercase; color: var(--yellow); }
+  .url { font: 700 50px/1 "Kalam", cursive; color: var(--teal); white-space: nowrap; }
+  .foot-line { display: flex; justify-content: space-between; margin-top: 14px; font-size: 17px; letter-spacing: .22em; text-transform: uppercase; color: var(--yellow); }
 </style>
 </head>
 <body>
@@ -61,7 +66,7 @@
           <div>
             <strong>Coimbra</strong>
             <p>A working farm and learning space for a regenerative future.</p>
-            <p class="addr">Esta&ccedil;&atilde;o de Vale de A&ccedil;or, MetroBus line S1 from Coimbra-B</p>
+            <p class="addr">Esta&ccedil;&atilde;o de Vale de A&ccedil;or (MetroBus S1)</p>
           </div>
         </div>
       </div>
@@ -79,8 +84,8 @@
           <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
           <div>
             <strong>Coimbra</strong>
-            <p>One day, open to all: talks, demos, community fair, networking and celebration in the heart of Coimbra.</p>
-            <p class="addr">Largo da Freiria 4, a 15 minute walk from the bus terminal</p>
+            <p>One day, open to all: talks, demos, community fair and celebration.</p>
+            <p class="addr">Largo da Freiria 4, city centre</p>
           </div>
         </div>
       </div>
