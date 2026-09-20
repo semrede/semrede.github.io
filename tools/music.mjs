@@ -3,6 +3,8 @@
 // The publisher feed lists one album feed per release; each album feed carries
 // the audio file. Only the metadata is copied here: the audio itself is always
 // streamed from Fountain, so plays and bandwidth stay with the artist.
+// Run `node tools/covers.mjs` afterwards: it copies the new album covers into
+// img/music/ so the page loads no pictures from Fountain.
 import fs from 'fs';
 import path from 'path';
 

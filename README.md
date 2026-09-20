@@ -18,6 +18,8 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `js/blossom.js`: picture uploads to public media servers
 - `js/music-data.js`, `js/music.js`: the Haleen player on the home page
 - `tools/music.mjs`: rebuilds the track list from the Fountain feeds
+- `tools/covers.mjs`: copies the album covers into `img/music/`
+- `fonts/`, `css/fonts.css`, `tools/fonts.mjs`: the self-hosted web fonts
 - `flyer/flyer.html`, `tools/flyer.mjs`: the printable flyer and its renderer
 - `tools/maps.sh`: refreshes the satellite views on /locations
 - `registration/index.html`, `js/registration.js`, `js/rsvp-count.js`, `css/registration.css`: registration and the counters, at /registration
@@ -111,11 +113,14 @@ back to a plain link if the media server ever drops the file.
 The home page plays Haleen's tracks. `tools/music.mjs` reads their Fountain
 publisher feed and each album feed and writes `js/music-data.js` (titles,
 lengths, covers and audio URLs). The audio is never copied here: it streams
-from Fountain, so plays and bandwidth count for the artist. Re-run the tool
+from Fountain, so plays and bandwidth count for the artist (nothing is fetched
+from there until somebody presses play). The album covers are copied into
+`img/music/` by `tools/covers.mjs`. Re-run the tool
 after they release something:
 
 ```bash
 node tools/music.mjs
+node tools/covers.mjs
 ```
 
 ## The flyer
@@ -284,6 +289,32 @@ written on top of it.
 To add another language, copy `js/i18n-pt.js` to `js/i18n-<code>.js`, set
 `window.SemRedeDict.<code>`, include it in the pages next to the Portuguese one
 and add the code to `pick()` in `js/i18n.js`.
+
+## Nothing is loaded from other servers
+
+Reading the site calls no third party. Everything a page needs is in this
+repository, so a visitor's IP address is never handed to anyone else just for
+looking.
+
+- Fonts are self-hosted in `fonts/`, declared by `css/fonts.css`. Rebuild them
+  with `node tools/fonts.mjs`, which downloads the woff2 files once (latin and
+  latin-ext) and rewrites the stylesheet. There is no `fonts.googleapis.com`
+  link in any page.
+- Album covers live in `img/music/` (`node tools/covers.mjs`), the maps and
+  photos in `img/`.
+- The social buttons on `/share` are plain links: those networks only see
+  somebody when they click.
+
+What still goes out, and why:
+
+- **NOSTR relays**, once a page needs them (chat, forum, registration counters,
+  messages). They see the IP of whoever opens those pages; that is what a relay
+  is. `js/nostr-config.js` holds the list.
+- **Fountain**, when somebody presses play in the music player. The audio is
+  streamed from there on purpose, so the play counts for the artist.
+- **Blossom servers**, when somebody uploads a picture, and whatever server
+  hosts a picture posted by somebody else. Those images are loaded with
+  `referrerpolicy="no-referrer"`.
 
 ## Deploy
 
