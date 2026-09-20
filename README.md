@@ -421,6 +421,12 @@ encrypted to that reader; `/admin` reads them with `authors: [stats key]`, which
 is also what stops anyone from forging a fake day. Re-running replaces rather
 than duplicating.
 
+The card draws page views and visits as bars, with the X axis switchable
+between days (last 30), weeks (26), months (24) and years. Clicking a bar picks
+that bucket, and the tables below add up every day inside it. A page can hand
+the card a set of days through `window.SemRedeStatsFixture` to look at the
+chart without waiting for real traffic; the site itself never sets it.
+
 Counting rules, and their limits, are shown on the card itself: a **visit** is
 one browser tab on one day, never "a person". Beacons that arrive from closed
 tabs are often lost, so the real numbers are higher; anything a forger sends is

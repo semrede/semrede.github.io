@@ -12,7 +12,32 @@
 .stat-bar i { display: block; height: 100%; background: var(--teal); }
 .stat-row strong { text-align: right; font: 700 13px var(--mono); color: var(--yellow); }
 
-.stats-day { padding: 5px 8px; border: 1px solid #34403a; background: #0a1413; color: var(--paper); font: 400 12px var(--mono); }
+/* days / weeks / months / years */
+.grain-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.grain-btn {
+  padding: 6px 12px; border: 1px solid #34403a; background: #0a1413; color: #8a938b;
+  font: 700 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; cursor: pointer;
+}
+.grain-btn:hover { color: var(--paper); border-color: #4a5a52; }
+.grain-btn.current { border-color: var(--teal); color: var(--teal); }
+
+.chart { margin-bottom: 20px; }
+.chart-plot { display: flex; align-items: flex-end; gap: 4px; height: 170px; padding: 10px 4px 0; border: 1px solid #22302d; background: #0a1413; overflow-x: auto; }
+.chart-col { flex: 1 1 0; min-width: 22px; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+.chart-bars { flex: 1 1 auto; width: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 2px; }
+.chart-bars i { display: block; width: 42%; min-height: 2px; }
+.bar-views { background: var(--teal); }
+.bar-visits { background: var(--yellow); opacity: .85; }
+.chart-col:hover .chart-bars i { filter: brightness(1.25); }
+.chart-col.current .chart-label { color: var(--paper); border-bottom: 1px solid var(--teal); }
+.chart-label { font: 400 9px var(--mono); color: #6f7a72; letter-spacing: .04em; white-space: nowrap; }
+.chart-legend { display: flex; gap: 16px; margin: 8px 0 0; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #8a938b; }
+.chart-legend span { display: flex; align-items: center; gap: 6px; }
+.chart-legend span::before { content: ""; width: 10px; height: 10px; }
+.chart-legend .key-views::before { background: var(--teal); }
+.chart-legend .key-visits::before { background: var(--yellow); }
+
+.bucket-title { margin-top: 0; }
 
 @media (max-width: 800px) {
   .count-row { grid-template-columns: 1fr; }
