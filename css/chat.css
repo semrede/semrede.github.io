@@ -9,7 +9,6 @@
 .chat-body:not(.forum-body) .site-footer { flex: none; }
 .chat-main, .account-main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .chat-shell { flex: 1; min-height: 0; }
-.nav-cta[aria-current="page"] { color: var(--yellow); }
 
 .chat-main { padding-bottom: 20px; }
 

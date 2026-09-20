@@ -71,6 +71,7 @@ nav { display: flex; align-items: center; gap: 24px; font-size: 11px; letter-spa
 nav a { transition: color .2s, transform .2s; }
 nav a:hover { color: var(--yellow); transform: translateY(-2px); }
 .nav-cta { color: var(--teal); }
+nav a[aria-current] { color: var(--yellow); }
 
 /* Phone menu: the three-line button and the panel it opens. */
 .site-header { position: relative; }
