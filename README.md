@@ -145,6 +145,28 @@ published under `files/` and offered on `/share`; older flyers stay where they
 are, nothing is overwritten. The two artwork bands come from the first flyer, a
 1024px image, so they are soft at print size while the text stays sharp.
 
+`flyer/flyer-pt.html` is the same poster in Portuguese, for Portuguese
+channels. The artwork carries its English text baked in, so the English lines
+are covered with a piece of the poster's own night sky and the Portuguese lines
+are drawn on top in the same fonts, sizes and colours:
+
+- `flyer/parts/night.png`: a flat strip of sky cut from under the landscape.
+- `flyer/parts/sky.png`: that strip stacked and shuffled, used where a larger
+  area is needed, since a plain repeat shows bands.
+- `flyer/parts/landscape.png`: the middle band cropped to the artwork, because
+  everything under it (the paragraph and the five icons) is rebuilt in HTML.
+
+The yellow swash under the subtitle is redrawn as an SVG path, since the
+English line it belonged to had to go. Render it the same way:
+
+```bash
+node tools/flyer.mjs http://localhost:8782/flyer/flyer-pt.html flyer-drafts/semrede-2026-flyer-pt.png
+SCALE=3 node tools/flyer.mjs http://localhost:8782/flyer/flyer-pt.html flyer-drafts/semrede-2026-flyer-pt-print.png
+```
+
+Both flyers are offered side by side on `/share`, each with its own preview
+(`img/flyer-preview.jpg`, `img/flyer-preview-pt.jpg`).
+
 ## Locations
 
 `/locations` carries both venue addresses, their coordinates, a link that opens

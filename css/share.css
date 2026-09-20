@@ -2,8 +2,11 @@
 
 .share-grid { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 24px; align-items: start; }
 .flyer-box { margin: 0; padding: 18px; border: 2px solid var(--teal); background: #0a1413; }
+.flyer-pair { display: flex; flex-direction: column; gap: 22px; }
+.flyer-pair figure { margin: 0; }
 .flyer-box img { display: block; width: 100%; height: auto; border: 1px solid #22302d; }
-.flyer-box figcaption { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 16px; text-align: center; }
+.flyer-box figcaption { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 14px; text-align: center; }
+.flyer-box figcaption strong { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--yellow); }
 .flyer-box .big-btn { width: auto; padding: 11px 20px; white-space: nowrap; }
 
 .share-actions { display: flex; flex-direction: column; gap: 18px; }
