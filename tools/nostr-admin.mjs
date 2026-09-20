@@ -2,6 +2,7 @@
 //   node nostr-admin.mjs create            generate (or reuse) the admin key, publish its profile and the chat room
 //   node nostr-admin.mjs mute <npub|hex>   hide a user's messages on semrede.com (NIP-51 mute list)
 //   node nostr-admin.mjs unmute <npub|hex>
+//   node nostr-admin.mjs calendar         publish the two calendar events people RSVP to
 //   node nostr-admin.mjs sync <channel id> copy the room and admin events onto every relay
 //   node nostr-admin.mjs list              show the current mute list
 // The admin secret key is read from ~/.config/semrede/nostr-admin.nsec (never commit it).
@@ -89,6 +90,32 @@ async function main() {
     if (cmd === 'mute') tags.push(['p', target]);
     await publish({ kind: 10000, tags, content: '' }, sk);
     console.log(cmd + 'd', target, '- mute list now has', tags.filter(t => t[0] === 'p').length, 'entries');
+  } else if (cmd === 'calendar') {
+    // Two NIP-52 date-based calendar events (kind 31922). People RSVP to these
+    // from /registration, and the counters are the RSVPs.
+    const sk = loadKey();
+    const parts = [
+      { d: 'semrede-2026-eva', title: 'SemRede 2026: the week at Eva Farm',
+        start: '2026-10-19', end: '2026-10-24',
+        location: 'Eva Farm, Coimbra, Portugal',
+        summary: 'Five days of hands-on sessions, talks and community time at Eva Farm. Free, registration helps us plan.' },
+      { d: 'semrede-2026-embaixada', title: 'SemRede 2026: open day at Edificio Embaixada',
+        start: '2026-10-24', end: '2026-10-25',
+        location: 'Edificio Embaixada, Coimbra, Portugal',
+        summary: 'One open day in the centre of Coimbra: talks, demos, community fair and celebration. Free, registration helps us plan.' },
+    ];
+    for (const p of parts) {
+      const ev = await publish({
+        kind: 31922,
+        tags: [
+          ['d', p.d], ['title', p.title], ['start', p.start], ['end', p.end],
+          ['location', p.location], ['summary', p.summary],
+          ['t', 'semrede'], ['r', SITE],
+        ],
+        content: p.summary,
+      }, sk);
+      console.log(p.d, '->', '31922:' + getPublicKey(sk) + ':' + p.d, '(event ' + ev.id.slice(0, 12) + ')');
+    }
   } else if (cmd === 'sync') {
     // Copy the room and the admin's own events onto every relay in RELAYS (never creates a new room).
     if (!arg) throw new Error('usage: sync <channel id>');
@@ -108,7 +135,7 @@ async function main() {
     const pk = getPublicKey(loadKey());
     for (const t of await currentMutes(pk)) if (t[0] === 'p') console.log(nip19.npubEncode(t[1]));
   } else {
-    console.log('usage: node nostr-admin.mjs create | mute <npub|hex> | unmute <npub|hex> | sync <channel id> | list');
+    console.log('usage: node nostr-admin.mjs create | calendar | mute <npub|hex> | unmute <npub|hex> | sync <channel id> | list');
   }
 }
 

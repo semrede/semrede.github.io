@@ -10,6 +10,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `chat/index.html`, `js/chat.js`, `css/chat.css`: the chat room, served at /chat
 - `forum/index.html`, `js/forum.js`, `css/forum.css`: the forum, served at /forum
 - `js/nostr-config.js`: relays, admin key, room id, forum categories
+- `registration/index.html`, `js/registration.js`, `js/rsvp-count.js`, `css/registration.css`: registration and the counters, at /registration
 - `locations/index.html`, `css/locations.css`: the venues and travel info, at /locations
 - `login/index.html`, `js/login-page.js`: log in, register, or manage your account, at /login
 - `messages/index.html`, `js/messages.js`, `js/dm.js`: private messages, at /messages
@@ -70,6 +71,25 @@ nostr.download), addressed by its sha256 and authorised with a kind 24242 event
 signed by the visitor. The browser crops it square, scales it to 512px and
 re-encodes it as WebP first, so nothing large or with camera metadata is sent.
 Only the resulting URL is written to the profile.
+
+## Registration
+
+The event is free, and `/registration` exists so the organizers know how many
+people to prepare for. It uses NIP-52: two date-based calendar events (kind
+31922) published once by the admin key with `node nostr-admin.mjs calendar`,
+and one RSVP per person and part (kind 31925, status `accepted` for going,
+`tentative` for interested, `declined` for not coming). RSVPs are addressable,
+so changing the answer replaces the old one.
+
+Answers are public, which is what makes the counters possible: the page counts
+RSVPs, and `js/rsvp-count.js` does the same on the home page with a plain relay
+socket, without loading the NOSTR library. The optional comment is the RSVP
+content and is public too; the page says so and points to `/messages` for
+anything private.
+
+The two coordinates are in `js/nostr-config.js` under `EVENTS`. Re-running
+`calendar` republishes the same two events (same `d` tags), it does not create
+new ones.
 
 ## Messages
 

@@ -22,6 +22,28 @@ window.SemRedeConfig = {
   // Forum: NIP-7D threads (kind 11) tagged with FORUM_TAG and one category tag,
   // answered by NIP-22 comments (kind 1111). Nothing is created in advance, so
   // the same categories carry over from one year to the next.
+  // Registration: NIP-52 date-based calendar events (kind 31922) published by
+  // the admin key with tools/nostr-admin.mjs calendar. People answer with
+  // RSVPs (kind 31925), which is also what the counters read.
+  EVENTS: [
+    {
+      slug: 'eva',
+      name: 'The week at Eva Farm',
+      dates: 'Monday to Friday, October 19 to 23',
+      about: 'Five days of hands-on sessions, talks, meals and community time.',
+      coord: '31922:a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3:semrede-2026-eva',
+      id: '8c8e5be3ead0ea5fc2c35794f9d38609650b9d4e05b6d0c72b3d2a34e4d2dd2e'
+    },
+    {
+      slug: 'embaixada',
+      name: 'Open day at Edif\u00edcio Embaixada',
+      dates: 'Saturday, October 24',
+      about: 'Talks, demos, community fair and the closing celebration, in the centre of Coimbra.',
+      coord: '31922:a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3:semrede-2026-embaixada',
+      id: '1113be4c790aa549697f530dd666b804905b9e3417304110bb779f126d03fd6f'
+    }
+  ],
+
   FORUM_TAG: 'semrede',
   CATEGORIES: [
     { slug: 'news', name: 'News', about: 'Announcements about SemRede itself.', color: 'orange' },

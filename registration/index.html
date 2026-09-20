@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SemRede Messages</title>
-  <meta name="description" content="Private messages between people at SemRede, encrypted end to end over NOSTR.">
-  <meta name="robots" content="noindex">
+  <title>SemRede Registration</title>
+  <meta name="description" content="Register for SemRede 2026 in Coimbra. The event is free; registration tells us how many people to prepare for.">
+  <meta property="og:title" content="SemRede 2026 registration">
+  <meta property="og:description" content="Free event, October 19 to 24 in Coimbra. Tell us which parts you are coming to.">
+  <meta property="og:image" content="https://semrede.com/img/hero-landscape.jpg">
+  <meta property="og:url" content="https://semrede.com/registration">
   <meta name="theme-color" content="#030706">
   <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,8 +17,9 @@
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/chat.css">
   <link rel="stylesheet" href="/css/account.css">
+  <link rel="stylesheet" href="/css/registration.css">
 </head>
-<body class="chat-body">
+<body class="chat-body forum-body">
   <div class="scanlines" aria-hidden="true"></div>
 
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -56,62 +60,54 @@
     </a>
     <nav>
       <a href="/locations">Locations</a>
-      <a href="/registration">Register</a>
       <a class="nav-chat" href="/chat">Chat</a>
       <a class="nav-chat" href="/forum">Forum</a>
+      <a class="nav-cta" href="/registration" aria-current="page">Register</a>
     </nav>
   </header>
 
-  <main class="container account-main">
+  <main class="container reg-main">
     <section class="chat-intro">
-      <div class="section-kicker">08 / Messages</div>
-      <h1>Messages</h1>
+      <div class="section-kicker">10 / Registration</div>
+      <h1>Register</h1>
+      <p class="reg-lead"><strong>The event is free.</strong> We ask you to register anyway, because food, water, space, workshops and sleeping room all have to be planned for a number of people, and that number is you.</p>
     </section>
 
-    <div class="dm-shell" id="dm-shell">
-      <section class="dm-list-pane">
-        <div class="room-bar">
-          <svg class="room-mark" width="34" height="34" aria-hidden="true"><use href="#sun-mark"/></svg>
-          <div class="room-title">
-            <strong>Inbox</strong>
-            <span id="dm-count">private and encrypted</span>
-          </div>
-          <div class="relay-status" title="Connected NOSTR relays">
-            <span class="relay-dots" id="relay-dots"></span>
-          </div>
-        </div>
-        <div class="dm-list" id="dm-list"></div>
-        <form class="dm-new" id="dm-new">
-          <label for="dm-to">Write to someone</label>
-          <div class="inline-row">
-            <input id="dm-to" type="text" placeholder="npub1... or X1ABCD" autocomplete="off" spellcheck="false">
-            <button type="submit" class="small-btn">Open</button>
-          </div>
-          <p class="form-error" id="dm-new-error" role="alert"></p>
-        </form>
-      </section>
+    <section class="reg-counts" id="reg-counts"></section>
 
-      <section class="dm-thread-pane" id="dm-thread-pane">
-        <div class="room-bar">
-          <a class="back-link dm-back" href="#/">Inbox</a>
-          <div class="room-title">
-            <strong id="dm-peer-name">Pick a conversation</strong>
-            <span id="dm-peer-key"></span>
+    <div class="reg-card">
+      <div class="room-bar">
+        <svg class="room-mark" width="34" height="34" aria-hidden="true"><use href="#sun-mark"/></svg>
+        <div class="room-title">
+          <strong>Which parts are you coming to?</strong>
+          <span>Change your answer whenever you want</span>
+        </div>
+        <div class="relay-status" title="Connected NOSTR relays">
+          <span class="relay-dots" id="relay-dots"></span>
+        </div>
+      </div>
+
+      <div class="reg-body">
+        <p class="muted-note" id="reg-locked"><a class="text-btn" href="/login?next=/registration">Log in</a> to register. It takes one click and needs no email.</p>
+
+        <div id="reg-parts"></div>
+
+        <div class="reg-comment-row" id="reg-comment-row" hidden>
+          <label for="reg-comment">Anything we should know? (public)</label>
+          <textarea id="reg-comment" rows="3" maxlength="500" placeholder="Arriving Tuesday, bringing a LoRa setup, travelling with two kids, vegan..."></textarea>
+          <div class="inline-row">
+            <button type="button" class="small-btn" id="reg-save">Save comment</button>
+            <span class="reg-status" id="reg-status" role="status"></span>
           </div>
+          <p class="hint">Your answer and this comment are public NOSTR events, like a post. Anyone can read them and count them, which is how the numbers above work. For anything private, <a href="/messages">write to the organizers</a>.</p>
         </div>
-        <div class="dm-messages" id="dm-messages">
-          <p class="muted-note" id="dm-empty">Your messages stay between you and the other person. The organizers can also write to you here.</p>
-        </div>
-        <form class="composer" id="dm-composer" hidden>
-          <textarea id="dm-input" rows="1" maxlength="4000" placeholder="Write a message" aria-label="Message"></textarea>
-          <button type="submit" class="send-btn" id="dm-send">Send</button>
-        </form>
-        <div class="composer-locked" id="dm-locked">
-          <span id="dm-locked-text">Log in to read and write messages.</span>
-          <a href="/login" class="text-btn">Log in</a>
-        </div>
-      </section>
+      </div>
     </div>
+
+    <section class="reg-help">
+      <strong>Questions?</strong>
+      <p>Write to the organizers from <a href="/messages">your messages</a>: that conversation is encrypted and only they can read it. For questions other people may also have, use the <a href="/forum">forum</a>.</p>
+    </section>
   </main>
 
   <footer class="site-footer container">
@@ -126,7 +122,7 @@
   <script src="/js/nostr-common.js"></script>
   <script src="/js/dm.js"></script>
   <script src="/js/account-bar.js"></script>
-  <script src="/js/messages.js"></script>
   <script src="/js/nav-menu.js"></script>
+  <script src="/js/registration.js"></script>
 </body>
 </html>

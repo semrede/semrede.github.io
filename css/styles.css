@@ -190,6 +190,17 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
 .music-copy .big-link { margin-top: 8px; color: var(--green); border-color: var(--green); }
 .music-copy .big-link:hover { background: var(--green); color: var(--ink); }
 
+.register-cta { padding-block: 110px; border-top: 1px solid #34403a; }
+.register-inner { margin-top: 18px; display: grid; grid-template-columns: 1fr auto; gap: 30px 60px; align-items: center; padding: 45px 55px; border: 2px solid var(--orange); background: radial-gradient(circle at 92% 20%, #3a2016, transparent 42%), linear-gradient(150deg, #1c120d, #07100f 70%); }
+.register-cta h2 { margin: 0 0 18px; font: 800 clamp(44px, 6vw, 80px)/.84 var(--display); text-transform: uppercase; letter-spacing: -.03em; }
+.register-cta h2 em { color: var(--orange); font-style: normal; }
+.register-cta p { margin: 0; max-width: 560px; color: #c3c5b9; font-size: 14px; }
+.register-cta .big-link { color: var(--orange); border-color: var(--orange); }
+.register-cta .big-link:hover { background: var(--orange); color: var(--ink); }
+.register-count { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 26px 34px; border: 2px solid var(--yellow); }
+.register-count strong { font: 800 clamp(48px, 7vw, 78px)/1 var(--display); color: var(--yellow); }
+.register-count span { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--paper); }
+
 .chat-cta { padding-block: 110px; border-top: 1px solid #34403a; }
 .chat-cta-inner { margin-top: 18px; display: grid; grid-template-columns: 1fr auto; gap: 30px 60px; align-items: end; padding: 45px 55px; border: 2px solid var(--teal); background: radial-gradient(circle at 92% 20%, #0f3b37, transparent 40%), linear-gradient(150deg, #0b1d1b, #07100f 70%); }
 .chat-cta h2 { margin: 0 0 18px; font: 800 clamp(44px, 6vw, 80px)/.84 var(--display); text-transform: uppercase; letter-spacing: -.03em; }
@@ -220,7 +231,8 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
   nav > a { display: none; }
   .nav-toggle { display: block; }
   nav { gap: 16px; }
-  .chat-cta { padding-block: 75px; }
+  .chat-cta, .register-cta { padding-block: 75px; }
+  .register-inner { grid-template-columns: 1fr; padding: 28px; }
   .chat-cta-inner { grid-template-columns: 1fr; padding: 28px; }
   .hero-corners { font-size: 10px; }
   .hero-mark { width: 130px; height: 130px; margin-bottom: -26px; }
