@@ -1,5 +1,6 @@
 /* SemRede: 80s retro / risograph-inspired design system, matched to the 2026 flyer */
 :root {
+  color-scheme: dark;
   --ink: #030706;
   --paper: #eee7d1;
   --cream: #f7edc8;
