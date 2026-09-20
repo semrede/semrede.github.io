@@ -14,6 +14,12 @@
   body { width: 1024px; height: 1536px; background: #0a0806; color: var(--paper); font-family: var(--mono); overflow: hidden; display: flex; flex-direction: column; }
   .venues { flex: 1; }
   .band { display: block; width: 1024px; }
+  .mid-wrap { position: relative; }
+  .icon-patch { position: absolute; left: 462px; top: 384px; width: 110px; height: 80px; background: url("/flyer/parts/patch.png") center / cover; }
+  .icon-new {
+    position: absolute; left: 486px; top: 390px; width: 64px; height: 64px;
+    fill: none; stroke: #ff4b1f; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  }
 
   .venues { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 6px 26px 0; }
   /* Like the first flyer: the photograph fills the whole block and the text
@@ -59,7 +65,19 @@
 </head>
 <body>
   <img class="band" src="/flyer/parts/top.png" alt="">
-  <img class="band" src="/flyer/parts/middle.png" alt="">
+  <div class="mid-wrap">
+    <img class="band" src="/flyer/parts/middle.png" alt="">
+    <!-- the first flyer's Communities icon was three generic people; it is
+         covered with a piece of the poster's own background and redrawn -->
+    <span class="icon-patch"></span>
+    <svg class="icon-new" viewBox="0 0 48 48" aria-hidden="true">
+      <path d="M24 7c4 5 6.5 8 6.5 11.5A6.5 6.5 0 0 1 24 25a6.5 6.5 0 0 1-6.5-6.5C17.5 15 20 12 24 7z"/>
+      <path d="M24 25c-1.8-1.6-2.6-3-2.6-4.4 0-1.6 1-3 2.6-4.9 1.6 1.9 2.6 3.3 2.6 4.9 0 1.4-.8 2.8-2.6 4.4z"/>
+      <path d="M11 34l26-6M11 28l26 6"/>
+      <circle cx="7" cy="23" r="2.6"/><circle cx="41" cy="23" r="2.6"/>
+      <circle cx="12" cy="42" r="2.6"/><circle cx="36" cy="42" r="2.6"/>
+    </svg>
+  </div>
 
   <div class="venues">
     <div class="venue farm">
