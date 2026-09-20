@@ -1,7 +1,9 @@
 /* /locations: the venues and how to reach them. */
 
 .loc-main { padding-bottom: 70px; }
-.loc-lead { margin: 12px 0 0; max-width: 680px; color: #c3c5b9; font-size: 14px; }
+/* the lead was sitting right on top of the first box */
+.loc-main .chat-intro { padding-bottom: 12px; }
+.loc-lead { margin: 14px 0 34px; max-width: 680px; color: #c3c5b9; font-size: 14px; line-height: 1.7; }
 
 .loc-card {
   margin-bottom: 22px; border: 2px solid var(--teal); background: linear-gradient(160deg, #0b1716, #07100f 70%);
