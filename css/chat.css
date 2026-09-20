@@ -1,9 +1,17 @@
 /* SemRede chat page. Builds on the tokens and components in styles.css. */
 
+/* The chat and messages pages are app screens: the whole page is exactly the
+   visible viewport, so the composer is always in reach and only the message
+   list scrolls. The forum keeps normal document scrolling. */
 .chat-body::after { display: none; }
+.chat-body:not(.forum-body) { height: 100svh; display: flex; flex-direction: column; overflow: hidden; }
+.chat-body:not(.forum-body) .site-header { flex: none; }
+.chat-body:not(.forum-body) .site-footer { flex: none; }
+.chat-main, .account-main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.chat-shell { flex: 1; min-height: 0; }
 .nav-cta[aria-current="page"] { color: var(--yellow); }
 
-.chat-main { padding-bottom: 60px; }
+.chat-main { padding-bottom: 20px; }
 
 .chat-intro { padding: 42px 0 26px; max-width: 760px; }
 .chat-intro h1 { margin: 14px 0 16px; font: 800 clamp(44px, 6vw, 76px)/.86 var(--display); text-transform: uppercase; letter-spacing: -.03em; }
@@ -20,7 +28,7 @@
   border: 2px solid var(--teal);
   background: linear-gradient(160deg, #0b1716, #050a09 70%);
   display: flex; flex-direction: column;
-  height: min(78vh, 780px); min-height: 480px;
+  height: 100%; min-height: 0;
 }
 .room-bar { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #1f3a37; }
 .room-mark { flex: none; }
@@ -137,12 +145,6 @@
 
 [hidden] { display: none !important; }
 
-@media (max-width: 900px) {
-  /* Leave the login card in reach on a phone, and follow the visible viewport
-     so the composer is not hidden behind the browser bars. */
-  .chat-room { height: 64vh; height: 64svh; min-height: 360px; }
-}
-
 @media (max-width: 800px) {
   .chat-intro { padding: 26px 0 18px; }
   .room-bar { padding: 12px 14px; }
@@ -159,18 +161,13 @@
   .key-row { gap: 8px 12px; }
 }
 
-/* Landscape on a phone leaves almost no height, so the page becomes one column
-   the size of the visible viewport: header, a small title, then the room. The
-   composer stays on screen because the room takes only the space that is left. */
+/* Landscape on a phone leaves almost no height: drop the page furniture so the
+   room keeps a usable size. */
 @media (orientation: landscape) and (max-height: 620px) {
-  body.chat-body { height: 100svh; display: flex; flex-direction: column; overflow: hidden; }
-  .site-header { flex: none; min-height: 50px; }
-  .chat-main { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-bottom: 10px; }
-  .chat-intro { flex: none; padding: 8px 0 8px; }
+  .site-header { min-height: 50px; }
+  .chat-intro { padding: 8px 0 8px; }
   .chat-intro .section-kicker { display: none; }
   .chat-intro h1 { font-size: clamp(24px, 6vh, 38px); }
-  .chat-shell { flex: 1; min-height: 0; }
-  .chat-room { height: 100%; min-height: 0; }
   .room-bar { padding: 7px 12px; }
   .room-mark { width: 26px; height: 26px; }
   .room-title strong { font-size: 18px; }

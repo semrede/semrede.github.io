@@ -71,6 +71,26 @@ nav a { transition: color .2s, transform .2s; }
 nav a:hover { color: var(--yellow); transform: translateY(-2px); }
 .nav-cta { color: var(--teal); }
 
+/* Phone menu: the three-line button and the panel it opens. */
+.site-header { position: relative; }
+.nav-toggle { display: none; width: 34px; height: 34px; padding: 0; border: 0; background: none; cursor: pointer; }
+.nav-toggle span { display: block; height: 2px; margin: 6px auto; width: 22px; background: var(--paper); transition: transform .2s, opacity .2s; }
+.nav-toggle.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+.nav-panel {
+  position: absolute; top: 100%; right: 0; left: 0; z-index: 30;
+  display: flex; flex-direction: column;
+  background: #07100f; border-top: 1px solid #34403a; border-bottom: 2px solid var(--teal);
+}
+.nav-panel a {
+  padding: 14px 4px; border-bottom: 1px solid #1c2b28;
+  font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--paper);
+}
+.nav-panel[hidden] { display: none; }
+.nav-panel a:last-child { border-bottom: 0; }
+.nav-panel a[aria-current] { color: var(--yellow); }
+
 /* Retro wordmark from the flyer: orange to yellow letters with teal stripes below */
 .wordmark {
   font: italic 900 1em/1 var(--display);
@@ -197,8 +217,8 @@ nav a:hover { color: var(--yellow); transform: translateY(-2px); }
   .container { width: min(calc(100% - 32px), var(--max)); }
   .site-header { min-height: 70px; }
   .brand .wordmark { font-size: 28px; }
-  nav > a:not(.nav-cta):not(.nav-chat) { display: none; }
-  nav > a.nav-hide-sm { display: none; }
+  nav > a { display: none; }
+  .nav-toggle { display: block; }
   nav { gap: 16px; }
   .chat-cta { padding-block: 75px; }
   .chat-cta-inner { grid-template-columns: 1fr; padding: 28px; }

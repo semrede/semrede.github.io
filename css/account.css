@@ -19,8 +19,11 @@
 .acct-name { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--paper); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .acct-chip:hover .acct-name { color: var(--yellow); }
 
+/* The account page scrolls like a normal page. */
+.account-main.login-main { display: block; overflow-y: auto; }
+
 /* login page */
-.account-main { padding-bottom: 70px; }
+.account-main { padding-bottom: 20px; }
 .account-grid { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 20px; align-items: start; }
 .account-grid .side-card { margin: 0; }
 .go-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 18px; }
@@ -38,7 +41,7 @@
 .dm-shell {
   display: grid; grid-template-columns: 320px minmax(0, 1fr);
   border: 2px solid var(--teal); background: linear-gradient(160deg, #0b1716, #050a09 70%);
-  height: min(74vh, 760px); min-height: 460px; overflow: hidden;
+  flex: 1; min-height: 0; overflow: hidden;
 }
 .dm-list-pane { display: flex; flex-direction: column; border-right: 1px solid #1f3a37; min-width: 0; }
 .dm-thread-pane { display: flex; flex-direction: column; min-width: 0; }
@@ -70,7 +73,7 @@
 
 @media (max-width: 900px) {
   .account-grid { grid-template-columns: 1fr; }
-  .dm-shell { grid-template-columns: 1fr; height: 70vh; height: 70svh; }
+  .dm-shell { grid-template-columns: 1fr; }
   .dm-list-pane { border-right: 0; }
   .dm-shell.thread-open .dm-list-pane { display: none; }
   .dm-shell:not(.thread-open) .dm-thread-pane { display: none; }
@@ -86,8 +89,6 @@
 /* Same idea as the chat: in landscape the inbox fills the visible viewport so
    the message box is never pushed below the fold. */
 @media (orientation: landscape) and (max-height: 620px) {
-  .account-main { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-bottom: 10px; }
-  .dm-shell { flex: 1; height: auto; min-height: 0; }
   .dm-new { padding: 8px 12px; }
   .dm-new label { margin-bottom: 4px; }
   .dm-messages { padding: 8px 12px 10px; }

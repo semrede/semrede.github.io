@@ -10,8 +10,10 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `chat/index.html`, `js/chat.js`, `css/chat.css`: the chat room, served at /chat
 - `forum/index.html`, `js/forum.js`, `css/forum.css`: the forum, served at /forum
 - `js/nostr-config.js`: relays, admin key, room id, forum categories
+- `locations/index.html`, `css/locations.css`: the venues and travel info, at /locations
 - `login/index.html`, `js/login-page.js`: log in, register, or manage your account, at /login
 - `messages/index.html`, `js/messages.js`, `js/dm.js`: private messages, at /messages
+- `js/nav-menu.js`: the three-line phone menu, on every page
 - `js/nostr-login.js`, `js/identity-ui.js`, `js/nostr-common.js`, `js/account-bar.js`: login, the header account corner, and the shared relay, profile and mute-list code
 - `js/vendor/nostr.bundle.js`: nostr-tools 2.25.2, vendored so the site has no runtime CDN dependency
 - `tools/nostr-admin.mjs`: room and moderation tool (node, run by hand)
