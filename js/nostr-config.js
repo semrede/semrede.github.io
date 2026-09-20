@@ -47,6 +47,7 @@ window.SemRedeConfig = {
   FORUM_TAG: 'semrede',
   CATEGORIES: [
     { slug: 'news', name: 'News', about: 'Announcements about SemRede itself.', color: 'orange' },
+    { slug: 'showcase', name: 'Showcase', about: 'Propose a project for the event and ask for a stand.', color: 'orange' },
     { slug: 'tech', name: 'Tech', about: 'Hardware, software, repairs, things you built.', color: 'teal' },
     { slug: 'mesh', name: 'Mesh & radio', about: 'Mesh networks, LoRa, HF, antennas, frequencies.', color: 'yellow' },
     { slug: 'energy', name: 'Energy & water', about: 'Solar, batteries, wells, filters, heating.', color: 'green' },

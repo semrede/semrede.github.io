@@ -30,6 +30,36 @@
 .cat-card.c-green { --tint: var(--green); }
 .cat-intro { margin: 0 0 18px; color: #c3c5b9; font-size: 13px; }
 
+/* sorting, votes and the owner actions */
+.sort-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.sort-btn {
+  padding: 6px 12px; border: 1px solid #34403a; background: none; color: #8a938b;
+  font: 700 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+}
+.sort-btn:hover { color: var(--teal); border-color: var(--teal); }
+.sort-btn.chosen { color: var(--ink); background: var(--teal); border-color: var(--teal); }
+
+.vote-btn {
+  flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px;
+  min-width: 46px; padding: 5px 8px; border: 1px solid #2a3f3c; background: none;
+  color: #8a938b; font: 700 13px var(--mono); cursor: pointer; transition: color .2s, border-color .2s;
+}
+.vote-btn:hover { color: var(--yellow); border-color: var(--yellow); }
+.vote-btn.voted { color: var(--yellow); border-color: var(--yellow); background: rgba(255, 210, 63, .1); }
+.vote-arrow { display: block; }
+.vote-count { line-height: 1; }
+.post-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.owner-actions { display: flex; gap: 12px; }
+.text-btn.danger { color: var(--orange); }
+.text-btn.danger:hover { color: var(--yellow); }
+.inline-edit { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 4px; }
+.inline-edit input, .inline-edit textarea {
+  width: 100%; padding: 10px 12px; background: #0d1918; border: 1px solid #2a3f3c;
+  color: var(--paper); font: 13px/1.5 var(--mono); resize: vertical;
+}
+.inline-edit input:focus, .inline-edit textarea:focus { outline: none; border-color: var(--teal); }
+.inline-edit .inline-row { align-items: center; gap: 12px; }
+
 /* thread lists */
 .thread-list { display: flex; flex-direction: column; }
 .thread-row {

@@ -142,6 +142,18 @@ Nothing is created in advance, so the categories carry over from year to year.
 They are listed in `js/nostr-config.js`; adding one is a line in `CATEGORIES`,
 and old threads keep working because each thread stores its own category tag.
 
+Threads can be upvoted (NIP-25 reactions, kind 7 with `+`), and a category can
+be sorted by most voted. Authors can edit or delete their own posts: a delete is
+a NIP-09 request (kind 5) that the client honours only when it comes from the
+author of the target, and an edit publishes a replacement carrying an `edit` tag
+with the id it supersedes, so the newest version wins here and the post is
+marked as edited. Edits are found through the tags they share with the original,
+since relays only filter single-letter tags.
+
+The **Showcase** category is where people propose a project and ask for a stand;
+the home page points there instead of an email address, and the votes are what
+show which proposals people want to see.
+
 Routes are hash based: `#/` categories, `#/c/<slug>` one category, `#/t/<id>`
 one thread. A thread link can be shared and opens straight from the relays.
 

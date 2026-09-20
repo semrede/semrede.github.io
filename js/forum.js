@@ -34,6 +34,7 @@
     catGrid: $('category-grid'),
     latest: $('latest-list'),
     catName: $('cat-name'), catAbout: $('cat-about'), catThreads: $('cat-threads'), catEmpty: $('cat-empty'),
+    sortRecent: $('sort-recent'), sortTop: $('sort-top'),
     newForm: $('new-thread'), newTitle: $('new-title'), newBody: $('new-body'), newError: $('new-error'),
     newToggle: $('new-toggle'), newLocked: $('new-locked'),
     threadBody: $('thread-body'), threadTitle: $('thread-title'), threadCat: $('thread-cat'),
@@ -45,6 +46,10 @@
   var threads = new Map();   // id -> kind 11 event
   var comments = new Map();  // id -> kind 1111 event
   var counts = new Map();    // thread id -> {replies, last}
+  var votes = new Map();     // target id -> Map(pubkey -> reaction event id)
+  var deleted = new Set();   // ids their own author asked to delete (NIP-09)
+  var edits = new Map();     // original id -> newest replacement by the same author
+  var sortBy = 'recent';
   var route = { view: 'index', slug: null, id: null };
   var threadSub = null;
   var countedIds = new Set();
@@ -74,15 +79,58 @@
     return (ev.content || '').trim().split('\n')[0].slice(0, 80) || 'Untitled';
   }
 
+  // An edit is a new event carrying an 'edit' tag with the id it replaces, by
+  // the same author. Other clients still show the original; here the newest
+  // version wins and the post is marked as edited.
+  function latest(ev) {
+    var replacement = edits.get(ev.id);
+    return replacement || ev;
+  }
+
+  function isEdited(ev) {
+    return edits.has(ev.id);
+  }
+
+  function noteEdit(ev) {
+    var original = tagValue(ev, 'edit');
+    if (!original) return false;
+    var target = threads.get(original) || comments.get(original);
+    if (target && target.pubkey !== ev.pubkey) return true;   // not yours to edit
+    var current = edits.get(original);
+    if (!current || current.created_at < ev.created_at) edits.set(original, ev);
+    return true;
+  }
+
+  function isHidden(ev) {
+    return deleted.has(ev.id) || net.isMuted(ev.pubkey);
+  }
+
+  function voteCount(id) {
+    var m = votes.get(id);
+    return m ? m.size : 0;
+  }
+
+  function myVote(id) {
+    var m = votes.get(id);
+    return (m && auth.pubkey && m.get(auth.pubkey)) || null;
+  }
+
   function isThread(ev) {
-    return ev.kind === THREAD_KIND && !net.isMuted(ev.pubkey) && !!threadCategory(ev) &&
+    return ev.kind === THREAD_KIND && !isHidden(ev) && !tagValue(ev, 'edit') && !!threadCategory(ev) &&
       ev.created_at < Date.now() / 1000 + 600;
   }
 
-  function visibleThreads(slug) {
-    return Array.from(threads.values())
-      .filter(function (ev) { return isThread(ev) && (!slug || threadCategory(ev) === slug); })
-      .sort(function (a, b) { return lastActivity(b) - lastActivity(a); });
+  function visibleThreads(slug, order) {
+    var list = Array.from(threads.values())
+      .filter(function (ev) { return isThread(ev) && (!slug || threadCategory(ev) === slug); });
+    if (order === 'top') {
+      list.sort(function (a, b) {
+        return (voteCount(b.id) - voteCount(a.id)) || (lastActivity(b) - lastActivity(a));
+      });
+    } else {
+      list.sort(function (a, b) { return lastActivity(b) - lastActivity(a); });
+    }
+    return list;
   }
 
   function lastActivity(ev) {
@@ -123,6 +171,53 @@
       wrap.appendChild(extra);
     }
     net.requestProfile(ev.pubkey);
+    return wrap;
+  }
+
+  function voteButton(ev) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'vote-btn' + (myVote(ev.id) ? ' voted' : '');
+    b.title = auth.pubkey ? 'Upvote this thread' : 'Log in to upvote';
+    var arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    arrow.setAttribute('class', 'vote-arrow');
+    arrow.setAttribute('viewBox', '0 0 12 8');
+    arrow.setAttribute('width', '12');
+    arrow.setAttribute('height', '8');
+    var tri = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    tri.setAttribute('d', 'M6 0L12 8H0z');
+    tri.setAttribute('fill', 'currentColor');
+    arrow.appendChild(tri);
+    var n = document.createElement('span');
+    n.className = 'vote-count';
+    n.textContent = String(voteCount(ev.id));
+    b.append(arrow, n);
+    b.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleVote(ev);
+    });
+    return b;
+  }
+
+  function ownerActions(ev, onEdit) {
+    var wrap = document.createElement('span');
+    wrap.className = 'owner-actions';
+    if (!auth.pubkey || auth.pubkey !== ev.pubkey) return wrap;
+    var edit = document.createElement('button');
+    edit.type = 'button';
+    edit.className = 'text-btn';
+    edit.textContent = 'Edit';
+    edit.addEventListener('click', onEdit);
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'text-btn danger';
+    del.textContent = 'Delete';
+    del.addEventListener('click', function () {
+      if (!confirm('Delete this for everyone? Relays are asked to drop it, but copies may survive elsewhere.')) return;
+      remove(ev);
+    });
+    wrap.append(edit, del);
     return wrap;
   }
 
@@ -184,11 +279,13 @@
     }
     meta.textContent = bits.join(' / ');
     main.appendChild(meta);
+    var title2 = main.querySelector('strong');
+    if (title2) title2.textContent = threadTitle(latest(ev));
     var count = document.createElement('span');
     count.className = 'reply-count';
     count.textContent = replyCount(ev.id);
     count.title = replyCount(ev.id) === 1 ? '1 reply' : replyCount(ev.id) + ' replies';
-    row.append(main, count);
+    row.append(main, count, voteButton(ev));
     net.requestProfile(ev.pubkey);
     return row;
   }
@@ -200,7 +297,11 @@
     if (!cat) return go('#/');
     els.catName.textContent = cat.name;
     els.catAbout.textContent = cat.about;
-    var list = visibleThreads(cat.slug);
+    if (els.sortRecent && els.sortTop) {
+      els.sortRecent.classList.toggle('chosen', sortBy === 'recent');
+      els.sortTop.classList.toggle('chosen', sortBy === 'top');
+    }
+    var list = visibleThreads(cat.slug, sortBy);
     els.catThreads.textContent = '';
     list.forEach(function (ev) { els.catThreads.appendChild(threadRow(ev, false)); });
     els.catEmpty.hidden = list.length > 0;
@@ -225,9 +326,14 @@
     els.threadCat.textContent = cat ? cat.name : 'Forum';
     els.threadCat.href = cat ? '#/c/' + cat.slug : '#/';
 
+    var shown = latest(ev);
     var post = document.createElement('article');
     post.className = 'post root';
-    post.append(authorLine(ev), bodyNode(ev.content));
+    post.append(authorLine(ev, isEdited(ev) ? 'edited' : ''), bodyNode(shown.content));
+    var actions = document.createElement('div');
+    actions.className = 'post-actions';
+    actions.append(voteButton(ev), ownerActions(ev, function () { openEditor(post, ev, true); }));
+    post.appendChild(actions);
     els.threadBody.appendChild(post);
 
     renderComments(ev);
@@ -237,7 +343,8 @@
   // rebuilt from those; anything whose parent is missing hangs off the root.
   function renderComments(root) {
     var mine = Array.from(comments.values()).filter(function (c) {
-      return !net.isMuted(c.pubkey) && c.tags.some(function (t) { return t[0] === 'E' && t[1] === root.id; });
+      return !isHidden(c) && !tagValue(c, 'edit') &&
+        c.tags.some(function (t) { return t[0] === 'E' && t[1] === root.id; });
     });
     var byParent = new Map();
     var known = new Set(mine.map(function (c) { return c.id; }));
@@ -267,9 +374,10 @@
   }
 
   function commentNode(ev, depth, root) {
+    var shown = latest(ev);
     var wrap = document.createElement('article');
     wrap.className = 'post comment depth-' + depth;
-    wrap.append(authorLine(ev), bodyNode(ev.content));
+    wrap.append(authorLine(ev, isEdited(ev) ? 'edited' : ''), bodyNode(shown.content));
 
     var actions = document.createElement('div');
     actions.className = 'post-actions';
@@ -282,6 +390,7 @@
       openInlineReply(wrap, ev, root);
     });
     actions.appendChild(reply);
+    actions.appendChild(ownerActions(ev, function () { openEditor(wrap, ev, false); }));
     wrap.appendChild(actions);
     return wrap;
   }
@@ -316,6 +425,108 @@
     });
     container.appendChild(form);
     area.focus();
+  }
+
+  // ---------- editing, deleting, voting ----------
+
+  // An edit keeps the original event in place (other clients still show it) and
+  // publishes a replacement tagged with the id it supersedes.
+  function openEditor(container, ev, isRoot) {
+    if (container.querySelector('.inline-edit')) return;
+    var current = latest(ev);
+    var form = document.createElement('form');
+    form.className = 'inline-edit';
+    var title;
+    if (isRoot) {
+      title = document.createElement('input');
+      title.type = 'text';
+      title.maxLength = TITLE_MAX;
+      title.value = threadTitle(current);
+      form.appendChild(title);
+    }
+    var area = document.createElement('textarea');
+    area.rows = 5;
+    area.maxLength = BODY_MAX;
+    area.value = current.content;
+    var row = document.createElement('div');
+    row.className = 'inline-row';
+    var save = document.createElement('button');
+    save.type = 'submit';
+    save.className = 'small-btn';
+    save.textContent = 'Save';
+    var cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'text-btn';
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', function () { form.remove(); });
+    row.append(save, cancel);
+    form.append(area, row);
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var body = area.value.trim();
+      if (!body) return;
+      save.disabled = true;
+      publishEdit(ev, body, title ? title.value.replace(/\s+/g, ' ').trim() : null)
+        .then(function () { form.remove(); }, function () { save.disabled = false; });
+    });
+    container.appendChild(form);
+    (title || area).focus();
+  }
+
+  function publishEdit(ev, body, title) {
+    var tags = ev.tags.filter(function (t) { return t[0] !== 'edit' && t[0] !== 'title'; });
+    if (title) tags.unshift(['title', title.slice(0, TITLE_MAX)]);
+    tags.push(['edit', ev.id]);
+    return auth.signEvent({ kind: ev.kind, created_at: Math.floor(Date.now() / 1000), tags: tags, content: body.slice(0, BODY_MAX) })
+      .then(function (signed) {
+        if (!NT.verifyEvent(signed)) throw new Error('Signature check failed');
+        if (signed.kind === THREAD_KIND) threads.set(signed.id, signed);
+        else comments.set(signed.id, signed);
+        noteEdit(signed);
+        queueRender();
+        return net.publish(signed);
+      });
+  }
+
+  // NIP-09: ask the relays to drop it. Copies elsewhere may survive, which the
+  // confirmation says.
+  function remove(ev) {
+    return auth.signEvent({
+      kind: 5,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [['e', ev.id], ['k', String(ev.kind)]],
+      content: 'deleted by the author'
+    }).then(function (signed) {
+      deleted.add(ev.id);
+      var replacement = edits.get(ev.id);
+      if (replacement) deleted.add(replacement.id);
+      queueRender();
+      if (route.view === 'thread' && route.id === ev.id) go('#/c/' + (threadCategory(ev) || ''));
+      return net.publish(signed);
+    });
+  }
+
+  // NIP-25 reaction: '+' is an upvote, and taking it back deletes the reaction.
+  function toggleVote(ev) {
+    if (!auth.pubkey) { location.href = '/login?next=/forum'; return; }
+    var existing = myVote(ev.id);
+    if (existing) {
+      var map = votes.get(ev.id);
+      map.delete(auth.pubkey);
+      queueRender();
+      return auth.signEvent({ kind: 5, created_at: Math.floor(Date.now() / 1000), tags: [['e', existing], ['k', '7']], content: 'vote removed' })
+        .then(function (signed) { deleted.add(existing); return net.publish(signed); });
+    }
+    return auth.signEvent({
+      kind: 7,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [['e', ev.id], ['p', ev.pubkey], ['k', String(ev.kind)]],
+      content: '+'
+    }).then(function (signed) {
+      addReaction(signed);
+      queueRender();
+      return net.publish(signed);
+    });
   }
 
   // ---------- publishing ----------
@@ -371,14 +582,57 @@
   function addThread(ev) {
     if (threads.has(ev.id) || ev.kind !== THREAD_KIND) return;
     threads.set(ev.id, ev);
+    applyPendingDeletes(ev);
+    if (noteEdit(ev)) { queueRender(); return; }
     net.requestProfile(ev.pubkey);
     scheduleCounts();
     queueRender();
   }
 
+  function addReaction(ev) {
+    if (ev.kind !== 7 || deleted.has(ev.id)) return;
+    if (['+', '', '\u2764', '\ud83d\udc4d'].indexOf(ev.content) === -1) return;
+    var target = ev.tags.filter(function (t) { return t[0] === 'e'; }).pop();
+    if (!target) return;
+    var map = votes.get(target[1]);
+    if (!map) { map = new Map(); votes.set(target[1], map); }
+    map.set(ev.pubkey, ev.id);
+    queueRender();
+  }
+
+  // A deletion only counts when it comes from the author of the target event.
+  var pendingDeletes = new Map();   // target id -> pubkey that asked
+  function addDeletion(ev) {
+    if (ev.kind !== 5) return;
+    ev.tags.forEach(function (t) {
+      if (t[0] !== 'e') return;
+      var target = threads.get(t[1]) || comments.get(t[1]);
+      if (target) {
+        if (target.pubkey === ev.pubkey) { deleted.add(t[1]); queueRender(); }
+        return;
+      }
+      pendingDeletes.set(t[1], ev.pubkey);
+      // reactions are only known by id, so drop ours if its author asked
+      votes.forEach(function (map, id) {
+        map.forEach(function (reactionId, pubkey) {
+          if (reactionId === t[1] && pubkey === ev.pubkey) { map.delete(pubkey); queueRender(); }
+        });
+      });
+    });
+  }
+
+  function applyPendingDeletes(ev) {
+    var asked = pendingDeletes.get(ev.id);
+    if (asked && asked === ev.pubkey) deleted.add(ev.id);
+  }
+
   function addComment(ev) {
+    if (ev.kind === 7) return addReaction(ev);
+    if (ev.kind === 5) return addDeletion(ev);
     if (comments.has(ev.id) || ev.kind !== COMMENT_KIND) return;
     comments.set(ev.id, ev);
+    applyPendingDeletes(ev);
+    if (noteEdit(ev)) { queueRender(); return; }
     net.requestProfile(ev.pubkey);
     var rootTag = ev.tags.filter(function (t) { return t[0] === 'E'; })[0];
     if (rootTag && !countedIds.has(ev.id)) {
@@ -398,10 +652,13 @@
       if (!ids.length) return;
       ids.forEach(function (id) { counted.add(id); });
       for (var i = 0; i < ids.length; i += 50) {
-        pool.subscribeManyEose(RELAYS, { kinds: [COMMENT_KIND], '#E': ids.slice(i, i + 50) }, {
+        var chunk = ids.slice(i, i + 50);
+        pool.subscribeManyEose(RELAYS, { kinds: [COMMENT_KIND], '#E': chunk }, {
           onevent: addComment,
           onclose: function () { queueRender(); }
         });
+        // votes on the threads themselves, and deletions of any of them
+        pool.subscribeMany(RELAYS, { kinds: [7, 5], '#e': chunk }, { onevent: addComment });
       }
     }, 400);
   }
@@ -428,6 +685,8 @@
     threadSub = pool.subscribeMany(RELAYS, { kinds: [COMMENT_KIND], '#E': [id], limit: 500 }, {
       onevent: addComment
     });
+    // edits and deletions of the thread and of anything in it
+    pool.subscribeMany(RELAYS, { kinds: [7, 5], '#e': [id], limit: 300 }, { onevent: addComment });
   }
 
   // ---------- routing and render loop ----------
@@ -496,6 +755,9 @@
 
   function wire() {
     window.addEventListener('hashchange', applyRoute);
+
+    if (els.sortRecent) els.sortRecent.addEventListener('click', function () { sortBy = 'recent'; render(); });
+    if (els.sortTop) els.sortTop.addEventListener('click', function () { sortBy = 'top'; render(); });
 
     els.newToggle.addEventListener('click', function () {
       els.newForm.hidden = !els.newForm.hidden;
