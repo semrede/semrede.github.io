@@ -98,6 +98,7 @@
       if (name.length < 2) return showError(els.loginError, 'Pick a name with at least 2 characters.');
       auth.createAccount().then(function () {
         net.profiles.set(auth.pubkey, { name: name, picture: '', created_at: 0, raw: {} });
+        if (window.SemRedeSession) window.SemRedeSession.saveProfile({ name: name, picture: '', at: 0 });
         ownProfileChecked = true;
         refresh();
         return saveName(name);

@@ -1,80 +1,91 @@
-/* The account corner in the header: "Log in" when signed out, and when signed
- * in an envelope with the unread count plus the account chip.
- * Added by script so every app page gets the same one.
+/* The account corner in the header.
+ *
+ * The markup is static in every page and the logged-in state is painted by CSS
+ * from what js/session.js read out of this browser, so nothing flashes and the
+ * corner looks the same everywhere. This script only adds what CSS cannot do:
+ * the profile picture, and, on the pages that talk to the relays, the unread
+ * count and live profile updates.
  */
 (function () {
   'use strict';
 
-  var net = window.SemRedeNet;
-  var auth = window.SemRedeNostr;
-  var dm = window.SemRedeDM;
+  var S = window.SemRedeSession;
+  if (!S) return;
 
-  var nav = document.querySelector('.site-header nav');
-  if (!nav) return;
+  var bar = document.querySelector('.site-header .account-bar');
+  if (!bar) return;
 
-  // A page may already carry a static bar (the marketing pages do); reuse it.
-  var bar = nav.querySelector('.account-bar');
-  var isNew = !bar;
-  if (isNew) {
-    bar = document.createElement('div');
-    bar.className = 'account-bar';
-  } else {
-    bar.textContent = '';
+  var me = bar.querySelector('.acct-me');
+  var avatar = me && me.querySelector('.avatar');
+  var mail = bar.querySelector('.acct-mail');
+  var badge = mail && mail.querySelector('.acct-badge');
+
+  function paintAvatar() {
+    if (!avatar) return;
+    var profile = S.profile();
+    var url = profile && profile.picture;
+    var img = avatar.querySelector('img');
+    if (!url) {
+      if (img) img.remove();
+      return;
+    }
+    if (img && img.getAttribute('src') === url) return;
+    if (!img) {
+      img = document.createElement('img');
+      img.alt = '';
+      img.width = 32;
+      img.height = 32;
+      img.decoding = 'async';
+      // Somebody else's server hosts this picture, so it learns nothing about
+      // where on the site its owner is reading.
+      img.referrerPolicy = 'no-referrer';
+      img.addEventListener('error', function () { img.remove(); });
+      avatar.appendChild(img);
+    }
+    img.src = url;
   }
 
-  var login = document.createElement('a');
-  login.className = 'acct-btn';
-  login.href = '/login';
-  login.textContent = 'Log in';
-
-  var mail = document.createElement('a');
-  mail.className = 'acct-mail';
-  mail.href = '/messages';
-  mail.title = 'Messages';
-  mail.setAttribute('aria-label', 'Messages');
-  mail.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">' +
-    '<rect x="2.5" y="5" width="19" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/>' +
-    '<path d="M3 6.5l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  var badge = document.createElement('span');
-  badge.className = 'acct-badge';
-  badge.hidden = true;
-  mail.appendChild(badge);
-
-  var chip = document.createElement('a');
-  chip.className = 'acct-chip';
-  chip.href = '/login';
-  var chipAvatar = document.createElement('span');
-  chipAvatar.className = 'avatar';
-  var chipName = document.createElement('span');
-  chipName.className = 'acct-name';
-  chip.append(chipAvatar, chipName);
-
-  bar.append(login, mail, chip);
-  if (isNew) nav.appendChild(bar);
+  function paintBadge(n) {
+    if (!badge) return;
+    badge.hidden = !n;
+    badge.textContent = n > 99 ? '99+' : String(n);
+    if (mail) mail.title = n ? n + (n === 1 ? ' unread message' : ' unread messages') : 'Messages';
+  }
 
   function refresh() {
-    var loggedIn = !!auth.pubkey;
-    login.hidden = loggedIn;
-    mail.hidden = !loggedIn;
-    chip.hidden = !loggedIn;
-    if (!loggedIn) return;
-    net.requestProfile(auth.pubkey);
-    net.fillAvatar(chipAvatar, auth.pubkey);
-    chipName.textContent = net.displayName(auth.pubkey);
-    updateBadge();
+    if (!S.pubkey) {
+      if (avatar) {
+        var img = avatar.querySelector('img');
+        if (img) img.remove();
+      }
+      paintBadge(0);
+      return;
+    }
+    paintAvatar();
   }
 
-  function updateBadge() {
-    if (!dm || !auth.pubkey) return;
-    var n = dm.unreadTotal();
-    badge.hidden = n === 0;
-    badge.textContent = n > 99 ? '99+' : String(n);
-    mail.title = n === 0 ? 'Messages' : n + (n === 1 ? ' unread message' : ' unread messages');
+  // The relay pages load their bundle after this script, so wait for the page
+  // to finish parsing before looking for them.
+  function attachLive() {
+    var net = window.SemRedeNet;
+    var auth = window.SemRedeNostr;
+    var dm = window.SemRedeDM;
+
+    if (net && auth && auth.pubkey) {
+      net.requestProfile(auth.pubkey);
+      net.onProfile(function (pubkey) { if (pubkey === auth.pubkey) paintAvatar(); });
+    }
+    if (dm) {
+      dm.onChange(function () { paintBadge(dm.unreadTotal()); });
+      paintBadge(dm.unreadTotal());
+    }
   }
 
   document.addEventListener('semrede-login', refresh);
   document.addEventListener('semrede-logout', refresh);
-  net.onProfile(function (pubkey) { if (pubkey === auth.pubkey) refresh(); });
-  if (dm) dm.onChange(updateBadge);
+  document.addEventListener('semrede-profile', paintAvatar);
+
   refresh();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attachLive);
+  else attachLive();
 })();

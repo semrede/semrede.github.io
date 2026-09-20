@@ -1,5 +1,17 @@
 /* Account corner in the header, the /login page and the /messages page. */
 
+[hidden] { display: none !important; }
+
+/* Round person picture, used in the header, the chat, the forum and /login. */
+.avatar {
+  --avatar: var(--teal);
+  flex: none; width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
+  display: grid; place-items: center; background: #0a1413; border: 2px solid var(--avatar); color: var(--avatar);
+  font: 800 13px/1 var(--display);
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-lg { width: 52px; height: 52px; font-size: 19px; }
+
 .account-bar { display: flex; align-items: center; gap: 14px; margin-left: 8px; }
 .acct-btn {
   padding: 7px 14px; border: 2px solid var(--yellow); color: var(--yellow);
@@ -14,10 +26,26 @@
   display: grid; place-items: center; border-radius: 9px; background: var(--orange); color: var(--ink);
   font: 700 10px/1 var(--mono);
 }
-.acct-chip { display: flex; align-items: center; gap: 8px; max-width: 190px; }
-.acct-chip .avatar { width: 30px; height: 30px; font-size: 12px; }
-.acct-name { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--paper); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.acct-chip:hover .acct-name { color: var(--yellow); }
+
+/* Which half of the account corner is shown is decided before the page is
+   painted, by the data-account attribute js/session.js puts on <html>. The
+   picture, the colour and the initials come from this browser, so a returning
+   visitor never sees "Log in" flash first. */
+.acct-me { display: grid; place-items: center; }
+.acct-me .avatar {
+  width: 32px; height: 32px; font-size: 12px;
+  --avatar: var(--acct-color, var(--teal));
+}
+.acct-me .avatar::before { content: var(--acct-initials, ""); }
+.acct-me .avatar:has(img)::before { content: none; }
+
+html[data-account="in"] .acct-btn,
+html[data-account="stale"] .acct-btn { display: none; }
+html:not([data-account="in"]):not([data-account="stale"]) .acct-mail,
+html:not([data-account="in"]):not([data-account="stale"]) .acct-me { display: none; }
+
+/* The key is known but the extension is not answering: still you, greyed. */
+html[data-account="stale"] .acct-me .avatar { opacity: .6; border-style: dashed; }
 
 /* The account page scrolls like a normal page. */
 .account-main.login-main { display: block; overflow-y: auto; }
@@ -82,7 +110,7 @@
 
 @media (max-width: 800px) {
   .account-bar { gap: 10px; margin-left: 4px; }
-  .acct-name { display: none; }
+  .acct-me .avatar { width: 28px; height: 28px; font-size: 11px; }
   .acct-btn { padding: 6px 10px; }
 }
 

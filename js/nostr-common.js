@@ -7,6 +7,7 @@
   var NT = window.NostrTools;
   var cfg = window.SemRedeConfig;
   var auth = window.SemRedeNostr;
+  var session = window.SemRedeSession;
   var RELAYS = cfg.RELAYS;
   var pool = new NT.SimplePool({ enablePing: true, enableReconnect: true });
 
@@ -25,7 +26,23 @@
     var name = String(data.display_name || data.name || '').replace(/\s+/g, ' ').trim().slice(0, 40);
     var picture = typeof data.picture === 'string' && /^https:\/\//.test(data.picture) ? data.picture : '';
     profiles.set(ev.pubkey, { name: name, picture: picture, created_at: ev.created_at, raw: data });
+    // Our own profile is kept in this browser, so the next page can draw the
+    // header without waiting for a relay.
+    if (session && ev.pubkey === auth.pubkey) {
+      session.saveProfile({ name: name, picture: picture, at: ev.created_at });
+    }
     profileListeners.forEach(function (fn) { fn(ev.pubkey); });
+  }
+
+  // Start from what this browser already knows about the visitor, so names and
+  // avatars do not appear as a callsign first and change a moment later.
+  if (session && session.pubkey) {
+    var cached = session.profile();
+    if (cached && (cached.name || cached.picture)) {
+      profiles.set(session.pubkey, {
+        name: cached.name, picture: cached.picture, created_at: cached.at || 0, raw: {}
+      });
+    }
   }
 
   function requestProfile(pubkey) {
@@ -156,9 +173,9 @@
     return (p && p.name) || auth.deriveCallsign(pubkey);
   }
 
+  // Same colour here and in the header; js/session.js owns it.
   function colorFor(pubkey) {
-    var palette = ['var(--orange)', 'var(--yellow)', 'var(--teal)', 'var(--green)'];
-    return palette[parseInt(pubkey.slice(-2), 16) % palette.length];
+    return session ? session.colorFor(pubkey) : 'var(--teal)';
   }
 
   function fillAvatar(el, pubkey) {

@@ -31,6 +31,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `login/index.html`, `js/login-page.js`: log in, register, or manage your account, at /login
 - `messages/index.html`, `js/messages.js`, `js/dm.js`: private messages, at /messages
 - `js/nav-menu.js`: the three-line phone menu, on every page
+- `js/session.js`: who is logged in, read from this browser before the page is painted
 - `js/nostr-login.js`, `js/identity-ui.js`, `js/nostr-common.js`, `js/account-bar.js`: login, the header account corner, and the shared relay, profile and mute-list code
 - `js/vendor/nostr.bundle.js`: nostr-tools 2.25.2, vendored so the site has no runtime CDN dependency
 - `tools/nostr-admin.mjs`: room and moderation tool (node, run by hand)
@@ -196,6 +197,33 @@ name, key backup and log out. The chat, the forum and the messages page only
 link to it, so there is one place to learn how accounts work.
 
 A page can send someone to `/login?next=/chat` to bring them back afterwards.
+
+### The account corner
+
+Logged in, the corner shows the visitor's own profile picture (initials when
+there is none) and the envelope for `/messages`. It is the same widget on all
+13 pages, and it must not blink between them:
+
+- `js/session.js` loads first, in the `<head>`, and depends on nothing. It reads
+  `semrede_nostr_pubkey`, `semrede_nostr_mode` and `semrede_profile` (this
+  visitor's own name and picture, cached from their kind 0) and writes
+  `<html data-account="in|out|stale">` plus the `--acct-color` and
+  `--acct-initials` custom properties. CSS draws the right corner from that,
+  before the first paint, so the marketing pages never load the 252 KB NOSTR
+  bundle just to know who is reading.
+- `js/nostr-login.js` restores the session synchronously: `api.pubkey` is set at
+  load, not after an extension has been looked for. The signer is separate and
+  may arrive later, which is what `api.signerReady` is for; `signEvent`,
+  `encryptFor` and `decryptFrom` wait for it themselves, so no caller has to.
+- `data-account="stale"` means the key is known but a NIP-07 extension is not
+  answering. The picture stays, dimmed with a dashed ring, and any attempt to
+  sign fails with a message saying to unlock the extension or log in again.
+- `js/nostr-common.js` writes the cache whenever a kind 0 for the visitor
+  arrives, and seeds its profile map from the cache at startup, so names never
+  appear as a callsign first and change a moment later.
+- The signer is held in a private reference inside `js/nostr-login.js`, never
+  read back from `window.nostr`: an extension that injects itself late would
+  otherwise sign with a different key than the one shown.
 
 ### Profile picture
 

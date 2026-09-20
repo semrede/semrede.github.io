@@ -73,14 +73,7 @@
 .send-state { margin-top: 3px; font-size: 10px; color: #8a938b; }
 .send-state.failed { color: var(--orange); }
 
-.avatar {
-  --avatar: var(--teal);
-  flex: none; width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
-  display: grid; place-items: center; background: #0a1413; border: 2px solid var(--avatar); color: var(--avatar);
-  font: 800 13px/1 var(--display);
-}
-.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.avatar-lg { width: 52px; height: 52px; font-size: 19px; }
+/* .avatar and [hidden] live in css/account.css, which every page loads. */
 
 /* ---- composer ---- */
 .composer { display: flex; align-items: flex-end; gap: 10px; padding: 12px 14px; border-top: 1px solid #1f3a37; background: #07100f; }
@@ -153,7 +146,6 @@
 .side-note ul { margin: 8px 0 0; padding-left: 16px; }
 .side-note li { margin-bottom: 6px; }
 
-[hidden] { display: none !important; }
 
 @media (max-width: 800px) {
   .chat-intro { padding: 26px 0 18px; }

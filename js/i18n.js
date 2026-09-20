@@ -39,6 +39,9 @@
 
   var lang = pick();
   var dict = (window.SemRedeDict && window.SemRedeDict[lang]) || null;
+  // Empty until a dictionary is laid over the page, so t() works in English too.
+  var exact = {};
+  var patterns = [];
 
   var api = window.SemRedeI18n = {
     lang: lang,
@@ -71,8 +74,8 @@
 
   if (!dict) return;
 
-  var exact = dict.exact || {};
-  var patterns = (dict.patterns || []).map(function (pair) {
+  exact = dict.exact || {};
+  patterns = (dict.patterns || []).map(function (pair) {
     return [new RegExp('^' + pair[0] + '$'), pair[1]];
   });
 

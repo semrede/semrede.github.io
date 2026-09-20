@@ -19,7 +19,6 @@ window.SemRedeDict.pt = {
     'Register': 'Inscrever',
     'Log in': 'Entrar',
     'Log out': 'Sair',
-    'Account': 'Conta',
     'Messages': 'Mensagens',
     'Coimbra / Portugal': 'Coimbra / Portugal',
     'October 26 to 31, 2026': '26 a 31 de outubro de 2026',

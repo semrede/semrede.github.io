@@ -270,6 +270,9 @@
     dm.onChange(render);
     net.onProfile(render);
     document.addEventListener('semrede-login', function () { render(); });
+    // The signer may only show up a moment after the page does, and whether it
+    // can encrypt decides what this page says.
+    document.addEventListener('semrede-signer', function () { render(); });
     document.addEventListener('semrede-logout', function () { current = null; location.hash = ''; render(); });
     auth.ready.then(render);
   }

@@ -11,10 +11,11 @@
   <meta property="og:url" content="https://semrede.com/">
   <meta name="theme-color" content="#030706">
   <meta name="color-scheme" content="dark">
-  <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/fonts.css">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/account.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/account.css">
+  <script src="/js/session.js"></script>
   <script src="/js/i18n-pt.js"></script>
   <script src="/js/i18n.js"></script>
 </head>
@@ -34,7 +35,11 @@
       <a href="/chat">Chat</a>
       <a href="/forum">Forum</a>
       <a class="nav-cta" href="/registration">Register</a>
-      <div class="account-bar"><a class="acct-btn" href="/login">Log in</a></div>
+      <div class="account-bar">
+        <a class="acct-btn" href="/login">Log in</a>
+        <a class="acct-mail" href="/messages" title="Messages" aria-label="Messages"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 6.5l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="acct-badge" hidden></span></a>
+        <a class="acct-me" href="/login" title="Your account" aria-label="Your account"><span class="avatar"></span></a>
+      </div>
     </nav>
   </header>
 
@@ -46,7 +51,7 @@
       </div>
 
       <figure class="hero-art">
-        <img src="img/hero-landscape.jpg" alt="Illustration of a solar-powered radio mast above a valley at sunset, with Coimbra on the river" width="830" height="292">
+        <img src="/img/hero-landscape.jpg" alt="Illustration of a solar-powered radio mast above a valley at sunset, with Coimbra on the river" width="830" height="292">
       </figure>
       <h1 class="wordmark">SemRede</h1>
       <p class="hero-subtitle">Offgrid Communications,<br>Communities &amp; People</p>
@@ -109,7 +114,7 @@
       <div class="section-kicker">02 / The week</div>
 
       <article class="venue venue-farm">
-        <img src="img/eva-farm.jpg" alt="Illustration of Eva Farm: wooden buildings, vegetable beds and solar panels" width="455" height="172" loading="lazy">
+        <img src="/img/eva-farm.jpg" alt="Illustration of Eva Farm: wooden buildings, vegetable beds and solar panels" width="455" height="172" loading="lazy">
         <div class="venue-body">
           <div class="venue-meta">Monday to Friday / Oct 26 to 30</div>
           <h2><small>at</small> Eva Farm</h2>
@@ -119,7 +124,7 @@
       </article>
 
       <article class="venue venue-city">
-        <img src="img/embaixada.jpg" alt="Illustration of the Edifício Embaixada terrace above the old town of Coimbra at dusk" width="455" height="160" loading="lazy">
+        <img src="/img/embaixada.jpg" alt="Illustration of the Edifício Embaixada terrace above the old town of Coimbra at dusk" width="455" height="160" loading="lazy">
         <div class="venue-body">
           <div class="venue-meta">Saturday / Oct 31</div>
           <h2><small>at</small> Edifício Embaixada</h2>
@@ -265,11 +270,11 @@
     <span>October 26 to 31, 2026</span>
     <span class="lang-switch"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></span>
   </footer>
-  <script src="js/music-data.js"></script>
-  <script src="js/music.js"></script>
-  <script src="js/nostr-config.js"></script>
-  <script src="js/rsvp-count.js"></script>
-  <script src="js/account-bar-lite.js"></script>
-  <script src="js/nav-menu.js"></script>
+  <script src="/js/music-data.js"></script>
+  <script src="/js/music.js"></script>
+  <script src="/js/nostr-config.js"></script>
+  <script src="/js/rsvp-count.js"></script>
+  <script src="/js/account-bar.js"></script>
+  <script src="/js/nav-menu.js"></script>
 </body>
 </html>
