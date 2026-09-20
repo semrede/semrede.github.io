@@ -260,6 +260,31 @@ mute list of that account is what the site reads.
 key file in place republishes the profile and creates a **second** room, so do
 not run it unless you want a new room id.
 
+## Languages
+
+The pages are written in English and stay that way. `js/i18n-pt.js` holds a
+Portuguese dictionary keyed by the English text, and `js/i18n.js` lays it over
+the page at runtime, so there is one copy of every page and translations are
+written on top of it.
+
+- The language is picked from `?lang=pt` first, then the choice saved in the
+  browser (`localStorage semrede_lang`, set by the EN / PT buttons in the
+  footer), then `navigator.languages`. Anything that is not Portuguese gets
+  English.
+- Text built by the scripts (chat messages, forum lists, counters) is
+  translated as well: a `MutationObserver` keeps watching the page.
+- Strings that carry a number go in the `patterns` list at the end of the
+  dictionary, as a regular expression plus a replacement with `$1`, `$2`.
+- A string with no entry simply stays in English, so the dictionary can grow
+  little by little. `tools/` has no build step for this: edit the file and
+  reload.
+- Dates and times follow the language, because `js/nostr-common.js` formats
+  them with `pt-PT` when `<html lang>` is `pt`.
+
+To add another language, copy `js/i18n-pt.js` to `js/i18n-<code>.js`, set
+`window.SemRedeDict.<code>`, include it in the pages next to the Portuguese one
+and add the code to `pick()` in `js/i18n.js`.
+
 ## Deploy
 
 The site is hosted on GitHub Pages from the repository

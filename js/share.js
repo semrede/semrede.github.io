@@ -12,6 +12,7 @@
   var FLYER = SITE + '/files/semrede-2026-flyer.png';
   var MESSAGE = 'SemRede 2026: offgrid communications, communities and people. ' +
     'October 26 to 31 in Coimbra, Portugal. Free, but register so they know how many to cook for. ' + SITE;
+  var t = function (text) { return window.SemRedeI18n ? window.SemRedeI18n.t(text) : text; };
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {
@@ -30,7 +31,7 @@
   function copy(text, button, label) {
     navigator.clipboard.writeText(text).then(function () {
       var old = button.textContent;
-      button.textContent = 'Copied';
+      button.textContent = t('Copied');
       setTimeout(function () { button.textContent = old; }, 1600);
     }, function () {
       status('Could not reach the clipboard. Select the text and copy it by hand.', 'bad');
@@ -59,7 +60,7 @@
   // Posting on NOSTR uses the account this site already knows about.
   function updateNostrButton() {
     if (!els.nostr) return;
-    els.nostr.textContent = auth.pubkey ? 'Post it on NOSTR' : 'Log in to post it on NOSTR';
+    els.nostr.textContent = t(auth.pubkey ? 'Post it on NOSTR' : 'Log in to post it on NOSTR');
   }
 
   if (els.nostr) els.nostr.addEventListener('click', function () {
@@ -96,6 +97,10 @@
       els.nostr.disabled = false;
     });
   });
+
+  // The textarea is left alone by the overlay (it is editable), so the default
+  // message is translated here instead.
+  if (els.message && els.message.value.trim() === MESSAGE) els.message.value = t(MESSAGE);
 
   document.addEventListener('semrede-login', updateNostrButton);
   document.addEventListener('semrede-logout', updateNostrButton);

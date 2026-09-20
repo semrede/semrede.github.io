@@ -117,8 +117,13 @@
     if (last < text.length) container.appendChild(document.createTextNode(text.slice(last)));
   }
 
+  // Dates follow whatever language the translation overlay settled on.
+  function locale() {
+    return document.documentElement.lang === 'pt' ? 'pt-PT' : 'en-GB';
+  }
+
   function timeLabel(ts) {
-    return new Date(ts * 1000).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    return new Date(ts * 1000).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
   }
 
   function dayLabel(ts) {
@@ -126,7 +131,7 @@
     var today = new Date();
     if (d.toDateString() === today.toDateString()) return 'Today';
     if (d.toDateString() === new Date(Date.now() - 864e5).toDateString()) return 'Yesterday';
-    return d.toLocaleDateString('en-GB', {
+    return d.toLocaleDateString(locale(), {
       weekday: 'long', day: 'numeric', month: 'long',
       year: d.getFullYear() === today.getFullYear() ? undefined : 'numeric'
     });
