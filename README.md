@@ -320,6 +320,21 @@ node nostr-admin.mjs sync <channel id> # copy the room onto every relay in the l
 Importing the admin nsec into Amethyst, Damus or an extension works too: the
 mute list of that account is what the site reads.
 
+The moderation team is a NIP-51 people set (kind 30000, `d = semrede-moderators`)
+that only the admin key may write, and it is also who receives the daily
+statistics:
+
+```bash
+node nostr-admin.mjs mods                 # who is on it
+node nostr-admin.mjs mod <npub|hex>       # add somebody
+node nostr-admin.mjs unmod <npub|hex>     # take them off
+```
+
+The same can be done from `/admin` when logged in with the admin key. After
+adding somebody, re-run `node tools/stats.mjs publish <day>` for any day they
+should be able to see: each aggregate is encrypted to one reader, so a new
+moderator only gets the days published after they joined.
+
 `node nostr-admin.mjs create` is a one-time command. Running it again with the
 key file in place republishes the profile and creates a **second** room, so do
 not run it unless you want a new room id.

@@ -44,6 +44,13 @@ async function publish(template, sk) {
   return event;
 }
 
+// The moderation team: a NIP-51 people set the admin key alone may write.
+// js/moderation.js reads exactly this and ignores anyone else's copy.
+async function currentModerators(pk) {
+  const ev = await pool.get(RELAYS, { kinds: [30000], authors: [pk], '#d': ['semrede-moderators'] }, { maxWait: 6000 });
+  return ev ? ev.tags.filter(t => t[0] === 'p' && /^[0-9a-f]{64}$/.test(t[1])).map(t => t[1]) : [];
+}
+
 async function currentMutes(pk) {
   const ev = await pool.get(RELAYS, { kinds: [10000], authors: [pk] });
   return ev ? ev.tags : [];
@@ -90,6 +97,26 @@ async function main() {
     if (cmd === 'mute') tags.push(['p', target]);
     await publish({ kind: 10000, tags, content: '' }, sk);
     console.log(cmd + 'd', target, '- mute list now has', tags.filter(t => t[0] === 'p').length, 'entries');
+  } else if (cmd === 'mod' || cmd === 'unmod' || cmd === 'mods') {
+    const sk = loadKey(); const pk = getPublicKey(sk);
+    let list = await currentModerators(pk);
+    if (cmd === 'mods') {
+      console.log('moderators (' + list.length + '):');
+      list.forEach(hex => console.log('  ' + nip19.npubEncode(hex) + '  ' + hex));
+    } else {
+      if (!arg) throw new Error('usage: ' + cmd + ' <npub|hex>');
+      const target = toHex(arg);
+      if (!/^[0-9a-f]{64}$/.test(target)) throw new Error('that is not a key');
+      list = list.filter(hex => hex !== target && hex !== pk);
+      if (cmd === 'mod') list.push(target);
+      await publish({
+        kind: 30000,
+        tags: [['d', 'semrede-moderators'], ['title', 'SemRede moderators']].concat(list.map(hex => ['p', hex])),
+        content: ''
+      }, sk);
+      console.log((cmd === 'mod' ? 'added ' : 'removed ') + nip19.npubEncode(target));
+      console.log('the team is now ' + list.length + ' moderator' + (list.length === 1 ? '' : 's') + ', plus the admin key');
+    }
   } else if (cmd === 'calendar') {
     // Two NIP-52 date-based calendar events (kind 31922). People RSVP to these
     // from /registration, and the counters are the RSVPs.
@@ -135,7 +162,7 @@ async function main() {
     const pk = getPublicKey(loadKey());
     for (const t of await currentMutes(pk)) if (t[0] === 'p') console.log(nip19.npubEncode(t[1]));
   } else {
-    console.log('usage: node nostr-admin.mjs create | calendar | mute <npub|hex> | unmute <npub|hex> | sync <channel id> | list');
+    console.log('usage: node nostr-admin.mjs create | calendar | mute <npub|hex> | unmute <npub|hex> | mod <npub|hex> | unmod <npub|hex> | mods | sync <channel id> | list');
   }
 }
 
