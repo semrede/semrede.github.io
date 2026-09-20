@@ -25,6 +25,7 @@
       if (link.closest('.account-bar')) return;
       var copy = document.createElement('a');
       copy.href = link.getAttribute('href');
+      copy.className = link.className;   // so a link only moderators see stays that way
       copy.textContent = link.textContent.trim();
       if (link.getAttribute('aria-current')) copy.setAttribute('aria-current', 'page');
       panel.appendChild(copy);

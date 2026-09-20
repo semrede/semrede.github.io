@@ -24,6 +24,7 @@
   var K_PRIV = 'semrede_nostr_privkey';
   var K_MODE = 'semrede_nostr_mode';
   var K_PROFILE = 'semrede_profile';
+  var K_MOD = 'semrede_mod';
 
   var BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
   var PALETTE = ['var(--orange)', 'var(--yellow)', 'var(--teal)', 'var(--green)'];
@@ -94,6 +95,10 @@
   function paint(state) {
     var root = document.documentElement;
     root.dataset.account = state;
+    // Only a hint for the header link; the real gate is that the moderation
+    // list is signed by the admin key and the numbers are encrypted.
+    if (state !== 'out' && read(K_MOD) === '1') root.dataset.mod = '1';
+    else root.removeAttribute('data-mod');
     if (state === 'out') {
       root.style.removeProperty('--acct-color');
       root.style.removeProperty('--acct-initials');
@@ -149,11 +154,21 @@
     // "stale" means: we know who you are, but the signer is not answering.
     setState: function (state) { paint(state); },
 
+    isModerator: function () { return read(K_MOD) === '1'; },
+
+    // js/moderation.js calls this once the admin's list has been read, so the
+    // pages that never load the relays still know whether to show the link.
+    setModerator: function (yes) {
+      if (yes) write(K_MOD, '1'); else drop(K_MOD);
+      paint(document.documentElement.dataset.account || 'out');
+    },
+
     clear: function () {
       drop(K_PUB);
       drop(K_PRIV);
       drop(K_MODE);
       drop(K_PROFILE);
+      drop(K_MOD);
       pubkey = api.pubkey = null;
       mode = api.mode = null;
       callsign = api.callsign = null;

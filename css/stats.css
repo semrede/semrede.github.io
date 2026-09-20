@@ -22,8 +22,8 @@
 .grain-btn.current { border-color: var(--teal); color: var(--teal); }
 
 .chart { margin-bottom: 20px; }
-.chart-plot { display: flex; align-items: flex-end; gap: 4px; height: 170px; padding: 10px 4px 0; border: 1px solid #22302d; background: #0a1413; overflow-x: auto; }
-.chart-col { flex: 1 1 0; min-width: 22px; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+.chart-plot { display: flex; align-items: flex-end; justify-content: flex-start; gap: 4px; height: 170px; padding: 10px 6px 0; border: 1px solid #22302d; background: #0a1413; overflow-x: auto; }
+.chart-col { flex: 1 1 0; min-width: 22px; max-width: 70px; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
 .chart-bars { flex: 1 1 auto; width: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 2px; }
 .chart-bars i { display: block; width: 42%; min-height: 2px; }
 .bar-views { background: var(--teal); }

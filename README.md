@@ -21,6 +21,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `tools/covers.mjs`: copies the album covers into `img/music/`
 - `tools/audio.mjs`, `files/music/`: the tracks themselves, as AAC
 - `crypto/index.html`, `css/crypto.css`: the CryptoEscudo page
+- `stats/index.html`: the visit numbers, for the admin and the moderators
 - `img/minerfan.png`, `img/xprs.png`, `img/gnpa.png`: the real project icons,
   taken from each project's own repository
 - `fonts/`, `css/fonts.css`, `tools/fonts.mjs`: the self-hosted web fonts
@@ -436,7 +437,18 @@ encrypted to that reader; `/admin` reads them with `authors: [stats key]`, which
 is also what stops anyone from forging a fake day. Re-running replaces rather
 than duplicating.
 
-The card draws page views and visits as bars, with the X axis switchable
+The numbers live on their own page, `/stats`, linked from `/admin` and back.
+It is gated the same way the moderation desk is: the key has to be on the
+moderator list, and each day is encrypted to one reader anyway.
+
+The header shows an **Admin** link to moderators only. Because the marketing
+pages never load the relays, that is decided by a flag `js/moderation.js` leaves
+in this browser (`semrede_mod`, read by `js/session.js` into
+`<html data-mod="1">`). It is a convenience, not a gate: setting the flag by
+hand shows the link and nothing else, since the pages behind it still check the
+signed moderator list and cannot decrypt anything without the right key.
+
+The chart draws page views and visits as bars, with the X axis switchable
 between days (last 30), weeks (26), months (24) and years. Clicking a bar picks
 that bucket, and the tables below add up every day inside it. A page can hand
 the card a set of days through `window.SemRedeStatsFixture` to look at the

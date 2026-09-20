@@ -24,13 +24,13 @@
     AGG_D_PREFIX: 'semrede-stats-',
     MAX_BYTES: 512,
 
-    // The pages that send a beacon. /login, /messages and /admin never do:
-    // counting those would tell the stats key when somebody opened their own
-    // inbox, which is nobody's business.
+    // The pages that send a beacon. /login, /messages, /admin and /stats never
+    // do: counting those would tell the stats key when somebody opened their
+    // own inbox or the numbers themselves, which is nobody's business.
     PATHS: ['/', '/chat', '/crypto', '/forum', '/locations', '/privacy',
             '/registration', '/schedule', '/share', '/showcase'],
 
-    SKIP_PATHS: ['/login', '/messages', '/admin'],
+    SKIP_PATHS: ['/login', '/messages', '/admin', '/stats'],
 
     SCREENS: ['phone', 'tablet', 'desktop'],
     SECS: ['0-5', '5-15', '15-60', '60-180', '180+'],

@@ -30,6 +30,11 @@
   var watching = false;
 
   function emit() {
+    // Remember whether this visitor moderates, so the header on the pages that
+    // never talk to a relay can still offer the link.
+    if (window.SemRedeSession && auth.pubkey) {
+      window.SemRedeSession.setModerator(isModerator(auth.pubkey));
+    }
     listeners.forEach(function (fn) { fn(); });
   }
 

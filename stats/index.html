@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SemRede Messages</title>
-  <meta name="description" content="Private messages between people at SemRede, encrypted end to end over NOSTR.">
+  <title>SemRede Visits</title>
+  <meta name="description" content="How much of the SemRede site is being read. Only the organizers and the moderation team can open this.">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#030706">
   <meta name="color-scheme" content="dark">
@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/chat.css">
   <link rel="stylesheet" href="/css/account.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/stats.css">
   <script src="/js/session.js"></script>
   <script src="/js/i18n-pt.js"></script>
   <script src="/js/i18n.js"></script>
@@ -42,58 +44,40 @@
     </nav>
   </header>
 
-  <main class="container account-main">
+  <main class="container account-main login-main">
     <section class="chat-intro">
-      <div class="section-kicker">08 / Messages</div>
-      <h1>Messages</h1>
+      <div class="section-kicker">17 / Visits</div>
+      <h1>Visits</h1>
+      <p class="admin-lead" id="stats-role"></p>
     </section>
 
-    <div class="dm-shell" id="dm-shell">
-      <section class="dm-list-pane">
+    <div class="side-card" id="stats-gate">
+      <p class="hint">These numbers are for the organizers and the moderation team. Log in with a key that is on the team and they show up here.</p>
+      <p class="hint">Nobody else can read them: every day is encrypted to one reader at a time.</p>
+      <a class="big-btn btn-teal" href="/login?next=/stats">Log in</a>
+    </div>
+
+    <div id="stats-desk" hidden>
+      <section class="admin-card" id="stats-section">
         <div class="room-bar">
-          <img class="room-mark" src="/img/logo-mark.png" width="34" height="34" alt="">
-          <div class="room-title">
-            <strong>Inbox</strong>
-            <span id="dm-count">private and encrypted</span>
-          </div>
-          <div class="relay-status" title="Connected NOSTR relays">
-            <span class="relay-dots" id="relay-dots"></span>
-          </div>
+          <div class="room-title"><strong>How much of this is being read</strong><span>Page views and visits, day by day</span></div>
+          <div class="relay-status"><span class="relay-dots" id="relay-dots" title="Connected NOSTR relays"></span></div>
         </div>
-        <div class="dm-list" id="dm-list"></div>
-        <form class="dm-new" id="dm-new">
-          <label for="dm-to">Write to someone</label>
-          <div class="inline-row">
-            <input id="dm-to" type="text" placeholder="npub1... or X1ABCD" autocomplete="off" spellcheck="false">
-            <button type="submit" class="small-btn">Open</button>
-          </div>
-          <p class="form-error" id="dm-new-error" role="alert"></p>
-        </form>
+        <div class="admin-body" id="stats-body"></div>
       </section>
 
-      <section class="dm-thread-pane" id="dm-thread-pane">
+      <section class="admin-card">
         <div class="room-bar">
-          <a class="back-link dm-back" href="#/">Inbox</a>
-          <div class="room-title">
-            <strong id="dm-peer-name">Pick a conversation</strong>
-            <span id="dm-peer-key"></span>
-          </div>
+          <div class="room-title"><strong>Where this comes from</strong><span>And what it does not say</span></div>
         </div>
-        <div class="dm-messages" id="dm-messages">
-          <p class="muted-note" id="dm-empty">Your messages stay between you and the other person. The organizers can also write to you here.</p>
-        </div>
-        <form class="composer" id="dm-composer" hidden>
-          <textarea id="dm-input" rows="1" maxlength="4000" placeholder="Write a message" aria-label="Message"></textarea>
-          <button type="submit" class="send-btn" id="dm-send">Send</button>
-        </form>
-        <div class="composer-locked" id="dm-locked">
-          <span id="dm-locked-text">Log in to read and write messages.</span>
-          <a href="/login" class="text-btn">Log in</a>
+        <div class="admin-body">
+          <p class="hint">Every page view sends one small encrypted message. It carries the page, the referring domain, the browser language, a screen size, whether that browser had been here before and roughly how long the page was open. Nothing that identifies a person, no address, no cookie. People who ask not to be tracked are never counted, and /login, /messages and /admin never send anything.</p>
+          <p class="hint">A <strong>visit</strong> is one browser tab on one day, never "a person". Two tabs are two visits. Visits that end by closing the last tab are often missed, so the real numbers are higher than these.</p>
+          <a class="big-btn btn-teal" href="/admin">Back to moderation</a>
         </div>
       </section>
     </div>
   </main>
-
   <footer class="site-footer container">
     <span>Coimbra / Portugal</span>
     <span><a href="/share">Share the flyer</a> / <a href="/privacy">Privacy</a></span>
@@ -105,9 +89,11 @@
   <script src="/js/nostr-config.js"></script>
   <script src="/js/nostr-login.js"></script>
   <script src="/js/nostr-common.js"></script>
+  <script src="/js/moderation.js"></script>
   <script src="/js/dm.js"></script>
   <script src="/js/account-bar.js"></script>
-  <script src="/js/messages.js"></script>
+  <script src="/js/stats-schema.js"></script>
+  <script src="/js/stats-view.js"></script>
   <script src="/js/nav-menu.js"></script>
 </body>
 </html>

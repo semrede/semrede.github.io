@@ -14,7 +14,6 @@
   <link rel="stylesheet" href="/css/chat.css">
   <link rel="stylesheet" href="/css/account.css">
   <link rel="stylesheet" href="/css/admin.css">
-  <link rel="stylesheet" href="/css/stats.css">
   <script src="/js/session.js"></script>
   <script src="/js/i18n-pt.js"></script>
   <script src="/js/i18n.js"></script>
@@ -34,6 +33,7 @@
       <a href="/showcase">Showcase</a>
       <a href="/chat">Chat</a>
       <a href="/forum">Forum</a>
+      <a class="nav-admin" href="/admin">Admin</a>
       <a class="nav-cta" href="/registration">Register</a>
       <div class="account-bar">
         <a class="acct-btn" href="/login">Log in</a>
@@ -121,11 +121,14 @@
         </div>
       </section>
 
-      <section class="admin-card" id="stats-section">
+      <section class="admin-card">
         <div class="room-bar">
           <div class="room-title"><strong>Visits</strong><span>How much of this is being read</span></div>
         </div>
-        <div class="admin-body" id="stats-body"></div>
+        <div class="admin-body">
+          <p class="hint">The numbers have their own page, so they can be opened and left open.</p>
+          <a class="big-btn btn-teal" href="/stats">Open the statistics</a>
+        </div>
       </section>
     </div>
   </main>
@@ -145,8 +148,6 @@
   <script src="/js/dm.js"></script>
   <script src="/js/account-bar.js"></script>
   <script src="/js/nav-menu.js"></script>
-  <script src="/js/stats-schema.js"></script>
-  <script src="/js/stats-view.js"></script>
   <script src="/js/admin.js"></script>
 </body>
 </html>

@@ -280,6 +280,12 @@ nav a[aria-current] { color: var(--yellow); }
 
 .site-footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .site-footer a:hover { color: var(--yellow); }
+/* Only shown to a browser that has been told it moderates; the page itself is
+   still gated by the moderation list and by encryption. */
+.nav-admin { color: var(--green); }
+.nav-admin:hover { color: var(--yellow); }
+html:not([data-mod="1"]) .nav-admin { display: none; }
+
 .lang-switch { display: inline-flex; gap: 6px; }
 /* The language you are NOT reading is the one worth clicking, so that is the
    one that stands out; the current one sits quiet. */
@@ -300,6 +306,7 @@ nav a[aria-current] { color: var(--yellow); }
   .site-header { min-height: 70px; }
   .brand .wordmark { font-size: 28px; }
   nav > a { display: none; }
+  .nav-panel .nav-admin { color: var(--green); }
   .nav-toggle { display: block; }
   nav { gap: 16px; }
   .chat-cta, .register-cta, .share-cta { padding-block: 75px; }

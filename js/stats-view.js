@@ -16,7 +16,11 @@
 
   var els = {
     section: document.getElementById('stats-section'),
-    body: document.getElementById('stats-body')
+    body: document.getElementById('stats-body'),
+    gate: document.getElementById('stats-gate'),
+    desk: document.getElementById('stats-desk'),
+    role: document.getElementById('stats-role'),
+    dots: document.getElementById('relay-dots')
   };
   if (!els.section || !cfg || !cfg.STATS || !S) return;
 
@@ -236,9 +240,19 @@
 
   function render() {
     if (!els.body) return;
-    els.body.textContent = '';
+    var allowed = !!auth.pubkey && mod.isModerator(auth.pubkey);
 
-    if (!auth.pubkey || !mod.isModerator(auth.pubkey)) return;
+    // On its own page the whole thing is gated, the way /admin is.
+    if (els.gate) els.gate.hidden = allowed;
+    if (els.desk) els.desk.hidden = !allowed;
+    if (els.role) {
+      els.role.textContent = !auth.pubkey ? ''
+        : allowed ? (mod.isAdmin(auth.pubkey) ? 'You are the admin' : 'You are a moderator')
+        : 'This key is not on the moderation team.';
+    }
+
+    els.body.textContent = '';
+    if (!allowed) return;
 
     var all = Array.from(days.keys()).sort().reverse();
     if (!all.length) {
@@ -295,6 +309,8 @@
   document.addEventListener('semrede-logout', render);
   mod.onChange(render);
   auth.ready.then(function () { watch(); render(); });
+  mod.watch();
+  if (els.dots) net.relayStatus(els.dots, null);
   watch();
   render();
 })();
