@@ -10,6 +10,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `chat/index.html`, `js/chat.js`, `css/chat.css`: the chat room, served at /chat
 - `forum/index.html`, `js/forum.js`, `css/forum.css`: the forum, served at /forum
 - `js/nostr-config.js`: relays, admin key, room id, forum categories
+- `tools/maps.sh`: refreshes the satellite views on /locations
 - `registration/index.html`, `js/registration.js`, `js/rsvp-count.js`, `css/registration.css`: registration and the counters, at /registration
 - `locations/index.html`, `css/locations.css`: the venues and travel info, at /locations
 - `login/index.html`, `js/login-page.js`: log in, register, or manage your account, at /login
@@ -50,6 +51,24 @@ The relay list matters: many public relays reject unknown keys, which would
 block everyone who creates an account on the site. Every relay above was
 checked to accept a brand-new key. The same list appears in `js/chat.js` and in
 `tools/nostr-admin.mjs`, and both must be changed together.
+
+## Locations
+
+`/locations` carries both venue addresses, their coordinates, a link that opens
+the spot on OpenStreetMap and a satellite view:
+
+| | |
+|---|---|
+| Edif&iacute;cio Embaixada | Largo da Freiria 4, Coimbra, 40.210186, -8.429712 |
+| Eva Farm | Esta&ccedil;&atilde;o de Vale de A&ccedil;or (MetroBus), 40.156442, -8.374109 |
+
+Both were checked against OpenStreetMap; the Vale de A&ccedil;or stop is tagged
+as a Metro Mondego stop on the MetroBus line (S1 from Coimbra-B to Serpins, S2
+from Rep&uacute;blica), which is what the travel directions are based on.
+
+The satellite images are stored in `img/map-*.jpg` rather than hotlinked, so the
+page stays fast and keeps working behind content blockers. Refresh them with
+`tools/maps.sh`; the imagery is Esri World Imagery and the page credits it.
 
 ## Account and login
 

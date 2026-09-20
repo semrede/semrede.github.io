@@ -20,6 +20,23 @@
 .loc-card a { color: var(--yellow); text-decoration: underline; text-underline-offset: 2px; }
 .loc-card strong { color: var(--paper); }
 
+.loc-address { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 0 0 16px; font-size: 13px; }
+.loc-address dt { color: var(--yellow); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; padding-top: 3px; }
+.loc-address dd { margin: 0; color: var(--paper); }
+.loc-address a { color: var(--paper); }
+
+.sat { margin: 0 0 18px; }
+.sat a { position: relative; display: block; border: 1px solid #22302d; }
+.sat img { display: block; width: 100%; height: auto; filter: saturate(.85) contrast(1.05); }
+.sat-pin {
+  position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px;
+  border: 3px solid var(--orange); border-radius: 50%; box-shadow: 0 0 0 2px rgba(3, 7, 6, .7), 0 0 14px rgba(255, 75, 31, .7);
+}
+.sat-pin::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--orange); }
+.sat figcaption { margin-top: 6px; font-size: 10px; letter-spacing: .04em; color: #7d877f; }
+#eva-farm .sat-pin { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(3, 7, 6, .7), 0 0 14px rgba(17, 216, 208, .7); }
+#eva-farm .sat-pin::after { background: var(--teal); }
+
 #embaixada { border-color: var(--orange); }
 #embaixada img { border-right-color: var(--orange); }
 #embaixada h2 { color: var(--orange); }
