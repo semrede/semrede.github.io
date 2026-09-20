@@ -6,23 +6,21 @@
       <stop offset=".75" stop-color="#ef3b35"/>
       <stop offset="1" stop-color="#c8235e"/>
     </linearGradient>
-    <mask id="cut">
-      <circle cx="32" cy="32" r="30" fill="#fff"/>
-      <g fill="#000">
-        <rect x="0" y="43" width="64" height="1.6"/>
-        <rect x="0" y="48" width="64" height="2.1"/>
-        <rect x="0" y="53" width="64" height="2.6"/>
-        <rect x="0" y="58" width="64" height="3.2"/>
-      </g>
-      <g fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M27.8 21.8a6 6 0 0 1 8.4 0"/>
-        <path d="M24.2 18.2a11 11 0 0 1 15.6 0"/>
-        <path d="M20.7 14.7a16 16 0 0 1 22.6 0"/>
-        <path d="M32 29L24.5 63M32 29l7.5 34"/>
-        <path d="M29.8 39h4.4M27.6 49h8.8M25.4 59h13.2M29.8 39l6.6 10M27.6 49l11 10"/>
-      </g>
-      <circle cx="32" cy="26" r="2.6" fill="#000"/>
-    </mask>
+    <clipPath id="clip"><circle cx="32" cy="32" r="30"/></clipPath>
   </defs>
-  <circle cx="32" cy="32" r="30" fill="url(#sun)" mask="url(#cut)"/>
+  <circle cx="32" cy="32" r="30" fill="url(#sun)"/>
+  <g clip-path="url(#clip)" fill="#030706">
+    <rect x="0" y="43" width="64" height="1.6"/>
+    <rect x="0" y="48" width="64" height="2.1"/>
+    <rect x="0" y="53" width="64" height="2.6"/>
+    <rect x="0" y="58" width="64" height="3.2"/>
+    <circle cx="32" cy="26" r="2.6"/>
+  </g>
+  <g clip-path="url(#clip)" fill="none" stroke="#030706" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M27.8 21.8a6 6 0 0 1 8.4 0"/>
+    <path d="M24.2 18.2a11 11 0 0 1 15.6 0"/>
+    <path d="M20.7 14.7a16 16 0 0 1 22.6 0"/>
+    <path d="M32 29L24.5 63M32 29l7.5 34"/>
+    <path d="M29.8 39h4.4M27.6 49h8.8M25.4 59h13.2M29.8 39l6.6 10M27.6 49l11 10"/>
+  </g>
 </svg>
