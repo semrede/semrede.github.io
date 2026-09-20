@@ -16,13 +16,21 @@
   .band { display: block; width: 1024px; }
 
   .venues { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 6px 26px 0; }
+  /* Like the first flyer: the photograph fills the whole block and the text
+     sits on a dark wash over it, instead of a black panel above the picture. */
   .venue {
-    border: 3px solid var(--teal); border-radius: 4px; overflow: hidden;
-    background: #0b1413; display: flex; flex-direction: column;
+    position: relative; border: 3px solid var(--teal); border-radius: 4px; overflow: hidden;
+    background: #0b1413 bottom / cover no-repeat; height: 372px;
+  }
+  .venue.farm { background-image: url("/flyer/parts/eva.jpg"); }
+  .venue.city { background-image: url("/flyer/parts/embaixada.jpg"); }
+  .venue::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(4,10,9,.97) 0%, rgba(4,10,9,.96) 36%, rgba(4,10,9,.6) 50%, rgba(4,10,9,.15) 62%, rgba(4,10,9,0) 74%);
   }
   .venue.city { border-color: var(--orange); }
   /* both boxes keep the same shape, so the photos line up whatever the text says */
-  .venue-body { padding: 14px 20px 12px; height: 218px; }
+  .venue-body { position: relative; padding: 16px 20px 12px; }
   .venue-when { display: flex; align-items: center; gap: 9px; font: 700 23px/1 "Barlow Condensed", sans-serif; letter-spacing: .05em; text-transform: uppercase; color: var(--teal); }
   .venue.city .venue-when { color: var(--orange); }
   .venue-when svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; }
@@ -36,7 +44,7 @@
   .venue.city .place strong { color: var(--orange); }
   .place p { margin-top: 5px; font-size: 16px; line-height: 1.35; color: var(--paper); }
   .place .addr { margin-top: 6px; font-size: 15px; line-height: 1.3; color: var(--yellow); }
-  .venue img { display: block; width: 100%; height: 140px; object-fit: cover; }
+
 
   .foot { padding: 14px 26px 0; }
   .foot-top { display: flex; align-items: center; gap: 18px; }
@@ -54,7 +62,7 @@
   <img class="band" src="/flyer/parts/middle.png" alt="">
 
   <div class="venues">
-    <div class="venue">
+    <div class="venue farm">
       <div class="venue-body">
         <div class="venue-when">
           <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
@@ -70,7 +78,6 @@
           </div>
         </div>
       </div>
-      <img src="/img/eva-farm.jpg" alt="">
     </div>
 
     <div class="venue city">
@@ -89,7 +96,6 @@
           </div>
         </div>
       </div>
-      <img src="/img/embaixada.jpg" alt="">
     </div>
   </div>
 
