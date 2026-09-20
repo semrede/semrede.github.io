@@ -12,6 +12,9 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `js/nostr-config.js`: relays, admin key, room id, forum categories
 - `admin/index.html`, `js/admin.js`, `js/moderation.js`: the moderation desk, at /admin
 - `js/blossom.js`: picture uploads to public media servers
+- `js/music-data.js`, `js/music.js`: the Haleen player on the home page
+- `tools/music.mjs`: rebuilds the track list from the Fountain feeds
+- `flyer-drafts/flyer.html`, `tools/flyer.mjs`: the printable flyer and its renderer
 - `tools/maps.sh`: refreshes the satellite views on /locations
 - `registration/index.html`, `js/registration.js`, `js/rsvp-count.js`, `css/registration.css`: registration and the counters, at /registration
 - `locations/index.html`, `css/locations.css`: the venues and travel info, at /locations
@@ -80,6 +83,32 @@ Pictures are uploaded to the same public Blossom servers as profile pictures
 normally do it. The browser scales them to at most 1600px and re-encodes them as
 WebP first. Image links are rendered inline in the forum and the chat, and fall
 back to a plain link if the media server ever drops the file.
+
+## Music player
+
+The home page plays Haleen's tracks. `tools/music.mjs` reads their Fountain
+publisher feed and each album feed and writes `js/music-data.js` (titles,
+lengths, covers and audio URLs). The audio is never copied here: it streams
+from Fountain, so plays and bandwidth count for the artist. Re-run the tool
+after they release something:
+
+```bash
+node tools/music.mjs
+```
+
+## The flyer
+
+`flyer-drafts/flyer.html` is the source of the printable flyer, using the same
+fonts and artwork as the site. Render it with a local server and a headless
+browser on the CDP port:
+
+```bash
+python3 -m http.server 8782 &
+node tools/flyer.mjs http://localhost:8782/flyer-drafts/flyer.html flyer-drafts/semrede-2026-flyer.png
+```
+
+The result is A4 at 150dpi. Older flyers stay where they are; nothing is
+overwritten.
 
 ## Locations
 
