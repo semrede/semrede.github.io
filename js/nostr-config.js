@@ -44,6 +44,20 @@ window.SemRedeConfig = {
     }
   ],
 
+  // Visit statistics. A beacon is a kind 30078 event signed by a throwaway key,
+  // p-tagged to this key, with its content encrypted to it (NIP-44). Nobody
+  // else can read it, and two beacons cannot be tied to each other.
+  // The secret key lives at ~/.config/semrede/nostr-stats.nsec and is never in
+  // this repository; tools/stats.mjs is the only thing that can read beacons.
+  STATS: {
+    ENABLED: true,
+    PUBKEY: '196e42c6b67732a935e4c4f88dd0bce628d07dfbe0a616e5dbeba8e9f7a7be6b',
+    // Two relays, not all six: fewer people see a visitor's address, and the
+    // beacons stay out of the way of the chat and the forum.
+    RELAYS: ['wss://nostr-pub.wellorder.net', 'wss://relay.primal.net'],
+    SAMPLE: 1
+  },
+
   FORUM_TAG: 'semrede',
   CATEGORIES: [
     { slug: 'news', name: 'News', about: 'Announcements about SemRede itself.', color: 'orange' },

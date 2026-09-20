@@ -32,6 +32,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `messages/index.html`, `js/messages.js`, `js/dm.js`: private messages, at /messages
 - `js/nav-menu.js`: the three-line phone menu, on every page
 - `js/session.js`: who is logged in, read from this browser before the page is painted
+- `js/stats.js`, `js/stats-schema.js`, `js/stats-view.js`, `tools/stats.mjs`: the visit beacon, its schema, the /admin card and the daily count
 - `js/nostr-login.js`, `js/identity-ui.js`, `js/nostr-common.js`, `js/account-bar.js`: login, the header account corner, and the shared relay, profile and mute-list code
 - `js/vendor/nostr.bundle.js`: nostr-tools 2.25.2, vendored so the site has no runtime CDN dependency
 - `tools/nostr-admin.mjs`: room and moderation tool (node, run by hand)
@@ -348,11 +349,12 @@ To add another language, copy `js/i18n-pt.js` to `js/i18n-<code>.js`, set
 `window.SemRedeDict.<code>`, include it in the pages next to the Portuguese one
 and add the code to `pick()` in `js/i18n.js`.
 
-## Nothing is loaded from other servers
+## What is loaded, and from where
 
-Reading the site calls no third party. Everything a page needs is in this
-repository, so a visitor's IP address is never handed to anyone else just for
-looking.
+No page fetches anything from another company: no fonts from Google, no
+analytics script, no CDN, no trackers, no cookies. Everything a page needs is
+in this repository. What does leave a visitor's browser is NOSTR relay traffic,
+listed at the end of this section.
 
 - Fonts are self-hosted in `fonts/`, declared by `css/fonts.css`. Rebuild them
   with `node tools/fonts.mjs`, which downloads the woff2 files once (latin and
@@ -368,9 +370,63 @@ What still goes out, and why:
 - **NOSTR relays**, once a page needs them (chat, forum, registration counters,
   messages). They see the IP of whoever opens those pages; that is what a relay
   is. `js/nostr-config.js` holds the list.
+- **One visit beacon per page view** on ten of the thirteen pages
+  (`js/stats.js`), unless the browser sends Do Not Track or Global Privacy
+  Control, or the visitor said no on `/privacy`. It is encrypted and signed with
+  a key that is thrown away, and carries no identifier that outlives the tab,
+  but the two relays it goes to do see the address, like any relay. `/login`,
+  `/messages` and `/admin` never send one. See "Visit statistics" below.
 - **Blossom servers**, when somebody uploads a picture, and whatever server
   hosts a picture posted by somebody else. Those images are loaded with
   `referrerpolicy="no-referrer"`.
+
+So a visitor's address is seen by the relays in `js/nostr-config.js` and by
+nobody else. It is not seen by us, because there is no server of ours anywhere
+in this, and it is not written down.
+
+## Visit statistics
+
+The site has no logs, so the numbers come from the visitors' own browsers.
+
+`js/stats.js` sends one event per page view: kind 30078 (NIP-78 app data) with
+`d = semrede-visit`, signed by a key generated and discarded on the spot,
+p-tagged to the stats key in `js/nostr-config.js`, with its content NIP-44
+encrypted to that key. Only `tools/stats.mjs`, holding
+`~/.config/semrede/nostr-stats.nsec`, can read one.
+
+Gift wraps (NIP-59) would have been the natural fit, and they were the first
+attempt, but most relays refuse to serve kind 1059 back by its `p` tag, so the
+beacons would have been write-only. `node tools/stats.mjs probe` is the command
+that found that out, and it is worth re-running before each season.
+
+The payload is fixed by `js/stats-schema.js`, which the browser and the node
+tool both execute, so the two cannot drift: path, referring domain, language,
+screen bucket, returning flag, time-on-page bucket, and a random per-tab id.
+There is no date in it, because a local date would leak a timezone; the day
+comes from the event's own `created_at` in UTC.
+
+```bash
+node tools/stats.mjs key                 # once: makes the stats key
+node tools/stats.mjs probe 5             # do relays take one-off keys?
+node tools/stats.mjs selftest            # the schema agrees with itself
+node tools/stats.mjs paths               # every page is in the schema
+node tools/stats.mjs fetch --since 2     # read beacons into ~/.config/semrede/stats
+node tools/stats.mjs show 2026-09-20     # print a day
+node tools/stats.mjs publish 2026-09-20  # send the day to admin + moderators
+node tools/stats.mjs verify beacon.json  # prove only the stats key can read it
+```
+
+`publish` writes one kind 30078 per reader, `d = semrede-stats-<day>-<reader>`,
+encrypted to that reader; `/admin` reads them with `authors: [stats key]`, which
+is also what stops anyone from forging a fake day. Re-running replaces rather
+than duplicating.
+
+Counting rules, and their limits, are shown on the card itself: a **visit** is
+one browser tab on one day, never "a person". Beacons that arrive from closed
+tabs are often lost, so the real numbers are higher; anything a forger sends is
+filtered by the same schema the browser uses, and anything with fewer than three
+page views in a day is folded into "other" so a rare language or referrer cannot
+point at one person.
 
 ## CryptoEscudos
 

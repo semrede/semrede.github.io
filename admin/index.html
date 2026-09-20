@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/css/chat.css">
   <link rel="stylesheet" href="/css/account.css">
   <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/stats.css">
   <script src="/js/session.js"></script>
   <script src="/js/i18n-pt.js"></script>
   <script src="/js/i18n.js"></script>
@@ -119,6 +120,14 @@
           <div id="closed-list"></div>
         </div>
       </section>
+
+      <section class="admin-card" id="stats-section">
+        <div class="room-bar">
+          <div class="room-title"><strong>Visits</strong><span>How much of this is being read</span></div>
+          <select id="stats-day" class="stats-day" aria-label="Pick a day" hidden></select>
+        </div>
+        <div class="admin-body" id="stats-body"></div>
+      </section>
     </div>
   </main>
 
@@ -137,6 +146,8 @@
   <script src="/js/dm.js"></script>
   <script src="/js/account-bar.js"></script>
   <script src="/js/nav-menu.js"></script>
+  <script src="/js/stats-schema.js"></script>
+  <script src="/js/stats-view.js"></script>
   <script src="/js/admin.js"></script>
 </body>
 </html>

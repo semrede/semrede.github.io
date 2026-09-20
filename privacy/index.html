@@ -109,6 +109,26 @@
       </div>
     </article>
 
+    <article class="loc-card priv-card green">
+      <div class="loc-body">
+        <div class="loc-meta">Counting</div>
+        <h2>What we count</h2>
+        <p>We count page views, so we know whether any of this is being read. When you leave a page, your browser sends one small message: which page, which site you arrived from (the domain only, never the link), your browser's language, whether your screen is phone, tablet or desktop sized, whether you had been here before, and roughly how long you stayed.</p>
+        <p>It is encrypted before it leaves your browser and signed with a key that is thrown away on the spot, so nobody, not even the relay carrying it, can tell that two of these came from the same person. There is no cookie, no account, and nothing that outlives the tab you have open.</p>
+        <ul>
+          <li>We never look at your address, and we never fingerprint your browser: no canvas, no fonts, no hardware. The relay does see your address, because that is what a relay is, the same as the chat and the forum.</li>
+          <li>Only the organizers and the moderation team can read the numbers, and they only ever see daily totals.</li>
+          <li>Once sent, it cannot be taken back: the key that signed it is gone, so it stays on the relays, unreadable, for good.</li>
+          <li><strong>/login, /messages and /admin are never counted.</strong> What you do with your own account is nobody's business.</li>
+        </ul>
+        <p>If your browser asks not to be tracked, with Do Not Track or Global Privacy Control, nothing is counted at all. Brave has that on by default. You can also just say no:</p>
+        <p class="stats-switch-row">
+          <button type="button" class="small-btn" id="stats-switch">Do not count my visits</button>
+          <span class="stats-switch-note" id="stats-switch-note"></span>
+        </p>
+      </div>
+    </article>
+
     <section class="loc-help">
       <strong>The short version</strong>
       <p>Wear the X and you are not in the pictures. Changed your mind later? <a href="/messages">Message the organizers</a> and it is dealt with.</p>
@@ -124,5 +144,8 @@
 
   <script src="/js/account-bar.js"></script>
   <script src="/js/nav-menu.js"></script>
+  <script src="/js/nostr-config.js"></script>
+  <script src="/js/stats-schema.js"></script>
+  <script src="/js/stats.js"></script>
 </body>
 </html>

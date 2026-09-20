@@ -4,6 +4,8 @@
 .priv-card.orange { border-color: var(--orange); }
 .priv-card.orange h2 { color: var(--orange); }
 .priv-card.yellow { border-color: var(--yellow); }
+.priv-card.green { border-color: var(--green); }
+.priv-card.green h2 { color: var(--green); }
 .priv-card.yellow h2 { color: var(--yellow); font-style: normal; }
 .priv-card h2 { font-style: normal; }
 .priv-card p, .priv-card li { font-size: 14px; }
@@ -20,3 +22,6 @@
   .priv-split { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .priv-card .loc-body { padding: 20px 18px 24px; }
 }
+
+.stats-switch-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
+.stats-switch-note { font-size: 11px; color: #8a938b; }

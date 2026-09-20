@@ -1,0 +1,20 @@
+/* The Visits card on /admin, and the number tiles it shares with /registration. */
+
+.count-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 22px; }
+.count-box { padding: 16px 18px; border: 1px solid #34403a; background: #0a1413; text-align: center; }
+.count-box strong { display: block; font: 800 34px/1 var(--display); color: var(--teal); }
+.count-label { display: block; margin-top: 4px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: #8a938b; }
+.count-extra { display: block; margin-top: 6px; font-size: 10px; color: #6f7a72; }
+
+.stat-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 42px; gap: 10px; align-items: center; margin-bottom: 6px; font-size: 13px; }
+.stat-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--paper); }
+.stat-bar { height: 8px; background: #16211f; border: 1px solid #22302d; }
+.stat-bar i { display: block; height: 100%; background: var(--teal); }
+.stat-row strong { text-align: right; font: 700 13px var(--mono); color: var(--yellow); }
+
+.stats-day { padding: 5px 8px; border: 1px solid #34403a; background: #0a1413; color: var(--paper); font: 400 12px var(--mono); }
+
+@media (max-width: 800px) {
+  .count-row { grid-template-columns: 1fr; }
+  .stat-row { grid-template-columns: 110px minmax(0, 1fr) 36px; font-size: 12px; }
+}
