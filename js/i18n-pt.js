@@ -82,7 +82,7 @@ window.SemRedeDict.pt = {
     'Projects and stands': 'Projetos e bancas',
     '04 / Music': '04 / Música',
     'Invited artist': 'Artista convidada',
-    'The player streams straight from Fountain, so every play counts for them there.': 'O leitor toca diretamente a partir do Fountain, por isso cada reprodução conta para eles lá.',
+    'The songs are served from here, so listening costs you nothing but a page load. Plays only count for Haleen on Fountain, so go give them a listen there too.': 'As músicas são servidas daqui, por isso ouvir não custa mais do que carregar a página. As reproduções só contam para os Haleen no Fountain, por isso vai ouvi-los lá também.',
     'Their page on Fountain': 'A página deles no Fountain',
     'All tracks': 'Todas as faixas',
     'Hide the tracks': 'Esconder as faixas',

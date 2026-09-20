@@ -19,6 +19,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `js/music-data.js`, `js/music.js`: the Haleen player on the home page
 - `tools/music.mjs`: rebuilds the track list from the Fountain feeds
 - `tools/covers.mjs`: copies the album covers into `img/music/`
+- `tools/audio.mjs`, `files/music/`: the tracks themselves, as AAC
 - `fonts/`, `css/fonts.css`, `tools/fonts.mjs`: the self-hosted web fonts
 - `flyer/flyer.html`, `tools/flyer.mjs`: the printable flyer and its renderer
 - `tools/maps.sh`: refreshes the satellite views on /locations
@@ -113,14 +114,18 @@ back to a plain link if the media server ever drops the file.
 The home page plays Haleen's tracks. `tools/music.mjs` reads their Fountain
 publisher feed and each album feed and writes `js/music-data.js` (titles,
 lengths, covers and audio URLs). The audio is never copied here: it streams
-from Fountain, so plays and bandwidth count for the artist (nothing is fetched
-from there until somebody presses play). The album covers are copied into
-`img/music/` by `tools/covers.mjs`. Re-run the tool
+The audio is served from this site: `tools/audio.mjs` downloads the lossless
+WAV from Fountain (about 40 MB a track), re-encodes it to AAC at 112 kbps and
+writes `files/music/*.m4a`, about 220 MB for the 64 tracks. The Fountain url
+stays in the data file under `fountain`, and the home page still points people
+at the artist's Fountain page, which is where a play counts for them. The album
+covers are copied into `img/music/` by `tools/covers.mjs`. Re-run the tools
 after they release something:
 
 ```bash
 node tools/music.mjs
 node tools/covers.mjs
+node tools/audio.mjs
 ```
 
 ## The flyer
@@ -310,8 +315,6 @@ What still goes out, and why:
 - **NOSTR relays**, once a page needs them (chat, forum, registration counters,
   messages). They see the IP of whoever opens those pages; that is what a relay
   is. `js/nostr-config.js` holds the list.
-- **Fountain**, when somebody presses play in the music player. The audio is
-  streamed from there on purpose, so the play counts for the artist.
 - **Blossom servers**, when somebody uploads a picture, and whatever server
   hosts a picture posted by somebody else. Those images are loaded with
   `referrerpolicy="no-referrer"`.
