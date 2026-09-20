@@ -255,6 +255,13 @@ nav a[aria-current] { color: var(--yellow); }
 .chat-cta p { margin: 0; max-width: 560px; color: #c3c5b9; font-size: 14px; }
 .chat-cta .big-link { margin-top: 0; }
 
+/* the crypto block sits between Register and Chat, so it takes the green of
+   the palette and leaves the teal to the chat below it */
+.crypto-cta .chat-cta-inner { border-color: var(--green); background: radial-gradient(circle at 92% 20%, #14361d, transparent 40%), linear-gradient(150deg, #0c1d13, #07100f 70%); }
+.crypto-cta h2 em { color: var(--green); }
+.crypto-cta .big-link { color: var(--green); border-color: var(--green); }
+.crypto-cta .big-link:hover { background: var(--green); color: var(--ink); }
+
 .share-cta { padding-block: 110px; border-top: 1px solid #34403a; }
 .share-cta-inner { display: grid; grid-template-columns: 1fr auto; gap: 30px 60px; align-items: center; padding: 45px 55px; border: 2px solid var(--yellow); background: radial-gradient(circle at 90% 20%, #3a2f14, transparent 40%), linear-gradient(150deg, #1b1a10, #07100f 70%); }
 .share-cta h2 { margin: 0 0 18px; font: 800 clamp(44px, 6vw, 80px)/.84 var(--display); text-transform: uppercase; letter-spacing: -.03em; }
