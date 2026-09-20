@@ -93,42 +93,6 @@
       <p class="form-error" id="login-error" role="alert"></p>
     </div>
 
-    <div class="side-card" id="me-card" hidden>
-      <div class="me-head">
-        <span class="avatar avatar-lg" id="me-avatar"></span>
-        <div>
-          <strong id="me-name"></strong>
-          <span class="callsign" id="me-callsign"></span>
-        </div>
-      </div>
-
-      <div class="backup" id="backup-box" hidden>
-        <strong>Save your key</strong>
-        <p>This account lives only in this browser. Copy your secret key somewhere safe, or you lose the account when the browser data is cleared. Never share it.</p>
-        <div class="key-row">
-          <code id="nsec-value">nsec hidden</code>
-          <button type="button" class="text-btn" id="nsec-reveal">Show</button>
-          <button type="button" class="text-btn" id="nsec-copy">Copy</button>
-        </div>
-      </div>
-
-      <form id="name-form" class="stack">
-        <label for="me-name-input">Display name</label>
-        <div class="inline-row">
-          <input id="me-name-input" type="text" maxlength="32" autocomplete="nickname">
-          <button type="submit" class="small-btn">Save</button>
-        </div>
-      </form>
-
-      <div class="key-row">
-        <span class="hint">Public key</span>
-        <code id="npub-value"></code>
-        <button type="button" class="text-btn" id="npub-copy">Copy</button>
-      </div>
-
-      <button type="button" class="text-btn logout" id="btn-logout">Log out</button>
-      <p class="form-error" id="me-error" role="alert"></p>
-    </div>
 
       <div class="side-card" id="me-card" hidden>
         <div class="me-head">
@@ -146,6 +110,19 @@
             <code id="nsec-value">nsec hidden</code>
             <button type="button" class="text-btn" id="nsec-reveal">Show</button>
             <button type="button" class="text-btn" id="nsec-copy">Copy</button>
+          </div>
+        </div>
+
+        <div class="avatar-row">
+          <span class="avatar avatar-lg" id="avatar-preview"></span>
+          <div class="avatar-actions">
+            <span class="hint">Your NOSTR profile picture, the same one other NOSTR apps show.</span>
+            <div class="inline-row">
+              <button type="button" class="small-btn" id="avatar-button">Upload a picture</button>
+              <button type="button" class="text-btn" id="avatar-remove" hidden>Remove</button>
+            </div>
+            <input id="avatar-input" type="file" accept="image/*" hidden>
+            <p class="avatar-status" id="avatar-status" role="status"></p>
           </div>
         </div>
 
@@ -197,6 +174,7 @@
   <script src="/js/identity-ui.js"></script>
   <script src="/js/dm.js"></script>
   <script src="/js/account-bar.js"></script>
+  <script src="/js/avatar.js"></script>
   <script src="/js/login-page.js"></script>
 </body>
 </html>

@@ -25,6 +25,15 @@
 .account-grid .side-card { margin: 0; }
 .go-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 18px; }
 
+.avatar-row { display: flex; gap: 14px; align-items: flex-start; margin: 4px 0 20px; }
+.avatar-row .avatar-lg { width: 64px; height: 64px; font-size: 22px; flex: none; }
+.avatar-actions { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.avatar-actions .inline-row { align-items: center; }
+.avatar-actions .small-btn { padding: 7px 14px; }
+.avatar-status { margin: 0; min-height: 1em; font-size: 11px; color: #8a938b; }
+.avatar-status.ok { color: var(--green); }
+.avatar-status.bad { color: var(--orange); }
+
 /* messages */
 .dm-shell {
   display: grid; grid-template-columns: 320px minmax(0, 1fr);

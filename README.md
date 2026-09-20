@@ -58,6 +58,17 @@ link to it, so there is one place to learn how accounts work.
 
 A page can send someone to `/login?next=/chat` to bring them back afterwards.
 
+### Profile picture
+
+The picture is the standard `picture` field of the NOSTR profile (kind 0), not
+a site-specific avatar: one set in Amethyst, Damus or anywhere else shows here
+unchanged. `/login` can also upload one. The site is static, so the file goes
+to public Blossom media servers (blossom.band, blossom.primal.net,
+nostr.download), addressed by its sha256 and authorised with a kind 24242 event
+signed by the visitor. The browser crops it square, scales it to 512px and
+re-encodes it as WebP first, so nothing large or with camera metadata is sent.
+Only the resulting URL is written to the profile.
+
 ## Messages
 
 `/messages` is one to one messaging, encrypted with NIP-17: the chat message
