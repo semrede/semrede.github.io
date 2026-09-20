@@ -1,0 +1,143 @@
+<!doctype html>
+<!-- Source of the 2026 flyer. Render it with: node tools/flyer.mjs -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,900&family=Kalam:wght@700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #030706; --paper: #eee7d1; --orange: #ff4b1f; --yellow: #ffd23f;
+    --teal: #11d8d0; --green: #72d34b;
+    --display: "Barlow Condensed", Impact, sans-serif; --mono: "Space Mono", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    width: 1240px; height: 1754px; padding: 54px 58px 44px;
+    background: radial-gradient(circle at 50% 0%, #0e1c1a 0, transparent 34rem),
+                radial-gradient(circle at 90% 88%, #22061a 0, transparent 30rem), #020403;
+    color: var(--paper); font-family: var(--mono); display: flex; flex-direction: column; gap: 22px;
+  }
+  .top { display: flex; align-items: center; gap: 20px; }
+  .top img { width: 96px; height: 96px; }
+  .word {
+    font: italic 900 108px/1 var(--display); letter-spacing: -.04em;
+    background: linear-gradient(180deg, #ff5a1f 0 38%, #ff8a1f 38% 55%, #ffc629 55% 72%, #ffe04a 72% 80%, #11d8d0 80% 86%, transparent 86% 89%, #1597c9 89%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(4px 4px 0 #0b3d4a);
+  }
+  .corner { margin-left: auto; text-align: right; font-size: 15px; letter-spacing: .2em; text-transform: uppercase; line-height: 1.5; color: var(--paper); }
+  .hero img { width: 100%; height: 330px; object-fit: cover; display: block;
+    mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 82%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 82%, transparent); }
+  .tagline { font: 700 58px/1.05 "Kalam", cursive; color: var(--yellow); text-align: center; transform: rotate(-1.5deg); }
+  .when { text-align: center; }
+  .when strong { display: block; font: 800 74px/1 var(--display); text-transform: uppercase; color: var(--orange); letter-spacing: .01em; }
+  .when span { display: block; margin-top: 6px; font-size: 17px; letter-spacing: .3em; text-transform: uppercase; color: var(--yellow); }
+  .venues { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .venue { border: 2px solid var(--teal); background: linear-gradient(160deg, #0b1d1b, #07100f 70%); overflow: hidden; }
+  .venue.city { border-color: var(--orange); }
+  .venue img { width: 100%; height: 150px; object-fit: cover; display: block; border-bottom: 2px solid var(--teal); }
+  .venue.city img { border-bottom-color: var(--orange); }
+  .venue-body { padding: 16px 20px 20px; }
+  .venue-when { font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--yellow); font-weight: 700; }
+  .venue h2 { margin: 8px 0 4px; font: italic 900 40px/.95 var(--display); text-transform: uppercase; color: var(--teal); }
+  .venue.city h2 { color: var(--orange); }
+  .venue p { font-size: 14px; line-height: 1.5; color: #c3c5b9; }
+  .venue .addr { margin-top: 8px; color: var(--paper); font-size: 13px; }
+  .themes { display: flex; justify-content: space-between; gap: 10px; padding: 18px 0; border-top: 1px solid #34403a; border-bottom: 1px solid #34403a; }
+  .theme { text-align: center; flex: 1; }
+  .theme svg { width: 44px; height: 44px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .theme span { display: block; margin-top: 6px; font: 700 15px var(--display); letter-spacing: .06em; text-transform: uppercase; }
+  .c-yellow { color: var(--yellow); } .c-teal { color: var(--teal); } .c-green { color: var(--green); } .c-orange { color: var(--orange); }
+  .middle { display: grid; grid-template-columns: 1.15fr 1fr; gap: 24px; margin-top: 4px; }
+  .mid-block h3 { font: 800 30px/1 var(--display); text-transform: uppercase; color: var(--paper); margin-bottom: 12px; }
+  .mid-block ul { margin: 0; padding-left: 18px; }
+  .mid-block li { font-size: 15px; line-height: 1.8; color: #c3c5b9; }
+  .mid-block p { font-size: 15px; line-height: 1.6; color: #c3c5b9; }
+  .mid-block.music { border-left: 2px solid var(--green); padding-left: 22px; }
+  .mid-block .artist { font: 800 44px/1 var(--display); text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+  .mid-block .small { margin-top: 10px; font-size: 13px; color: #8a938b; }
+
+  .foot { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+  .foot .free { font: 800 46px/1 var(--display); text-transform: uppercase; color: var(--yellow); }
+  .foot .free small { display: block; margin-top: 8px; font: 400 15px/1.5 var(--mono); text-transform: none; color: #c3c5b9; letter-spacing: 0; max-width: 520px; }
+  .site { text-align: right; }
+  .site strong { display: block; font: 800 52px/1 var(--display); color: var(--paper); letter-spacing: -.01em; }
+  .site span { display: block; margin-top: 8px; font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: var(--teal); }
+</style>
+</head>
+<body>
+  <div class="top">
+    <img src="/img/logo-mark.png" alt="">
+    <div class="word">SemRede</div>
+    <div class="corner">Offgrid communications<br>Communities &amp; people</div>
+  </div>
+
+  <div class="hero"><img src="/img/hero-landscape.jpg" alt=""></div>
+
+  <div class="tagline">Offgrid Communications, Communities &amp; People</div>
+
+  <div class="when">
+    <strong>October 26 to 31, 2026</strong>
+    <span>Coimbra / Portugal</span>
+  </div>
+
+  <div class="venues">
+    <div class="venue">
+      <img src="/img/eva-farm.jpg" alt="">
+      <div class="venue-body">
+        <div class="venue-when">Monday to Friday / Oct 26 to 30</div>
+        <h2>Eva Farm</h2>
+        <p>Five days of hands-on sessions, talks, meals and camping on a working farm.</p>
+        <p class="addr">Estacao de Vale de Acor, MetroBus line S1 from Coimbra-B</p>
+      </div>
+    </div>
+    <div class="venue city">
+      <img src="/img/embaixada.jpg" alt="">
+      <div class="venue-body">
+        <div class="venue-when">Saturday / Oct 31</div>
+        <h2>Edificio Embaixada</h2>
+        <p>One open day in the centre: talks, demos, community fair and celebration.</p>
+        <p class="addr">Largo da Freiria 4, Coimbra</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="themes">
+    <div class="theme c-yellow"><svg viewBox="0 0 48 48"><path d="M24 20L16 44M24 20l8 24M19 36h10M21.5 28h5M21.5 28l6.5 8M19 36l11 8"/><circle cx="24" cy="17" r="2.5"/><path d="M17 12a10 10 0 0 1 14 0M12 7a17 17 0 0 1 24 0"/></svg><span>Offgrid comms</span></div>
+    <div class="theme c-green"><svg viewBox="0 0 48 48"><path d="M24 44V24"/><path d="M24 26C24 14 32 8 43 8c0 12-8 18-19 18z"/><path d="M24 30C24 20 17 15 7 15c0 10 7 15 17 15z"/></svg><span>Sustainable living</span></div>
+    <div class="theme c-orange"><svg viewBox="0 0 48 48"><path d="M24 7c4 5 6.5 8 6.5 11.5A6.5 6.5 0 0 1 24 25a6.5 6.5 0 0 1-6.5-6.5C17.5 15 20 12 24 7z"/><path d="M11 34l26-6M11 28l26 6"/><circle cx="7" cy="23" r="2.6"/><circle cx="41" cy="23" r="2.6"/><circle cx="12" cy="42" r="2.6"/><circle cx="36" cy="42" r="2.6"/></svg><span>Communities</span></div>
+    <div class="theme c-teal"><svg viewBox="0 0 48 48"><rect x="8" y="10" width="32" height="22" rx="2"/><path d="M3 38h42"/><circle cx="24" cy="21" r="4"/><path d="M24 14v3M24 25v3M17 21h3M28 21h3"/></svg><span>Workshops</span></div>
+    <div class="theme c-yellow"><svg viewBox="0 0 48 48"><path d="M24 10L10 38h28z"/><path d="M20 38l4-8 4 8"/><path d="M5 30l3-8 3 8zM37 30l3-8 3 8zM8 30v8M40 30v8"/></svg><span>People</span></div>
+  </div>
+
+  <div class="middle">
+    <div class="mid-block">
+      <h3>What happens</h3>
+      <ul>
+        <li>Workshops and talks, hands on, all week</li>
+        <li>Radio, mesh and antennas in the field</li>
+        <li>Solar, batteries, water and growing food</li>
+        <li>Projects on show, with stands and demos</li>
+        <li>Meals, camping and evenings together</li>
+      </ul>
+    </div>
+    <div class="mid-block music">
+      <h3>Live music</h3>
+      <p class="artist">Haleen</p>
+      <p>A Belgian couple living off-grid in Portugal. Hypnotic, uplifting, made to be heard under an open sky.</p>
+      <p class="small">Listen on semrede.com before you come.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="free">Free entry
+      <small>Registration keeps the food, the space and the workshops in line with how many people come. Register, ask questions in the chat and the forum, or propose your project for a stand.</small>
+    </div>
+    <div class="site">
+      <strong>semrede.com</strong>
+      <span>Register / Chat / Forum</span>
+    </div>
+  </div>
+</body>
+</html>

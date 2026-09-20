@@ -14,7 +14,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `js/blossom.js`: picture uploads to public media servers
 - `js/music-data.js`, `js/music.js`: the Haleen player on the home page
 - `tools/music.mjs`: rebuilds the track list from the Fountain feeds
-- `flyer-drafts/flyer.html`, `tools/flyer.mjs`: the printable flyer and its renderer
+- `flyer/flyer.html`, `tools/flyer.mjs`: the printable flyer and its renderer
 - `tools/maps.sh`: refreshes the satellite views on /locations
 - `registration/index.html`, `js/registration.js`, `js/rsvp-count.js`, `css/registration.css`: registration and the counters, at /registration
 - `locations/index.html`, `css/locations.css`: the venues and travel info, at /locations
@@ -98,13 +98,13 @@ node tools/music.mjs
 
 ## The flyer
 
-`flyer-drafts/flyer.html` is the source of the printable flyer, using the same
+`flyer/flyer.html` is the source of the printable flyer, using the same
 fonts and artwork as the site. Render it with a local server and a headless
 browser on the CDP port:
 
 ```bash
 python3 -m http.server 8782 &
-node tools/flyer.mjs http://localhost:8782/flyer-drafts/flyer.html flyer-drafts/semrede-2026-flyer.png
+node tools/flyer.mjs http://localhost:8782/flyer/flyer.html flyer-drafts/semrede-2026-flyer.png
 ```
 
 The result is A4 at 150dpi. Older flyers stay where they are; nothing is
