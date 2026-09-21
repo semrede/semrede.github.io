@@ -318,6 +318,15 @@ node nostr-admin.mjs list
 node nostr-admin.mjs sync <channel id> # copy the room onto every relay in the list
 ```
 
+### Following the newest message
+
+The room follows the bottom until somebody scrolls up, and starts following
+again as soon as they come back down. Two things make that work: renders
+collapse into one animation frame, so the request to stick has to survive the
+collapse, and a `ResizeObserver` on the message list re-pins when a picture or
+an avatar finishes loading and makes the list taller. Loading older messages
+sets the flag aside while it restores the previous position.
+
 ### Likes and quotes
 
 A message can be liked (NIP-25: kind 7 with `+`, tagging the message and its

@@ -35,17 +35,54 @@
     return c.scrollHeight - c.scrollTop - c.clientHeight < 120;
   }
 
+  // ---------- keeping the newest message in sight ----------
+  //
+  // The room follows the bottom until somebody scrolls up, and goes back to
+  // following as soon as they scroll down again. Pictures and avatars arrive
+  // after the message they belong to, so the list is watched for growth as
+  // well: without that, the view ends up a few hundred pixels short of the
+  // newest message every time an image finishes loading.
+
+  var stuck = true;         // is the view following the newest message
+  var restoring = false;    // "load older" is putting the old position back
+
+  function pin() {
+    els.messages.scrollTop = els.messages.scrollHeight;
+  }
+
+  els.messages.addEventListener('scroll', function () {
+    if (restoring) return;
+    stuck = isNearBottom();
+  }, { passive: true });
+
+  if (window.ResizeObserver && els.list) {
+    new ResizeObserver(function () {
+      if (stuck && !restoring) pin();
+    }).observe(els.list);
+  }
+
   // ---------- rendering ----------
 
   var renderQueued = false;
+  var renderStick = false;
   function queueRender(stickToBottom) {
+    // Renders collapse into one frame, so the request to stick has to survive
+    // the collapse; otherwise a message sent while another render is queued
+    // scrolls nowhere.
+    renderStick = renderStick || stickToBottom || stuck;
     if (renderQueued) return;
     renderQueued = true;
-    var wasNearBottom = isNearBottom();
     requestAnimationFrame(function () {
       renderQueued = false;
+      var goToBottom = renderStick;
+      renderStick = false;
       render();
-      if (stickToBottom || wasNearBottom) els.messages.scrollTop = els.messages.scrollHeight;
+      if (goToBottom) {
+        stuck = true;
+        pin();
+        // once more after layout, for anything that changed size in between
+        requestAnimationFrame(pin);
+      }
     });
   }
 
@@ -426,9 +463,12 @@
       .then(function (events) {
         var added = 0;
         events.forEach(function (ev) { if (!messages.has(ev.id) && isRoomMessage(ev)) { added++; } addMessage(ev); });
+        restoring = true;
         requestAnimationFrame(function () {
           render();
           els.messages.scrollTop = els.messages.scrollHeight - before;
+          stuck = false;
+          requestAnimationFrame(function () { restoring = false; });
         });
         els.older.disabled = false;
         els.older.textContent = 'Load older messages';
