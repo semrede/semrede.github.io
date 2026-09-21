@@ -21,6 +21,7 @@
   var OFF_KEY = 'semrede_stats_off';
   var SEEN_KEY = 'semrede_stats_seen';
   var SID_KEY = 'semrede_stats_sid';
+  var OUTBOX_KEY = 'semrede_stats_outbox';
   var BUNDLE = '/js/vendor/nostr.bundle.js';
 
   // A local run is for testing the page, not for counting.
@@ -114,6 +115,7 @@
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
       visibleSince = Date.now();
+      flushOutbox();
     } else {
       if (visibleSince) visibleMs += Date.now() - visibleSince;
       visibleSince = 0;
@@ -121,10 +123,16 @@
     }
   });
 
-  // ---- the library, fetched when the page is otherwise idle ----
+  // ---- the library and the socket, both got ready while the page is idle ----
+  //
+  // The socket has to be connected BEFORE somebody leaves. Opening one during
+  // pagehide is a handshake against a page that is being torn down, and it
+  // almost never finishes, which is how most beacons used to get lost.
 
   var tools = null;
   var loading = false;
+  var socket = null;
+  var relayIndex = 0;
 
   function loadTools(done) {
     if (window.NostrTools) { tools = window.NostrTools; return done(); }
@@ -138,10 +146,70 @@
     document.head.appendChild(script);
   }
 
+  function connect() {
+    var relays = cfg.STATS.RELAYS || [];
+    if (socket || relayIndex >= relays.length) return;
+    var url = relays[relayIndex++];
+    try { socket = new WebSocket(url); } catch (e) { socket = null; return connect(); }
+    socket.addEventListener('open', function () { flushOutbox(); });
+    socket.addEventListener('close', function () { socket = null; });
+    socket.addEventListener('error', function () {
+      socket = null;
+      connect();               // the second relay, if the first will not have us
+    });
+  }
+
   var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 2000); };
   window.addEventListener('load', function () {
-    idle(function () { loadTools(function () {}); });
+    idle(function () { loadTools(connect); });
   });
+
+  // ---- the outbox ----
+  //
+  // A beacon that could not be pushed is kept here and goes out with the next
+  // page view. Re-sending is harmless: an event id is a hash of the event, so
+  // the relay drops the duplicate and the aggregator counts it once.
+
+  function readOutbox() {
+    var raw = stored(OUTBOX_KEY);
+    if (!raw) return [];
+    var list;
+    try { list = JSON.parse(raw); } catch (e) { return []; }
+    if (!Array.isArray(list)) return [];
+    var cutoff = Date.now() - 48 * 3600 * 1000;
+    return list.filter(function (row) {
+      return row && row.event && row.at > cutoff && (row.tries || 0) < 3;
+    }).slice(-5);
+  }
+
+  function writeOutbox(list) {
+    if (!list.length) {
+      try { localStorage.removeItem(OUTBOX_KEY); } catch (e) {}
+      return;
+    }
+    remember(OUTBOX_KEY, JSON.stringify(list.slice(-5)));
+  }
+
+  function queue(event) {
+    var list = readOutbox();
+    if (list.some(function (row) { return row.event && row.event.id === event.id; })) return;
+    list.push({ event: event, at: Date.now(), tries: 0 });
+    writeOutbox(list);
+  }
+
+  function flushOutbox() {
+    if (!socket || socket.readyState !== 1) return;
+    var list = readOutbox();
+    if (!list.length) return;
+    var left = [];
+    list.forEach(function (row) {
+      if (!push(row.event)) {
+        row.tries = (row.tries || 0) + 1;
+        left.push(row);
+      }
+    });
+    writeOutbox(left);
+  }
 
   // ---- sending ----
 
@@ -172,29 +240,19 @@
 
     sent = true;
     remember(SEEN_KEY, today);
-    publish(event);
+    if (!push(event)) queue(event);
   }
 
-  // One socket, one frame, no waiting for an answer: the page is going away.
-  function publish(event) {
-    var relays = cfg.STATS.RELAYS || [];
-    var frame = JSON.stringify(['EVENT', event]);
-    var index = 0;
-
-    (function attempt() {
-      if (index >= relays.length) return;
-      var url = relays[index++];
-      var socket;
-      try { socket = new WebSocket(url); } catch (e) { return attempt(); }
-      var done = false;
-      socket.addEventListener('open', function () {
-        try { socket.send(frame); } catch (e) { /* gone */ }
-        setTimeout(function () { try { socket.close(); } catch (e) {} }, 1500);
-        done = true;
-      });
-      socket.addEventListener('error', function () { if (!done) attempt(); });
-      setTimeout(function () { if (!done) { try { socket.close(); } catch (e) {} attempt(); } }, 4000);
-    })();
+  // One frame down the socket that is already open. No waiting for the answer:
+  // the page is going away, and the outbox covers what does not land.
+  function push(event) {
+    if (!socket || socket.readyState !== 1) return false;
+    try {
+      socket.send(JSON.stringify(['EVENT', event]));
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   window.addEventListener('pagehide', send);

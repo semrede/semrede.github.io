@@ -38,6 +38,8 @@
 .chart-legend .key-visits::before { background: var(--yellow); }
 
 .bucket-title { margin-top: 0; }
+.stats-fresh { margin-bottom: 4px; }
+.stats-fresh.stale { color: var(--orange); }
 
 @media (max-width: 800px) {
   .count-row { grid-template-columns: 1fr; }

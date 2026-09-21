@@ -6,8 +6,8 @@
  *   node tools/stats.mjs paths               the page list matches the repo
  *   node tools/stats.mjs fetch [--since N]   read beacons, keep them locally
  *   node tools/stats.mjs show [day]          print a day
- *   node tools/stats.mjs publish [day]       send the day to the moderators
- *   node tools/stats.mjs run                 fetch, then publish yesterday
+ *   node tools/stats.mjs publish [day]       send a day to the moderators
+ *   node tools/stats.mjs run [--days N]      fetch, then publish the last days
  *
  * A beacon is an ordinary NIP-78 event (kind 30078) signed by a key the
  * browser throws away immediately, p-tagged to the stats key, with its content
@@ -84,6 +84,16 @@ function loadKey() {
 
 function dayOf(seconds) {
   return new Date(seconds * 1000).toISOString().slice(0, 10);
+}
+
+function today() {
+  return dayOf(Date.now() / 1000);
+}
+
+function daysBack(n) {
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(dayOf(Date.now() / 1000 - i * 86400));
+  return out;
 }
 
 function readCache(day) {
@@ -292,7 +302,7 @@ function aggregate(day) {
 }
 
 function cmdShow(day) {
-  const which = day || dayOf(Date.now() / 1000 - 86400);
+  const which = day || today();
   const a = aggregate(which);
   console.log('\n' + a.day + '   ' + a.views + ' page views, ' + a.visits + ' visits (' + a.firstTime + ' first time here)');
   console.log('from ' + a.beacons + ' beacons' + (a.capped ? ', ' + a.capped + ' capped' : '') + (a.ungrouped ? ', ' + a.ungrouped + ' could not be grouped' : ''));
@@ -306,7 +316,7 @@ function cmdShow(day) {
 }
 
 async function cmdPublish(day) {
-  const which = day || dayOf(Date.now() / 1000 - 86400);
+  const which = day || today();
   const sk = loadKey();
   const data = aggregate(which);
   if (!data.beacons) { console.log('nothing cached for ' + which); return; }
@@ -375,7 +385,15 @@ async function main() {
   if (cmd === 'show') return cmdShow(arg);
   if (cmd === 'publish') return cmdPublish(arg);
   if (cmd === 'verify') return cmdVerify(arg);
-  if (cmd === 'run') { await cmdFetch(2); return cmdPublish(); }
+  if (cmd === 'run') {
+    const days = process.argv.includes('--days') ? Number(process.argv[process.argv.indexOf('--days') + 1]) || 2 : 2;
+    await cmdFetch(days);
+    // Today first, so the card moves during the day, then the days before it,
+    // which closes out yesterday after midnight and fills in a machine that
+    // was switched off.
+    for (const day of daysBack(days)) await cmdPublish(day);
+    return;
+  }
   console.log('usage: node tools/stats.mjs key | probe [n] | selftest | paths | fetch [--since N] | show [day] | publish [day] | verify <file> | run');
 }
 

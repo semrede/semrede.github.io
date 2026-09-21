@@ -115,10 +115,10 @@
         <div class="loc-meta">Counting</div>
         <h2>What we count</h2>
         <p>We count page views, so we know whether any of this is being read. When you leave a page, your browser sends one small message: which page, which site you arrived from (the domain only, never the link), your browser's language, whether your screen is phone, tablet or desktop sized, whether you had been here before, and roughly how long you stayed.</p>
-        <p>It is encrypted before it leaves your browser and signed with a key that is thrown away on the spot, so nobody, not even the relay carrying it, can tell that two of these came from the same person. There is no cookie, no account, and nothing that outlives the tab you have open.</p>
+        <p>It is encrypted before it leaves your browser and signed with a key that is thrown away on the spot, so nobody, not even the relay carrying it, can tell that two of these came from the same person. There is no cookie, no account, and nothing that outlives the tab you have open. If it cannot be sent at that moment, it waits in your browser and goes out with the next page you open, or it is dropped after two days.</p>
         <ul>
           <li>We never look at your address, and we never fingerprint your browser: no canvas, no fonts, no hardware. The relay does see your address, because that is what a relay is, the same as the chat and the forum.</li>
-          <li>Only the organizers and the moderation team can read the numbers, and they only ever see daily totals.</li>
+          <li>Only the organizers and the moderation team can read the numbers, and they only ever see daily totals. The counting runs on GitHub every hour, so GitHub holds that key too.</li>
           <li>Once sent, it cannot be taken back: the key that signed it is gone, so it stays on the relays, unreadable, for good.</li>
           <li><strong>/login, /messages and /admin are never counted.</strong> What you do with your own account is nobody's business.</li>
         </ul>

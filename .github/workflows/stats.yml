@@ -1,0 +1,68 @@
+# Reads the visit beacons off the relays every hour, aggregates a day and sends
+# the numbers to the admin and to every moderator.
+#
+# This needs the stats key, which lives here as the secret SEMREDE_STATS_NSEC.
+# That is a real trade: GitHub can decrypt every beacon this site has ever
+# received. It is written down on /privacy and in the README, and the key is
+# worth rotating whenever the people with repository access change.
+#
+# There is no pull_request trigger on purpose: a fork must never be able to run
+# with this secret.
+name: visit statistics
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: semrede-stats
+  cancel-in-progress: false
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install the tools
+        working-directory: tools
+        run: npm ci --omit=dev || npm install --no-audit --no-fund
+
+      # The raw beacons are kept between runs, so a relay dropping them is not
+      # the same as losing a day.
+      - name: Restore the beacon cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.config/semrede/stats
+          key: semrede-stats-${{ github.run_id }}
+          restore-keys: semrede-stats-
+
+      - name: Write the stats key
+        env:
+          SEMREDE_STATS_NSEC: ${{ secrets.SEMREDE_STATS_NSEC }}
+        run: |
+          set +x
+          if [ -z "$SEMREDE_STATS_NSEC" ]; then
+            echo "SEMREDE_STATS_NSEC is not set; nothing to do."
+            exit 1
+          fi
+          mkdir -p ~/.config/semrede
+          chmod 700 ~/.config/semrede
+          printf '%s\n' "$SEMREDE_STATS_NSEC" > ~/.config/semrede/nostr-stats.nsec
+          chmod 600 ~/.config/semrede/nostr-stats.nsec
+
+      - name: Count and publish
+        run: node tools/stats.mjs run --days 3
+
+      - name: Forget the key
+        if: always()
+        run: rm -f ~/.config/semrede/nostr-stats.nsec

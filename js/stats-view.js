@@ -27,6 +27,7 @@
   var days = new Map();     // 'YYYY-MM-DD' -> {at, data}
   var watching = false;
   var current = null;       // the bucket key being shown below the chart
+  var picked = false;       // true once somebody chose a bucket themselves
   var grain = 'day';        // day | week | month | year
 
   // A page opened by a test can hand the card a set of days, so the chart can
@@ -155,7 +156,7 @@
       label.textContent = bucketLabel(point.key, grain);
 
       column.append(bars, label);
-      column.addEventListener('click', function () { current = point.key; render(); });
+      column.addEventListener('click', function () { current = point.key; picked = true; render(); });
       plot.appendChild(column);
     });
 
@@ -184,6 +185,7 @@
       button.addEventListener('click', function () {
         grain = pair[0];
         current = null;
+        picked = false;
         render();
       });
       row.appendChild(button);
@@ -264,7 +266,9 @@
     }
 
     var points = series(grain);
-    if (!current || !points.some(function (p) { return p.key === current; })) {
+    // Follow the newest bucket until somebody picks one, so a day arriving
+    // mid-session does not leave the card sitting on yesterday.
+    if (!picked || !current || !points.some(function (p) { return p.key === current; })) {
       current = points.length ? points[points.length - 1].key : null;
     }
 
@@ -293,6 +297,25 @@
       var block = table(pair[0], pair[1]);
       if (block) els.body.appendChild(block);
     });
+
+    var newestDay = points[points.length - 1];
+    var newest = days.get(grain === 'day' ? (newestDay && newestDay.key) : Array.from(days.keys()).sort().pop());
+    if (newest && newest.at) {
+      var when = new Date(newest.at * 1000);
+      var age = Date.now() / 1000 - newest.at;
+      var freshness = document.createElement('p');
+      freshness.className = 'muted-note stats-fresh';
+      var stamp = when.toLocaleTimeString(document.documentElement.lang === 'pt' ? 'pt-PT' : 'en-GB',
+        { hour: '2-digit', minute: '2-digit' });
+      if (age > 90 * 60) {
+        freshness.classList.add('stale');
+        freshness.textContent = 'These numbers stopped arriving at ' + stamp +
+          ' on ' + when.toISOString().slice(0, 10) + '. The hourly count is not running.';
+      } else {
+        freshness.textContent = 'Updated at ' + stamp + '.';
+      }
+      els.body.appendChild(freshness);
+    }
 
     var note = document.createElement('p');
     note.className = 'muted-note';

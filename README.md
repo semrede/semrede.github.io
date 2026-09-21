@@ -431,7 +431,11 @@ in this, and it is not written down.
 
 The site has no logs, so the numbers come from the visitors' own browsers.
 
-`js/stats.js` sends one event per page view: kind 30078 (NIP-78 app data) with
+`js/stats.js` opens the relay socket while the page is idle, because opening one
+while a tab is closing almost never finishes, and that was losing most beacons.
+A beacon that still cannot be pushed waits in `semrede_stats_outbox` and goes
+out with the next page view. It sends one event per page view: kind 30078
+(NIP-78 app data) with
 `d = semrede-visit`, signed by a key generated and discarded on the spot,
 p-tagged to the stats key in `js/nostr-config.js`, with its content NIP-44
 encrypted to that key. Only `tools/stats.mjs`, holding
@@ -456,8 +460,28 @@ node tools/stats.mjs paths               # every page is in the schema
 node tools/stats.mjs fetch --since 2     # read beacons into ~/.config/semrede/stats
 node tools/stats.mjs show 2026-09-20     # print a day
 node tools/stats.mjs publish 2026-09-20  # send the day to admin + moderators
+node tools/stats.mjs run --days 3        # fetch, then publish the last days
 node tools/stats.mjs verify beacon.json  # prove only the stats key can read it
 ```
+
+### It runs by itself
+
+`.github/workflows/stats.yml` runs `stats.mjs run --days 3` every hour. The raw
+beacons are kept in the Actions cache between runs, so a relay dropping an event
+is not the same as losing a day, and publishing the same day again simply
+replaces the previous aggregate.
+
+This needs the stats key as the repository secret `SEMREDE_STATS_NSEC`, and that
+is a real cost, written down here and on `/privacy`: **GitHub can decrypt every
+beacon the site has ever received.** There is no `pull_request` trigger, so a
+fork cannot reach the secret, and the workflow never prints it. Rotate the key
+whenever the people with repository access change: `stats.mjs key` on a clean
+machine, new pubkey into `js/nostr-config.js`, new nsec into the secret, old
+nsec kept locally for the old cache.
+
+Without the workflow, nothing publishes and the card silently shows the last day
+it ever received. That is why `/stats` says when the numbers were last updated,
+and warns when they stopped arriving.
 
 `publish` writes one kind 30078 per reader, `d = semrede-stats-<day>-<reader>`,
 encrypted to that reader; `/admin` reads them with `authors: [stats key]`, which
