@@ -485,7 +485,13 @@ node tools/stats.mjs verify beacon.json  # prove only the stats key can read it
 
 ### It runs by itself
 
-`.github/workflows/stats.yml` runs `stats.mjs run --days 3` every hour. The raw
+Two mechanisms, because one of them cannot be trusted alone.
+
+**A timer on the organizer's machine** (`tools/systemd/`, see the README there)
+runs `stats.mjs run --days 3` every hour while the machine is on, and catches
+up after it was asleep. This is the one that actually keeps the card moving.
+
+**`.github/workflows/stats.yml`** runs the same command every hour. The raw
 beacons are kept in the Actions cache between runs, so a relay dropping an event
 is not the same as losing a day, and publishing the same day again simply
 replaces the previous aggregate.
@@ -498,8 +504,14 @@ whenever the people with repository access change: `stats.mjs key` on a clean
 machine, new pubkey into `js/nostr-config.js`, new nsec into the secret, old
 nsec kept locally for the old cache.
 
-Without the workflow, nothing publishes and the card silently shows the last day
-it ever received. That is why `/stats` says when the numbers were last updated,
+GitHub's scheduler is not dependable: on this repository it delivered **no**
+scheduled run at all in six hours (`event=schedule` count: zero) while the same
+workflow ran fine on `workflow_dispatch`. That is why the local timer exists.
+Running both is harmless, because an aggregate is an addressable event and
+publishing a day again replaces it.
+
+Without something running, nothing publishes and the card silently shows the
+last day it ever received. That is why `/stats` says when the numbers were last updated,
 and warns when they stopped arriving.
 
 `publish` writes one kind 30078 per reader, `d = semrede-stats-<day>-<reader>`,

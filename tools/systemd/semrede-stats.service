@@ -1,0 +1,13 @@
+# Counts the visit beacons and sends the day to the admin and the moderators.
+# Installed copy lives in ~/.config/systemd/user/. See tools/systemd/README.md.
+[Unit]
+Description=SemRede visit statistics
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/code/2026/semrede
+ExecStart=%h/.nvm/versions/node/v24.11.0/bin/node tools/stats.mjs run --days 3
+# The relays are not always reachable; a failed run is not worth a red light,
+# the next hour picks the beacons up again.
+SuccessExitStatus=0 1
