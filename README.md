@@ -318,6 +318,18 @@ node nostr-admin.mjs list
 node nostr-admin.mjs sync <channel id> # copy the room onto every relay in the list
 ```
 
+### Likes and quotes
+
+A message can be liked (NIP-25: kind 7 with `+`, tagging the message and its
+author) and quoted. Liking again publishes a kind 5 that takes it back, the same
+way the forum's upvote works. Reactions are asked for in batches of 50 message
+ids as messages arrive, and likes from hidden accounts are not counted.
+
+Quoting uses the NIP-28 reply tags rather than a `nostr:` link: the answer
+carries `['e', channel, relay, 'root']` and `['e', quoted, relay, 'reply']` plus
+a `p` tag for the author, so other NOSTR clients thread it correctly. The quoted
+message is drawn above the answer and clicking it scrolls back to the original.
+
 ### Moderating the chat
 
 A moderator sees two links under every message somebody else wrote: **Hide this

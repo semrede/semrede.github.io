@@ -87,6 +87,7 @@
     var own = auth.pubkey === ev.pubkey;
     var row = document.createElement('article');
     row.className = 'msg' + (own ? ' own' : '') + (grouped ? ' grouped' : '');
+    row.dataset.id = ev.id;
     row.style.setProperty('--who', net.colorFor(ev.pubkey));
 
     var avatar = document.createElement('span');
@@ -112,10 +113,15 @@
       meta.append(name, cs, t);
       bubble.appendChild(meta);
     }
+    var quoted = quotedId(ev);
+    if (quoted) bubble.appendChild(quoteNode(quoted));
+
     var text = document.createElement('div');
     text.className = 'text';
     net.renderText(text, ev.content);
     bubble.appendChild(text);
+
+    bubble.appendChild(reactions(ev));
 
     var state = pending.get(ev.id);
     if (state) {
@@ -137,6 +143,36 @@
     if (mod && mod.isModerator(auth.pubkey) && !own) bubble.appendChild(modTools(ev));
 
     row.appendChild(bubble);
+    return row;
+  }
+
+  function reactions(ev) {
+    var row = document.createElement('div');
+    row.className = 'msg-actions';
+
+    var count = likeCount(ev.id);
+    var like = document.createElement('button');
+    like.type = 'button';
+    like.className = 'like-btn' + (myLike(ev.id) ? ' liked' : '');
+    like.title = auth.pubkey ? 'Like this message' : 'Log in to like';
+    like.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">' +
+      '<path d="M12 20s-7-4.6-7-9.3A4 4 0 0 1 12 7a4 4 0 0 1 7 3.7C19 15.4 12 20 12 20z" ' +
+      'fill="currentColor" fill-opacity="var(--heart-fill, 0)" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+    var n = document.createElement('span');
+    n.className = 'like-count';
+    n.textContent = count ? String(count) : '';
+    like.appendChild(n);
+    like.addEventListener('click', function () { toggleLike(ev); });
+    row.appendChild(like);
+
+    if (auth.pubkey) {
+      var quote = document.createElement('button');
+      quote.type = 'button';
+      quote.className = 'quote-btn';
+      quote.textContent = 'Quote';
+      quote.addEventListener('click', function () { setReplyTo(ev); });
+      row.appendChild(quote);
+    }
     return row;
   }
 
@@ -187,6 +223,165 @@
 
   // ---------- relay traffic ----------
 
+  // ---------- likes (NIP-25) and quoting (NIP-28 replies) ----------
+
+  var likes = new Map();        // message id -> Map(pubkey -> reaction id)
+  var deletedLikes = new Set();
+  var watchedLikes = new Set();
+  var likeTimer = null;
+  var replyTo = null;           // the message being answered, if any
+
+  function addReaction(ev) {
+    if (ev.kind === 5) {
+      ev.tags.forEach(function (t) {
+        if (t[0] !== 'e') return;
+        deletedLikes.add(t[1]);
+        likes.forEach(function (map, id) {
+          map.forEach(function (reactionId, pubkey) { if (reactionId === t[1]) map.delete(pubkey); });
+        });
+      });
+      queueRender(false);
+      return;
+    }
+    if (ev.kind !== 7 || deletedLikes.has(ev.id)) return;
+    // "+" is the NIP-25 like; a bare heart or thumb means the same thing.
+    if (['+', '', '\u2764', '\ud83d\udc4d'].indexOf(ev.content) === -1) return;
+    var target = ev.tags.filter(function (t) { return t[0] === 'e'; }).pop();
+    if (!target || !messages.has(target[1])) return;
+    var map = likes.get(target[1]);
+    if (!map) { map = new Map(); likes.set(target[1], map); }
+    if (map.get(ev.pubkey) === ev.id) return;
+    map.set(ev.pubkey, ev.id);
+    net.requestProfile(ev.pubkey);
+    queueRender(false);
+  }
+
+  function likeCount(id) {
+    var map = likes.get(id);
+    if (!map) return 0;
+    var n = 0;
+    map.forEach(function (_, pubkey) { if (!net.isMuted(pubkey)) n++; });
+    return n;
+  }
+
+  function myLike(id) {
+    var map = likes.get(id);
+    return (map && auth.pubkey && map.get(auth.pubkey)) || null;
+  }
+
+  // Reactions are asked for in batches, as messages arrive.
+  function watchLikes() {
+    clearTimeout(likeTimer);
+    likeTimer = setTimeout(function () {
+      var ids = [];
+      messages.forEach(function (ev, id) { if (!watchedLikes.has(id)) { watchedLikes.add(id); ids.push(id); } });
+      if (!ids.length) return;
+      for (var i = 0; i < ids.length; i += 50) {
+        pool.subscribeMany(RELAYS, { kinds: [7, 5], '#e': ids.slice(i, i + 50) }, { onevent: addReaction });
+      }
+    }, 400);
+  }
+
+  function toggleLike(ev) {
+    if (!auth.pubkey) { showError('Log in to like a message.', 'bad'); return; }
+    var existing = myLike(ev.id);
+    if (existing) {
+      var map = likes.get(ev.id);
+      if (map) map.delete(auth.pubkey);
+      queueRender(false);
+      auth.signEvent({ kind: 5, created_at: Math.floor(Date.now() / 1000), tags: [['e', existing], ['k', '7']], content: 'like removed' })
+        .then(function (signed) { deletedLikes.add(existing); return net.publish(signed); })
+        .catch(function (err) { showError((err && err.message) || 'Could not take the like back', 'bad'); });
+      return;
+    }
+    auth.signEvent({
+      kind: 7,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [['e', ev.id, RELAYS[0]], ['p', ev.pubkey], ['k', String(ev.kind)]],
+      content: '+'
+    }).then(function (signed) {
+      addReaction(signed);
+      return net.publish(signed).then(function (ok) {
+        if (!ok) throw new Error('No relay accepted the like');
+      });
+    }).catch(function (err) {
+      var map = likes.get(ev.id);
+      if (map && auth.pubkey) map.delete(auth.pubkey);
+      queueRender(false);
+      showError((err && err.message) || 'Could not like the message', 'bad');
+    });
+  }
+
+  function quotedId(ev) {
+    var reply = ev.tags.filter(function (t) { return t[0] === 'e' && t[3] === 'reply'; })[0];
+    if (reply) return reply[1];
+    // Older clients tag the answered message without marking it.
+    var others = ev.tags.filter(function (t) { return t[0] === 'e' && t[1] !== CHANNEL_ID; });
+    return others.length ? others[others.length - 1][1] : null;
+  }
+
+  function setReplyTo(ev) {
+    replyTo = ev;
+    drawReplyBar();
+    if (els.input) els.input.focus();
+  }
+
+  function drawReplyBar() {
+    var bar = document.getElementById('reply-bar');
+    if (!replyTo || !auth.pubkey) {
+      if (bar) bar.remove();
+      return;
+    }
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'reply-bar';
+      bar.className = 'reply-bar';
+      els.composer.parentNode.insertBefore(bar, els.composer);
+    }
+    bar.textContent = '';
+    var who = document.createElement('strong');
+    who.textContent = net.displayName(replyTo.pubkey);
+    var text = document.createElement('span');
+    text.className = 'reply-bar-text';
+    text.textContent = replyTo.content.replace(/\s+/g, ' ').slice(0, 90);
+    var cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'text-btn';
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', function () { replyTo = null; drawReplyBar(); });
+    bar.append(who, text, cancel);
+  }
+
+  // The message being answered, drawn above the answer.
+  function quoteNode(id) {
+    var quoted = messages.get(id);
+    var box = document.createElement('div');
+    box.className = 'quote';
+    if (!quoted) {
+      box.classList.add('missing');
+      box.textContent = 'A message that is not loaded here';
+      return box;
+    }
+    if (net.isMuted(quoted.pubkey) || (mod && mod.isHidden(quoted.id))) {
+      box.classList.add('missing');
+      box.textContent = 'A hidden message';
+      return box;
+    }
+    var who = document.createElement('strong');
+    who.textContent = net.displayName(quoted.pubkey);
+    var text = document.createElement('span');
+    text.textContent = quoted.content.replace(/\s+/g, ' ').slice(0, 140);
+    box.append(who, text);
+    box.addEventListener('click', function () {
+      var target = els.messages.querySelector('[data-id="' + id + '"]');
+      if (!target) return;
+      target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      target.classList.add('flash');
+      setTimeout(function () { target.classList.remove('flash'); }, 1200);
+    });
+    return box;
+  }
+
   function isRoomMessage(ev) {
     if (ev.kind !== 42 || typeof ev.content !== 'string' || !ev.content.trim()) return false;
     if (ev.content.length > MAX_LENGTH * 2) return false;
@@ -199,6 +394,7 @@
     messages.set(ev.id, ev);
     if (oldestSeen === null || ev.created_at < oldestSeen) oldestSeen = ev.created_at;
     net.requestProfile(ev.pubkey);
+    watchLikes();
     queueRender(ev.pubkey === auth.pubkey);
   }
 
@@ -262,14 +458,21 @@
     if (content.length > MAX_LENGTH) return;
     sending = true;
     els.send.disabled = true;
+    var tags = [['e', CHANNEL_ID, RELAYS[0], 'root']];
+    if (replyTo) {
+      tags.push(['e', replyTo.id, RELAYS[0], 'reply']);
+      tags.push(['p', replyTo.pubkey]);
+    }
     auth.signEvent({
       kind: 42,
       created_at: Math.floor(Date.now() / 1000),
-      tags: [['e', CHANNEL_ID, RELAYS[0], 'root']],
+      tags: tags,
       content: content
     }).then(function (ev) {
       if (!NT.verifyEvent(ev)) throw new Error('Signature check failed');
       els.input.value = '';
+      replyTo = null;
+      drawReplyBar();
       autosize();
       return publishSigned(ev);
     }).catch(function (err) {
@@ -286,6 +489,7 @@
     var loggedIn = !!auth.pubkey;
     els.composer.hidden = !loggedIn;
     els.locked.hidden = loggedIn;
+    if (!loggedIn) { replyTo = null; drawReplyBar(); }
     queueRender(true);
   }
 

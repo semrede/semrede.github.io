@@ -75,6 +75,26 @@
 
 /* .avatar and [hidden] live in css/account.css, which every page loads. */
 
+/* likes and quotes */
+.msg-actions { display: flex; align-items: center; gap: 12px; margin-top: 7px; }
+.like-btn { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: #6f7a72; cursor: pointer; font: 700 11px var(--mono); }
+.like-btn:hover { color: var(--orange); }
+.like-btn.liked { color: var(--orange); --heart-fill: 1; }
+.like-btn svg { display: block; }
+.like-count { min-width: 6px; }
+.quote-btn { padding: 0; border: 0; background: none; color: #6f7a72; cursor: pointer; font: 700 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.quote-btn:hover { color: var(--yellow); }
+
+.quote { display: flex; flex-direction: column; gap: 2px; margin-bottom: 7px; padding: 6px 10px; border-left: 3px solid var(--teal); background: #0c1a19; cursor: pointer; font-size: 12px; color: #9ea59e; }
+.quote strong { color: var(--paper); font: 700 11px var(--mono); }
+.quote.missing { color: #6f7a72; font-style: italic; cursor: default; }
+.msg.own .quote { border-left-color: var(--yellow); }
+.msg.flash .bubble { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+.reply-bar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-top: 1px solid #1f3a37; background: #0b1817; font-size: 12px; color: #9ea59e; }
+.reply-bar strong { flex: none; color: var(--teal); font: 700 11px var(--mono); }
+.reply-bar-text { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .chat-status { margin: 0; padding: 6px 14px; min-height: 1em; font-size: 11px; color: #8a938b; }
 .chat-status.ok { color: var(--green); }
 .chat-status.bad { color: var(--orange); }
