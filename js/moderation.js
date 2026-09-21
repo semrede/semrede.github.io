@@ -6,9 +6,13 @@
  *
  * Mute lists are the standard kind 10000 of each moderator, merged.
  *
- * Pinned and closed threads: kind 30078 (app data) with d = semrede-forum-state,
- * one per moderator, merged. A thread is pinned or closed when any moderator
- * says so. Removing it from your own list only undoes your own decision.
+ * Pinned and closed threads, and hidden messages: kind 30078 (app data) with
+ * d = semrede-forum-state, one per moderator, merged. A thread is pinned,
+ * closed or a message hidden when any moderator says so. Removing it from your
+ * own list only undoes your own decision.
+ *
+ * Hiding is not deleting: the event stays on the relays and other NOSTR apps
+ * still show it. This site does not.
  */
 (function () {
   'use strict';
@@ -23,9 +27,10 @@
 
   var moderators = [cfg.ADMIN_PUBKEY];
   var modListAt = 0;
-  var states = new Map();      // pubkey -> {at, pinned:Set, closed:Set}
+  var states = new Map();      // pubkey -> {at, pinned:Set, closed:Set, hidden:Set}
   var pinned = new Set();
   var closed = new Set();
+  var hidden = new Set();
   var listeners = [];
   var watching = false;
 
@@ -46,10 +51,12 @@
   function recompute() {
     pinned = new Set();
     closed = new Set();
+    hidden = new Set();
     states.forEach(function (state, pubkey) {
       if (!isModerator(pubkey)) return;    // a demoted moderator stops counting
       state.pinned.forEach(function (id) { pinned.add(id); });
       state.closed.forEach(function (id) { closed.add(id); });
+      state.hidden.forEach(function (id) { hidden.add(id); });
     });
     emit();
   }
@@ -74,7 +81,8 @@
     states.set(ev.pubkey, {
       at: ev.created_at,
       pinned: new Set(Array.isArray(data.pinned) ? data.pinned : []),
-      closed: new Set(Array.isArray(data.closed) ? data.closed : [])
+      closed: new Set(Array.isArray(data.closed) ? data.closed : []),
+      hidden: new Set(Array.isArray(data.hidden) ? data.hidden : [])
     });
     recompute();
   }
@@ -105,7 +113,8 @@
     var mine = auth.pubkey && states.get(auth.pubkey);
     return {
       pinned: new Set(mine ? mine.pinned : []),
-      closed: new Set(mine ? mine.closed : [])
+      closed: new Set(mine ? mine.closed : []),
+      hidden: new Set(mine ? mine.hidden : [])
     };
   }
 
@@ -114,7 +123,11 @@
       kind: STATE_KIND,
       created_at: Math.floor(Date.now() / 1000),
       tags: [['d', STATE_D]],
-      content: JSON.stringify({ pinned: Array.from(state.pinned), closed: Array.from(state.closed) })
+      content: JSON.stringify({
+        pinned: Array.from(state.pinned),
+        closed: Array.from(state.closed),
+        hidden: Array.from(state.hidden)
+      })
     }).then(function (ev) {
       applyState(ev);
       return net.publish(ev);
@@ -130,6 +143,14 @@
   function setClosed(threadId, on) {
     var state = myState();
     if (on) state.closed.add(threadId); else state.closed.delete(threadId);
+    return publishState(state);
+  }
+
+  // One message, hidden everywhere on this site. The event itself stays on the
+  // relays; we cannot delete somebody else's post and do not pretend to.
+  function setHidden(eventId, on) {
+    var state = myState();
+    if (on) state.hidden.add(eventId); else state.hidden.delete(eventId);
     return publishState(state);
   }
 
@@ -171,6 +192,9 @@
     pinnedIds: function () { return Array.from(pinned); },
     closedIds: function () { return Array.from(closed); },
     isClosed: function (id) { return closed.has(id); },
+    isHidden: function (id) { return hidden.has(id); },
+    hiddenIds: function () { return Array.from(hidden); },
+    setHidden: setHidden,
     setPinned: setPinned,
     setClosed: setClosed,
     setMuted: setMuted,

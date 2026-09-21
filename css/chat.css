@@ -75,6 +75,12 @@
 
 /* .avatar and [hidden] live in css/account.css, which every page loads. */
 
+.msg-mod { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; padding-top: 7px; border-top: 1px dashed #24413d; }
+.msg-mod .text-btn { font-size: 10px; letter-spacing: .1em; color: #8a938b; }
+.msg-mod .text-btn:hover { color: var(--yellow); }
+.msg-mod .text-btn.danger:hover { color: var(--orange); }
+.msg-mod .text-btn[disabled] { opacity: .5; cursor: default; }
+
 /* ---- composer ---- */
 .composer { display: flex; align-items: flex-end; gap: 10px; padding: 12px 14px; border-top: 1px solid #1f3a37; background: #07100f; }
 .composer textarea {

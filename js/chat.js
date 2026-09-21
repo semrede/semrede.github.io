@@ -7,6 +7,7 @@
   'use strict';
 
   var NT = window.NostrTools;
+  var mod = window.SemRedeMod;
   var net = window.SemRedeNet;
   var auth = window.SemRedeNostr;
   var pool = net.pool;
@@ -50,7 +51,7 @@
 
   function render() {
     var list = Array.from(messages.values())
-      .filter(function (e) { return !net.isMuted(e.pubkey); })
+      .filter(function (e) { return !net.isMuted(e.pubkey) && !(mod && mod.isHidden(e.id)); })
       .sort(function (a, b) { return a.created_at - b.created_at || (a.id < b.id ? -1 : 1); });
 
     var frag = document.createDocumentFragment();
@@ -133,8 +134,47 @@
       }
       bubble.appendChild(s);
     }
+    if (mod && mod.isModerator(auth.pubkey) && !own) bubble.appendChild(modTools(ev));
+
     row.appendChild(bubble);
     return row;
+  }
+
+  // Hiding a message takes it off this site; hiding an account does the same
+  // for everything that account ever writes here. Neither deletes anything
+  // from the relays, and the wording says so.
+  function modTools(ev) {
+    var box = document.createElement('div');
+    box.className = 'msg-mod';
+
+    var hide = document.createElement('button');
+    hide.type = 'button';
+    hide.className = 'text-btn';
+    hide.textContent = 'Hide this message';
+    hide.addEventListener('click', function () {
+      hide.disabled = true;
+      mod.setHidden(ev.id, true).then(function () { queueRender(false); }, function () {
+        hide.disabled = false;
+        showError('Could not hide the message');
+      });
+    });
+
+    var ban = document.createElement('button');
+    ban.type = 'button';
+    ban.className = 'text-btn danger';
+    ban.textContent = 'Hide this account';
+    ban.addEventListener('click', function () {
+      var who = net.displayName(ev.pubkey) + ' (' + auth.deriveCallsign(ev.pubkey) + ')';
+      if (!window.confirm('Hide everything from ' + who + ' on this site? Their posts stay on the relays and other NOSTR apps still show them.')) return;
+      ban.disabled = true;
+      mod.setMuted(ev.pubkey, true).then(function () { queueRender(false); }, function () {
+        ban.disabled = false;
+        showError('Could not hide the account');
+      });
+    });
+
+    box.append(hide, ban);
+    return box;
   }
 
   // ---------- relay traffic ----------
@@ -167,7 +207,9 @@
       onevent: addMessage,
       oneose: markLoaded
     });
+    // The admin's mute list and every moderator's, once the team is known.
     net.watchMuteList();
+    if (mod) mod.watch();
   }
 
   function loadOlder() {
@@ -302,6 +344,7 @@
     auth.ready.then(onLoginChange);
     net.onProfile(function () { queueRender(false); });
     net.onMuteChange(function () { queueRender(false); });
+    if (mod) mod.onChange(function () { queueRender(false); });
   }
 
   // ---------- start ----------

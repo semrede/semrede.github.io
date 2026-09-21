@@ -104,7 +104,7 @@
   }
 
   function isHidden(ev) {
-    return deleted.has(ev.id) || net.isMuted(ev.pubkey);
+    return deleted.has(ev.id) || mod.isHidden(ev.id) || net.isMuted(ev.pubkey);
   }
 
   function voteCount(id) {

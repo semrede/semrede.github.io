@@ -296,6 +296,10 @@ window.SemRedeDict.pt = {
     'Write a message, in any language': 'Escreve uma mensagem, em qualquer língua',
     'Message': 'Mensagem',
     'Add a picture': 'Adicionar uma imagem',
+    'Hide this message': 'Esconder esta mensagem',
+    'Hide this account': 'Esconder esta conta',
+    'Could not hide the message': 'Não foi possível esconder a mensagem',
+    'Could not hide the account': 'Não foi possível esconder a conta',
     'Uploading the picture...': 'A enviar a imagem...',
     'Upload failed': 'O envio falhou',
     'Could not sign the message': 'Não foi possível assinar a mensagem',
@@ -687,6 +691,8 @@ window.SemRedeDict.pt = {
     ['week of (\\d{4}-\\d{2}-\\d{2})', 'semana de $1'],
     ['(X1[A-Z0-9]+) / extension', '$1 / extensão'],
     ['(X1[A-Z0-9]+) / this browser', '$1 / este browser'],
+    ['Hide everything from (.*) on this site\\? Their posts stay on the relays and other NOSTR apps still show them\\.',
+      'Esconder tudo de $1 neste site? O que escreveu continua nos relays e outras aplicações NOSTR continuam a mostrá-lo.'],
     ['You: (.*)', 'Tu: $1'],
     ['Reply to (.*)', 'Responder a $1']
   ]

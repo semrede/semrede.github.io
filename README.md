@@ -318,6 +318,21 @@ node nostr-admin.mjs list
 node nostr-admin.mjs sync <channel id> # copy the room onto every relay in the list
 ```
 
+### Moderating the chat
+
+A moderator sees two links under every message somebody else wrote: **Hide this
+message** and **Hide this account**. Hiding a message adds its id to that
+moderator's `semrede-forum-state` (kind 30078), which every page merges, so the
+message disappears from the chat and the forum for everybody. Hiding an account
+is the ordinary kind 10000 mute list, the same one `/admin` writes.
+
+Neither deletes anything: the events stay on the relays and other NOSTR apps
+keep showing them. The buttons say so, and so does the confirmation.
+
+`js/moderation.js` is loaded on every page that carries the NOSTR bundle, not
+only `/admin` and `/forum`, so a moderator is recognised wherever they are and
+the header link follows them.
+
 Importing the admin nsec into Amethyst, Damus or an extension works too: the
 mute list of that account is what the site reads.
 
