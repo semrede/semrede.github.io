@@ -20,7 +20,9 @@ class QuietWebSocket extends WebSocket {
 }
 useWebSocketImplementation(QuietWebSocket);
 
-const RELAYS = ['wss://relay.primal.net', 'wss://relay.damus.io', 'wss://relay.snort.social', 'wss://nostr-pub.wellorder.net', 'wss://purplerelay.com', 'wss://relay.piazza.today'];
+// Same list, same order, as js/nostr-config.js; primal is last because it
+// serves back almost nothing it accepts.
+const RELAYS = ['wss://relay.damus.io', 'wss://relay.snort.social', 'wss://nostr-pub.wellorder.net', 'wss://purplerelay.com', 'wss://relay.piazza.today', 'wss://relay.primal.net'];
 const KEY_FILE = path.join(os.homedir(), '.config', 'semrede', 'nostr-admin.nsec');
 const SITE = 'https://semrede.com';
 

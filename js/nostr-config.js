@@ -2,15 +2,19 @@
  * The relay list is also in tools/nostr-admin.mjs and both must be changed together.
  * These relays were picked because they accept events from keys they have never
  * seen; many popular relays do not, which would silence anyone who signs up here.
+ *
+ * Order matters: the code that only asks a few relays takes them from the top.
+ * relay.primal.net is last because it accepts events and then serves almost
+ * none of them back, which is what made the registration counter read zero.
  */
 window.SemRedeConfig = {
   RELAYS: [
-    'wss://relay.primal.net',
     'wss://relay.damus.io',
     'wss://relay.snort.social',
     'wss://nostr-pub.wellorder.net',
     'wss://purplerelay.com',
-    'wss://relay.piazza.today'
+    'wss://relay.piazza.today',
+    'wss://relay.primal.net'
   ],
 
   // Admin identity: its NIP-51 mute list (kind 10000) hides accounts on this site.
