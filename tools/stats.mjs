@@ -82,6 +82,14 @@ function loadKey() {
   return nip19.decode(nsec).data;
 }
 
+// Beacons are addressed to the admin key now; the ones sent before that went to
+// the stats key. Both live on this machine, so a run can read either.
+function loadAdminKey() {
+  const file = path.join(CONFIG_DIR, 'nostr-admin.nsec');
+  if (!fs.existsSync(file)) return null;
+  return nip19.decode(fs.readFileSync(file, 'utf8').trim()).data;
+}
+
 function dayOf(seconds) {
   return new Date(seconds * 1000).toISOString().slice(0, 10);
 }
@@ -204,10 +212,17 @@ async function cmdProbe(count) {
 
 async function cmdFetch(sinceDays) {
   const sk = loadKey();
+  const adminSk = loadAdminKey();
+  const targets = [];
+  if (adminSk) targets.push({ pubkey: cfg.ADMIN_PUBKEY, sk: adminSk });
+  if (cfg.STATS.LEGACY_PUBKEY) targets.push({ pubkey: cfg.STATS.LEGACY_PUBKEY, sk: sk });
+  if (!targets.length) throw new Error('no key to read beacons with');
   const since = Math.floor(Date.now() / 1000) - (Number(sinceDays) || 2) * 86400;
   console.log('reading beacons addressed to the stats key...');
-  const events = await pool.querySync(STATS_RELAYS,
-    { kinds: [S.RUMOR_KIND], '#p': [STATS_PUBKEY], since, limit: 5000 }, { maxWait: 10000 });
+  const relays = STATS_RELAYS.concat(cfg.RELAYS).filter((u, i, all) => all.indexOf(u) === i);
+  const wanted = targets.map(t => t.pubkey);
+  const events = await pool.querySync(relays,
+    { kinds: [S.RUMOR_KIND], '#p': wanted, '#d': [S.BEACON_D], since, limit: 5000 }, { maxWait: 10000 });
   console.log('got ' + events.length + ' events');
 
   const dropped = {};
@@ -220,7 +235,8 @@ async function cmdFetch(sinceDays) {
     if (ev.kind !== S.RUMOR_KIND || !verifyEvent(ev)) { drop('bad signature'); continue; }
     if ((ev.tags.find(t => t[0] === 'd') || [])[1] !== S.BEACON_D) { drop('not a beacon'); continue; }
     const ps = ev.tags.filter(t => t[0] === 'p');
-    if (ps.length !== 1 || ps[0][1] !== STATS_PUBKEY) { drop('not for us'); continue; }
+    const target = ps.length === 1 && targets.filter(t => t.pubkey === ps[0][1])[0];
+    if (!target) { drop('not for us'); continue; }
     // An honest browser uses its key once and throws it away.
     if (authors.has(ev.pubkey)) { drop('key reused'); continue; }
     authors.add(ev.pubkey);
@@ -229,7 +245,7 @@ async function cmdFetch(sinceDays) {
 
     let payload = null;
     try {
-      payload = S.validate(JSON.parse(nip44.decrypt(ev.content, nip44.getConversationKey(sk, ev.pubkey))));
+      payload = S.validate(JSON.parse(nip44.decrypt(ev.content, nip44.getConversationKey(target.sk, ev.pubkey))));
     } catch (e) { payload = null; }
     if (!payload) { drop('will not decrypt or not a valid payload'); continue; }
 
@@ -243,62 +259,10 @@ async function cmdFetch(sinceDays) {
   if (Object.keys(dropped).length) console.log('dropped: ' + Object.entries(dropped).map(([k, v]) => k + ' ' + v).join(', '));
 }
 
-// Counting rules live here and are explained in the README: a visit is one
-// browser tab on one day, never "a person".
+// The counting rules live in js/stats-schema.js, so the browser and this tool
+// cannot disagree about what a visit is.
 function aggregate(day) {
-  const rows = readCache(day);
-  const perSid = {};
-  const kept = [];
-  let capped = 0;
-
-  for (const row of rows) {
-    const sid = row.p.sid;
-    perSid[sid] = perSid[sid] || { views: 0, paths: {} };
-    const seen = perSid[sid];
-    seen.paths[row.p.path] = (seen.paths[row.p.path] || 0) + 1;
-    if (seen.views >= 40 || seen.paths[row.p.path] > 10) { capped++; continue; }
-    seen.views++;
-    kept.push(row);
-  }
-
-  const count = (field) => kept.reduce((acc, r) => {
-    const key = r.p[field] === '' ? 'direct' : String(r.p[field]);
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {});
-
-  // Nothing with fewer than three page views is reported on its own: a single
-  // rare referrer or language would point at one person.
-  const kAnon = (table) => {
-    const out = {};
-    let folded = 0;
-    for (const [key, n] of Object.entries(table)) {
-      if (n >= 3) out[key] = n; else folded += n;
-    }
-    if (folded) out.other = (out.other || 0) + folded;
-    return out;
-  };
-
-  const sids = Object.keys(perSid);
-  const ungrouped = sids.filter(s => s[0] === 'v').length;
-  const firstTime = new Set(kept.filter(r => r.p.ret === 0).map(r => r.p.sid)).size;
-
-  return {
-    v: S.VERSION,
-    day: day,
-    views: kept.length,
-    visits: sids.length,
-    firstTime: firstTime,
-    engaged: kept.filter(r => r.p.eng === 1).length,
-    ungrouped: ungrouped,
-    capped: capped,
-    beacons: rows.length,
-    paths: count('path'),
-    refs: kAnon(count('ref')),
-    langs: kAnon(count('lang')),
-    screens: count('screen'),
-    secs: count('secs')
-  };
+  return S.aggregate(day, readCache(day));
 }
 
 function cmdShow(day) {

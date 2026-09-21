@@ -111,6 +111,75 @@
     ]
   };
 
+  // Turning beacons into a day's numbers. Both the browser (/stats) and
+  // tools/stats.mjs call this, so "a visit" means the same thing everywhere.
+  //
+  // rows are { id, at, p } where p is a validated payload.
+  S.aggregate = function (day, rows) {
+    var perSid = {};
+    var kept = [];
+    var capped = 0;
+
+    rows.forEach(function (row) {
+      var sid = row.p.sid;
+      perSid[sid] = perSid[sid] || { views: 0, paths: {} };
+      var seen = perSid[sid];
+      seen.paths[row.p.path] = (seen.paths[row.p.path] || 0) + 1;
+      // One browser tab cannot be 40 page views of the same page in a day, and
+      // anybody can send us made-up beacons.
+      if (seen.views >= 40 || seen.paths[row.p.path] > 10) { capped++; return; }
+      seen.views++;
+      kept.push(row);
+    });
+
+    function count(field) {
+      return kept.reduce(function (acc, r) {
+        var key = r.p[field] === '' ? 'direct' : String(r.p[field]);
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+    }
+
+    // Nothing with fewer than three page views is reported on its own: a single
+    // rare referrer or language would point at one person.
+    function kAnon(table) {
+      var out = {};
+      var folded = 0;
+      Object.keys(table).forEach(function (key) {
+        if (table[key] >= 3) out[key] = table[key]; else folded += table[key];
+      });
+      if (folded) out.other = (out.other || 0) + folded;
+      return out;
+    }
+
+    var sids = Object.keys(perSid);
+    var firstTime = {};
+    kept.forEach(function (r) { if (r.p.ret === 0) firstTime[r.p.sid] = 1; });
+
+    return {
+      v: S.VERSION,
+      day: day,
+      views: kept.length,
+      visits: sids.length,
+      firstTime: Object.keys(firstTime).length,
+      engaged: kept.filter(function (r) { return r.p.eng === 1; }).length,
+      ungrouped: sids.filter(function (sid) { return sid[0] === 'v'; }).length,
+      capped: capped,
+      beacons: rows.length,
+      paths: count('path'),
+      refs: kAnon(count('ref')),
+      langs: kAnon(count('lang')),
+      screens: count('screen'),
+      secs: count('secs')
+    };
+  };
+
+  // The UTC day an event belongs to. There is no date inside a beacon, so the
+  // event's own timestamp decides.
+  S.dayOf = function (seconds) {
+    return new Date(seconds * 1000).toISOString().slice(0, 10);
+  };
+
   root.SemRedeStatsSchema = S;
   if (typeof module !== 'undefined' && module.exports) module.exports = S;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

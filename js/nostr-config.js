@@ -49,16 +49,22 @@ window.SemRedeConfig = {
   ],
 
   // Visit statistics. A beacon is a kind 30078 event signed by a throwaway key,
-  // p-tagged to this key, with its content encrypted to it (NIP-44). Nobody
-  // else can read it, and two beacons cannot be tied to each other.
-  // The secret key lives at ~/.config/semrede/nostr-stats.nsec and is never in
-  // this repository; tools/stats.mjs is the only thing that can read beacons.
+  // p-tagged to the admin key, with its content encrypted to it (NIP-44).
+  // Nobody else can read one, and two beacons cannot be tied to each other.
+  //
+  // They are addressed to the admin key on purpose: /stats then decrypts and
+  // counts them in the organizer's own browser, so nothing has to be scheduled
+  // anywhere and no key is stored on any machine but theirs.
   STATS: {
     ENABLED: true,
-    PUBKEY: '196e42c6b67732a935e4c4f88dd0bce628d07dfbe0a616e5dbeba8e9f7a7be6b',
+    PUBKEY: 'a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3',
+    // Beacons sent before 2026-09-21 went to a separate stats key, whose nsec
+    // lives at ~/.config/semrede/nostr-stats.nsec. tools/stats.mjs still reads
+    // those; nothing new is addressed to it.
+    LEGACY_PUBKEY: '196e42c6b67732a935e4c4f88dd0bce628d07dfbe0a616e5dbeba8e9f7a7be6b',
     // Two relays, not all six: fewer people see a visitor's address, and the
     // beacons stay out of the way of the chat and the forum.
-    RELAYS: ['wss://nostr-pub.wellorder.net', 'wss://relay.primal.net'],
+    RELAYS: ['wss://nostr-pub.wellorder.net', 'wss://relay.damus.io'],
     SAMPLE: 1
   },
 

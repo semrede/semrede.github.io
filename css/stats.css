@@ -13,6 +13,9 @@
 .stat-row strong { text-align: right; font: 700 13px var(--mono); color: var(--yellow); }
 
 /* days / weeks / months / years */
+.stats-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+.stats-working { font-size: 11px; color: var(--yellow); }
+
 .grain-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .grain-btn {
   padding: 6px 12px; border: 1px solid #34403a; background: #0a1413; color: #8a938b;

@@ -483,52 +483,39 @@ node tools/stats.mjs run --days 3        # fetch, then publish the last days
 node tools/stats.mjs verify beacon.json  # prove only the stats key can read it
 ```
 
-### It runs by itself
+### Nothing is scheduled
 
-Two mechanisms, because one of them cannot be trusted alone.
+`/stats` does the counting. The beacons are encrypted to the **admin key**, so
+when an organizer opens the page their browser reads them off the relays,
+decrypts them in batches, counts them with `S.aggregate` from
+`js/stats-schema.js`, renders the numbers, and publishes each of the last three
+days to the admin and to every moderator. A moderator who is not the admin reads
+those published days and cannot read a single raw beacon.
 
-**A timer on the organizer's machine** (`tools/systemd/`, see the README there)
-runs `stats.mjs run --days 3` every hour while the machine is on, and catches
-up after it was asleep. This is the one that actually keeps the card moving.
+That means the numbers are as fresh as the last time an organizer opened the
+page, which the card says out loud. It also means there is no cron, no server,
+no always-on machine and no key stored anywhere but the organizer's own browser.
+GitHub Actions was tried first and never fired: zero scheduled runs repo-wide in
+six hours while the same workflow ran fine on demand.
 
-**`.github/workflows/stats.yml`** runs the same command every hour. The raw
-beacons are kept in the Actions cache between runs, so a relay dropping an event
-is not the same as losing a day, and publishing the same day again simply
-replaces the previous aggregate.
+Details that matter if this is ever touched again:
 
-This needs the stats key as the repository secret `SEMREDE_STATS_NSEC`, and that
-is a real cost, written down here and on `/privacy`: **GitHub can decrypt every
-beacon the site has ever received.** There is no `pull_request` trigger, so a
-fork cannot reach the secret, and the workflow never prints it. Rotate the key
-whenever the people with repository access change: `stats.mjs key` on a clean
-machine, new pubkey into `js/nostr-config.js`, new nsec into the secret, old
-nsec kept locally for the old cache.
-
-GitHub's scheduler is not dependable: on this repository it delivered **no**
-scheduled run at all in six hours (`event=schedule` count: zero) while the same
-workflow ran fine on `workflow_dispatch`. That is why the local timer exists.
-Running both is harmless, because an aggregate is an addressable event and
-publishing a day again replaces it.
-
-Without something running, nothing publishes and the card silently shows the
-last day it ever received. That is why `/stats` says when the numbers were last updated,
-and warns when they stopped arriving.
-
-`publish` writes one kind 30078 per reader, `d = semrede-stats-<day>-<reader>`,
-encrypted to that reader; `/admin` reads them with `authors: [stats key]`, which
-is also what stops anyone from forging a fake day. Re-running replaces rather
-than duplicating.
-
-The numbers live on their own page, `/stats`, linked from `/admin` and back.
-It is gated the same way the moderation desk is: the key has to be on the
-moderator list, and each day is encrypted to one reader anyway.
-
-The header shows an **Admin** link to moderators only. Because the marketing
-pages never load the relays, that is decided by a flag `js/moderation.js` leaves
-in this browser (`semrede_mod`, read by `js/session.js` into
-`<html data-mod="1">`). It is a convenience, not a gate: setting the flag by
-hand shows the link and nothing else, since the pages behind it still check the
-signed moderator list and cannot decrypt anything without the right key.
+- The read uses **its own `SimplePool`**. Asking the shared pool (the one
+  carrying the chat, messages and moderation subscriptions) for beacons returned
+  nothing on the relay those subscriptions live on, while a fresh connection to
+  the same relay returned them all.
+- Decrypted payloads are cached in `localStorage` per event id and pruned at 45
+  days, so a second visit only decrypts what is new. A visit decrypts at most
+  1500 beacons, in chunks of 25, because an extension signer answers one call at
+  a time.
+- A published day that is **bigger** than what this browser counted is kept: the
+  browser only sees thirty days, only what the relays still hold, and only what
+  it had time to decrypt.
+- Publishing is throttled through `localStorage` to one send per day per ten
+  minutes, so opening the page repeatedly does not spam the relays.
+- `tools/stats.mjs` still works and reads beacons addressed to **either** key,
+  the admin one and the older stats one, so a day can be rebuilt by hand:
+  `node tools/stats.mjs fetch --since 2 && node tools/stats.mjs publish <day>`.
 
 The chart draws page views and visits as bars, with the X axis switchable
 between days (last 30), weeks (26), months (24) and years. Clicking a bar picks
