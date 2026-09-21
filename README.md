@@ -318,6 +318,16 @@ node nostr-admin.mjs list
 node nostr-admin.mjs sync <channel id> # copy the room onto every relay in the list
 ```
 
+### Rendering without flicker
+
+The room is drawn by comparing what should be on screen with what already is.
+Every message and every day separator carries a key and a signature of
+everything visible about it (the name, the picture, the like count, whether it
+is grouped, whether a moderator is looking). A node whose signature has not
+changed is left untouched, so profiles and reactions trickling in no longer
+throw away every avatar and picture in the room. Twenty renders where nothing
+changed now touch zero nodes.
+
 ### Following the newest message
 
 The room follows the bottom until somebody scrolls up, and starts following

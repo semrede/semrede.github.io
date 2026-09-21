@@ -47,7 +47,9 @@
   var restoring = false;    // "load older" is putting the old position back
 
   function pin() {
-    els.messages.scrollTop = els.messages.scrollHeight;
+    var c = els.messages;
+    var bottom = c.scrollHeight - c.clientHeight;
+    if (Math.abs(c.scrollTop - bottom) > 1) c.scrollTop = bottom;
   }
 
   els.messages.addEventListener('scroll', function () {
@@ -86,32 +88,82 @@
     });
   }
 
+  // What a message looks like right now. If this has not changed, the node on
+  // screen is already correct and is left exactly as it is: rebuilding it is
+  // what made the room flicker, because every avatar and every picture was
+  // thrown away and fetched again on any incoming event.
+  function signature(ev, grouped) {
+    var profile = net.profiles.get(ev.pubkey);
+    var quoted = quotedId(ev);
+    return [
+      ev.id,
+      grouped ? 'g' : '',
+      pending.get(ev.id) || '',
+      likeCount(ev.id),
+      myLike(ev.id) ? 'mine' : '',
+      net.displayName(ev.pubkey),
+      (profile && profile.picture) || '',
+      quoted ? quoted + (messages.has(quoted) ? 'y' : 'n') : '',
+      (mod && mod.isModerator(auth.pubkey)) ? 'm' : '',
+      auth.pubkey === ev.pubkey ? 'own' : ''
+    ].join('|');
+  }
+
   function render() {
     var list = Array.from(messages.values())
       .filter(function (e) { return !net.isMuted(e.pubkey) && !(mod && mod.isHidden(e.id)); })
       .sort(function (a, b) { return a.created_at - b.created_at || (a.id < b.id ? -1 : 1); });
 
-    var frag = document.createDocumentFragment();
+    // What the list should hold, in order, each with a key and a way to tell
+    // whether the node already on screen is still right.
+    var wanted = [];
     var lastDay = null, prev = null;
     list.forEach(function (ev) {
       var day = new Date(ev.created_at * 1000).toDateString();
       if (day !== lastDay) {
-        var sep = document.createElement('div');
-        sep.className = 'day-sep';
-        var label = document.createElement('span');
-        label.textContent = net.dayLabel(ev.created_at);
-        sep.appendChild(label);
-        frag.appendChild(sep);
+        var label = net.dayLabel(ev.created_at);
+        wanted.push({
+          key: 'day:' + day,
+          sig: label,
+          make: function () {
+            var sep = document.createElement('div');
+            sep.className = 'day-sep';
+            var span = document.createElement('span');
+            span.textContent = label;
+            sep.appendChild(span);
+            return sep;
+          }
+        });
         lastDay = day;
         prev = null;
       }
-      var grouped = prev && prev.pubkey === ev.pubkey && ev.created_at - prev.created_at < GROUP_WINDOW;
-      frag.appendChild(messageNode(ev, grouped));
+      var grouped = !!(prev && prev.pubkey === ev.pubkey && ev.created_at - prev.created_at < GROUP_WINDOW);
+      wanted.push({
+        key: 'msg:' + ev.id,
+        sig: signature(ev, grouped),
+        make: function () { return messageNode(ev, grouped); }
+      });
       prev = ev;
     });
 
-    els.list.textContent = '';
-    els.list.appendChild(frag);
+    var existing = new Map();
+    Array.prototype.forEach.call(els.list.children, function (node) {
+      if (node.dataset.key) existing.set(node.dataset.key, node);
+    });
+
+    wanted.forEach(function (item, index) {
+      var node = existing.get(item.key);
+      if (!node || node.dataset.sig !== item.sig) {
+        node = item.make();
+        node.dataset.key = item.key;
+        node.dataset.sig = item.sig;
+      }
+      var atPosition = els.list.children[index];
+      if (atPosition !== node) els.list.insertBefore(node, atPosition || null);
+    });
+
+    while (els.list.children.length > wanted.length) els.list.removeChild(els.list.lastChild);
+
     if (list.length) {
       els.empty.hidden = true;
     } else if (initialLoaded) {
