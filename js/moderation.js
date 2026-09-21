@@ -118,6 +118,14 @@
     };
   }
 
+  // A relay read that never answers must not leave the button spinning.
+  function withTimeout(promise, ms, fallback) {
+    return Promise.race([
+      promise,
+      new Promise(function (resolve) { setTimeout(function () { resolve(fallback); }, ms); })
+    ]);
+  }
+
   function publishState(state) {
     return auth.signEvent({
       kind: STATE_KIND,
@@ -129,8 +137,11 @@
         hidden: Array.from(state.hidden)
       })
     }).then(function (ev) {
-      applyState(ev);
-      return net.publish(ev);
+      applyState(ev);            // it takes effect here whatever the relays do
+      return net.publish(ev).then(function (accepted) {
+        if (!accepted) throw new Error('No relay accepted it. It is hidden for you, but not for anybody else yet.');
+        return true;
+      });
     });
   }
 
@@ -157,7 +168,9 @@
   // The mute list is this moderator's own kind 10000; it hides the account
   // across the chat, the forum and the messages of everyone using this site.
   function setMuted(pubkey, on) {
-    return net.pool.get(net.RELAYS, { kinds: [10000], authors: [auth.pubkey] }, { maxWait: 4000 })
+    if (!auth.pubkey) return Promise.reject(new Error('Not logged in'));
+    return withTimeout(net.pool.get(net.RELAYS, { kinds: [10000], authors: [auth.pubkey] }, { maxWait: 4000 }), 5000, null)
+      .catch(function () { return null; })
       .then(function (ev) {
         var tags = (ev && ev.tags ? ev.tags : []).filter(function (t) { return !(t[0] === 'p' && t[1] === pubkey); });
         if (on) tags.push(['p', pubkey]);
@@ -165,7 +178,10 @@
       })
       .then(function (signed) {
         net.applyMuteEvent(signed);
-        return net.publish(signed);
+        return net.publish(signed).then(function (accepted) {
+          if (!accepted) throw new Error('No relay accepted it. It is hidden for you, but not for anybody else yet.');
+          return true;
+        });
       });
   }
 

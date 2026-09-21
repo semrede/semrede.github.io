@@ -75,6 +75,10 @@
 
 /* .avatar and [hidden] live in css/account.css, which every page loads. */
 
+.chat-status { margin: 0; padding: 6px 14px; min-height: 1em; font-size: 11px; color: #8a938b; }
+.chat-status.ok { color: var(--green); }
+.chat-status.bad { color: var(--orange); }
+
 .msg-mod { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; padding-top: 7px; border-top: 1px dashed #24413d; }
 .msg-mod .text-btn { font-size: 10px; letter-spacing: .1em; color: #8a938b; }
 .msg-mod .text-btn:hover { color: var(--yellow); }

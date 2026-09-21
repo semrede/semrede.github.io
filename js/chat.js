@@ -21,7 +21,7 @@
   var els = {
     messages: $('messages'), list: $('message-list'), empty: $('chat-empty'), older: $('load-older'),
     composer: $('composer'), input: $('chat-input'), send: $('send-btn'), locked: $('composer-locked'),
-    relayDots: $('relay-dots'), relayCount: $('relay-count'), error: $('me-error')
+    relayDots: $('relay-dots'), relayCount: $('relay-count'), error: null
   };
 
 
@@ -153,9 +153,13 @@
     hide.textContent = 'Hide this message';
     hide.addEventListener('click', function () {
       hide.disabled = true;
-      mod.setHidden(ev.id, true).then(function () { queueRender(false); }, function () {
+      showError('Hiding the message...');
+      mod.setHidden(ev.id, true).then(function () {
+        showError('Message hidden.', 'ok');
+        queueRender(false);
+      }, function (err) {
         hide.disabled = false;
-        showError('Could not hide the message');
+        showError((err && err.message) || 'Could not hide the message', 'bad');
       });
     });
 
@@ -167,9 +171,13 @@
       var who = net.displayName(ev.pubkey) + ' (' + auth.deriveCallsign(ev.pubkey) + ')';
       if (!window.confirm('Hide everything from ' + who + ' on this site? Their posts stay on the relays and other NOSTR apps still show them.')) return;
       ban.disabled = true;
-      mod.setMuted(ev.pubkey, true).then(function () { queueRender(false); }, function () {
+      showError('Hiding the account...');
+      mod.setMuted(ev.pubkey, true).then(function () {
+        showError('Account hidden.', 'ok');
+        queueRender(false);
+      }, function (err) {
         ban.disabled = false;
-        showError('Could not hide the account');
+        showError((err && err.message) || 'Could not hide the account', 'bad');
       });
     });
 
@@ -281,11 +289,28 @@
     queueRender(true);
   }
 
-  function showError(msg) {
-    if (!els.error) return;
-    els.error.textContent = msg;
-    clearTimeout(els.error._t);
-    els.error._t = setTimeout(function () { els.error.textContent = ''; }, 6000);
+  // The old target for this lived in the login card, which moved to /login, so
+  // every message in here was being thrown away. It now has its own line above
+  // the composer.
+  function statusLine() {
+    if (els.error && document.body.contains(els.error)) return els.error;
+    var line = document.createElement('p');
+    line.className = 'chat-status';
+    line.setAttribute('role', 'status');
+    var anchor = els.composer || els.messages;
+    if (!anchor || !anchor.parentNode) return null;
+    anchor.parentNode.insertBefore(line, anchor);
+    els.error = line;
+    return line;
+  }
+
+  function showError(msg, kind) {
+    var line = statusLine();
+    if (!line) return;
+    line.textContent = msg || '';
+    line.className = 'chat-status' + (kind ? ' ' + kind : '');
+    clearTimeout(line._t);
+    if (msg) line._t = setTimeout(function () { line.textContent = ''; }, 6000);
   }
 
   function autosize() {
