@@ -213,6 +213,8 @@ async function cmdProbe(count) {
 async function cmdFetch(sinceDays) {
   const sk = loadKey();
   const adminSk = loadAdminKey();
+  // Only the readers whose key is on this machine: the admin one, and the
+  // stats key that the first beacons were addressed to.
   const targets = [];
   if (adminSk) targets.push({ pubkey: cfg.ADMIN_PUBKEY, sk: adminSk });
   if (cfg.STATS.LEGACY_PUBKEY) targets.push({ pubkey: cfg.STATS.LEGACY_PUBKEY, sk: sk });

@@ -69,7 +69,7 @@
     net.pool.subscribeMany(net.RELAYS, {
       kinds: [S.RUMOR_KIND], authors: authors, '#p': [auth.pubkey], limit: 200
     }, { onevent: apply });
-    if (mod.isAdmin(auth.pubkey)) readBeacons();
+    if (canCount()) readBeacons();
   }
 
   // ---- the admin's browser does the counting ----
@@ -120,8 +120,14 @@
     return Object.keys(byDay);
   }
 
+  // Whoever is listed as a reader of the beacons can do the counting here.
+  function canCount() {
+    var readers = cfg.STATS.READERS || [cfg.STATS.PUBKEY];
+    return !!auth.pubkey && readers.indexOf(auth.pubkey) !== -1;
+  }
+
   function readBeacons() {
-    if (reading || !mod.isAdmin(auth.pubkey)) return;
+    if (reading || !canCount()) return;
     reading = true;
     status = 'Looking for beacons...';
     render();
@@ -188,7 +194,7 @@
   }
 
   function publishDays() {
-    if (!mod.isAdmin(auth.pubkey)) return;
+    if (!canCount()) return;
     var now = Date.now();
     var recipients = mod.moderators();
     var log = publishedLog();
@@ -325,10 +331,17 @@
     return wrap;
   }
 
+  function problem(text) {
+    var box = document.createElement('p');
+    box.className = 'muted-note stats-fresh stale';
+    box.textContent = text;
+    return box;
+  }
+
   function topBar() {
     var bar = document.createElement('div');
     bar.className = 'stats-bar';
-    if (mod.isAdmin(auth.pubkey)) {
+    if (canCount()) {
       var refresh = document.createElement('button');
       refresh.type = 'button';
       refresh.className = 'small-btn';
@@ -428,11 +441,24 @@
     els.body.textContent = '';
     if (!allowed) return;
 
+    // Numbers are encrypted. A signer that cannot decrypt has to say so, or the
+    // page looks empty and the reason is invisible.
+    if (auth.signerState === 'lost') {
+      els.body.appendChild(problem('Your NOSTR extension is not answering, so nothing here can be decrypted. Unlock it and reload, or log in with your key kept in this browser.'));
+      return;
+    }
+    if (!auth.canEncrypt()) {
+      els.body.appendChild(problem('This login cannot decrypt (the extension has no NIP-44 support), so the numbers cannot be read. Log in on /login with your key kept in this browser instead.'));
+      return;
+    }
+
     var all = Array.from(days.keys()).sort().reverse();
     if (!all.length) {
       var none = document.createElement('p');
       none.className = 'muted-note';
-      none.textContent = 'No numbers yet. They arrive once the organizers run the daily count.';
+      none.textContent = canCount()
+        ? 'No beacons found yet. They appear here as people read the site.'
+        : 'No numbers yet. They appear once somebody who can read the beacons opens this page.';
       els.body.appendChild(none);
       return;
     }

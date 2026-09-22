@@ -57,6 +57,14 @@ window.SemRedeConfig = {
   // anywhere and no key is stored on any machine but theirs.
   STATS: {
     ENABLED: true,
+    // Everyone who may count the visits. A beacon is sent once per reader, each
+    // copy encrypted to that reader, so whoever opens /stats can count them
+    // with their own key. Keep this short: it is one event per reader per page
+    // view.
+    READERS: [
+      'a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3',  // the admin key
+      'ba5115c37b0f911e530ed6c487ccbd9b737da33fd4b88a9f590860378c06af62'   // Max
+    ],
     PUBKEY: 'a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3',
     // Beacons sent before 2026-09-21 went to a separate stats key, whose nsec
     // lives at ~/.config/semrede/nostr-stats.nsec. tools/stats.mjs still reads

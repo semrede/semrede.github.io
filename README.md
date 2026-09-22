@@ -485,8 +485,10 @@ node tools/stats.mjs verify beacon.json  # prove only the stats key can read it
 
 ### Nothing is scheduled
 
-`/stats` does the counting. The beacons are encrypted to the **admin key**, so
-when an organizer opens the page their browser reads them off the relays,
+`/stats` does the counting. Every page view sends one beacon **per reader** in
+`STATS.READERS` (the admin key and the organizer's own key), each copy encrypted
+to that reader and signed with its own throwaway key. Whoever on that list opens
+the page reads them off the relays,
 decrypts them in batches, counts them with `S.aggregate` from
 `js/stats-schema.js`, renders the numbers, and publishes each of the last three
 days to the admin and to every moderator. A moderator who is not the admin reads
@@ -513,6 +515,13 @@ Details that matter if this is ever touched again:
   it had time to decrypt.
 - Publishing is throttled through `localStorage` to one send per day per ten
   minutes, so opening the page repeatedly does not spam the relays.
+- A signer that cannot decrypt is now said out loud on the page. An extension
+  without NIP-44, or one that is locked, used to leave the card looking simply
+  empty, which is indistinguishable from "no visitors". It now says which of the
+  two it is and what to do about it.
+- Adding somebody to `STATS.READERS` only affects beacons sent after the change;
+  the ones already on the relays are readable by the keys they were addressed
+  to.
 - `tools/stats.mjs` still works and reads beacons addressed to **either** key,
   the admin one and the older stats one, so a day can be rebuilt by hand:
   `node tools/stats.mjs fetch --since 2 && node tools/stats.mjs publish <day>`.

@@ -226,21 +226,28 @@
     });
     if (!payload) return;
 
-    var event;
+    // One copy per reader, each signed with its own throwaway key, so the
+    // copies cannot be tied to each other either.
+    var readers = cfg.STATS.READERS || [cfg.STATS.PUBKEY];
+    var events = [];
     try {
-      var sk = tools.generateSecretKey();
-      var key = tools.nip44.getConversationKey(sk, cfg.STATS.PUBKEY);
-      event = tools.finalizeEvent({
-        kind: S.RUMOR_KIND,
-        created_at: Math.floor(Date.now() / 1000),
-        tags: [['d', S.BEACON_D], ['p', cfg.STATS.PUBKEY]],
-        content: tools.nip44.encrypt(JSON.stringify(payload), key)
-      }, sk);
+      readers.forEach(function (reader) {
+        var sk = tools.generateSecretKey();
+        var key = tools.nip44.getConversationKey(sk, reader);
+        events.push(tools.finalizeEvent({
+          kind: S.RUMOR_KIND,
+          created_at: Math.floor(Date.now() / 1000),
+          tags: [['d', S.BEACON_D], ['p', reader]],
+          content: tools.nip44.encrypt(JSON.stringify(payload), key)
+        }, sk));
+      });
     } catch (e) { return; }
 
     sent = true;
     remember(SEEN_KEY, today);
-    if (!push(event)) queue(event);
+    events.forEach(function (event) {
+      if (!push(event)) queue(event);
+    });
   }
 
   // One frame down the socket that is already open. No waiting for the answer:
