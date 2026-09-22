@@ -526,7 +526,9 @@ Details that matter if this is ever touched again:
   the admin one and the older stats one, so a day can be rebuilt by hand:
   `node tools/stats.mjs fetch --since 2 && node tools/stats.mjs publish <day>`.
 
-The chart draws page views and visits as bars, with the X axis switchable
+Each bar carries its own numbers above it, page views in teal over visits in
+yellow, so a day can be read without hovering. The chart draws page views and
+visits as bars, with the X axis switchable
 between days (last 30), weeks (26), months (24) and years. Clicking a bar picks
 that bucket, and the tables below add up every day inside it. A page can hand
 the card a set of days through `window.SemRedeStatsFixture` to look at the

@@ -298,6 +298,18 @@
       column.className = 'chart-col' + (point.key === current ? ' current' : '');
       column.title = bucketTitle(point.key, grain) + ': ' + point.data.views + ' page views, ' + point.data.visits + ' visits';
 
+      // The numbers sit above the bars, so a glance is enough and nobody has
+      // to hover to read the day.
+      var values = document.createElement('span');
+      values.className = 'chart-values';
+      var viewsValue = document.createElement('i');
+      viewsValue.className = 'value-views';
+      viewsValue.textContent = point.data.views;
+      var visitsValue = document.createElement('i');
+      visitsValue.className = 'value-visits';
+      visitsValue.textContent = point.data.visits;
+      values.append(viewsValue, visitsValue);
+
       var bars = document.createElement('span');
       bars.className = 'chart-bars';
       var views = document.createElement('i');
@@ -312,7 +324,7 @@
       label.className = 'chart-label';
       label.textContent = bucketLabel(point.key, grain);
 
-      column.append(bars, label);
+      column.append(values, bars, label);
       column.addEventListener('click', function () { current = point.key; picked = true; render(); });
       plot.appendChild(column);
     });
