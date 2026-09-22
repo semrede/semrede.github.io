@@ -334,7 +334,11 @@
   function problem(text) {
     var box = document.createElement('p');
     box.className = 'muted-note stats-fresh stale';
-    box.textContent = text;
+    box.textContent = text + ' ';
+    var link = document.createElement('a');
+    link.href = '/login?next=/stats';
+    link.textContent = 'Go to the login page';
+    box.appendChild(link);
     return box;
   }
 

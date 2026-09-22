@@ -657,6 +657,7 @@ window.SemRedeDict.pt = {
     'time on page': 'tempo na p\u00e1gina',
     'No numbers yet. They arrive once the organizers run the daily count.': 'Ainda n\u00e3o h\u00e1 n\u00fameros. Aparecem quando a organiza\u00e7\u00e3o abrir esta p\u00e1gina.',
     'Read the beacons again': 'Ler outra vez',
+    'Go to the login page': 'Ir para a página de entrada',
     'Your NOSTR extension is not answering, so nothing here can be decrypted. Unlock it and reload, or log in with your key kept in this browser.': 'A tua extens\u00e3o NOSTR n\u00e3o responde, por isso nada aqui pode ser decifrado. Desbloqueia-a e recarrega, ou entra com a tua chave guardada neste browser.',
     'This login cannot decrypt (the extension has no NIP-44 support), so the numbers cannot be read. Log in on /login with your key kept in this browser instead.': 'Esta forma de entrar n\u00e3o consegue decifrar (a extens\u00e3o n\u00e3o suporta NIP-44), por isso os n\u00fameros n\u00e3o podem ser lidos. Entra em /login com a tua chave guardada neste browser.',
     'No beacons found yet. They appear here as people read the site.': 'Ainda n\u00e3o foram encontradas mensagens. Aparecem aqui \u00e0 medida que as pessoas leem o site.',
