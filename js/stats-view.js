@@ -298,33 +298,31 @@
       column.className = 'chart-col' + (point.key === current ? ' current' : '');
       column.title = bucketTitle(point.key, grain) + ': ' + point.data.views + ' page views, ' + point.data.visits + ' visits';
 
-      // The numbers sit above the bars, so a glance is enough and nobody has
-      // to hover to read the day.
-      var values = document.createElement('span');
-      values.className = 'chart-values';
-      var viewsValue = document.createElement('i');
-      viewsValue.className = 'value-views';
-      viewsValue.textContent = point.data.views;
-      var visitsValue = document.createElement('i');
-      visitsValue.className = 'value-visits';
-      visitsValue.textContent = point.data.visits;
-      values.append(viewsValue, visitsValue);
-
+      // Each bar is its own little column: the number sits on the bar's top
+      // edge, so it is read with the bar and not with the one next to it.
       var bars = document.createElement('span');
       bars.className = 'chart-bars';
-      var views = document.createElement('i');
-      views.className = 'bar-views';
-      views.style.height = Math.max(2, Math.round(point.data.views / most * 100)) + '%';
-      var visits = document.createElement('i');
-      visits.className = 'bar-visits';
-      visits.style.height = Math.max(2, Math.round(point.data.visits / most * 100)) + '%';
-      bars.append(views, visits);
+
+      function bar(kind, value) {
+        var stack = document.createElement('span');
+        stack.className = 'bar ' + kind;
+        var number = document.createElement('i');
+        number.className = 'bar-value';
+        number.textContent = value;
+        var fill = document.createElement('i');
+        fill.className = 'bar-fill';
+        fill.style.height = Math.max(2, Math.round(value / most * 100)) + '%';
+        stack.append(number, fill);
+        return stack;
+      }
+
+      bars.append(bar('views', point.data.views), bar('visits', point.data.visits));
 
       var label = document.createElement('span');
       label.className = 'chart-label';
       label.textContent = bucketLabel(point.key, grain);
 
-      column.append(values, bars, label);
+      column.append(bars, label);
       column.addEventListener('click', function () { current = point.key; picked = true; render(); });
       plot.appendChild(column);
     });
