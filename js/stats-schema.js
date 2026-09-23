@@ -30,7 +30,7 @@
     PATHS: ['/', '/chat', '/crypto', '/forum', '/locations', '/privacy',
             '/registration', '/schedule', '/share', '/showcase', '/tickets'],
 
-    SKIP_PATHS: ['/login', '/messages', '/admin', '/stats'],
+    SKIP_PATHS: ['/login', '/messages', '/admin', '/stats', '/check'],
 
     SCREENS: ['phone', 'tablet', 'desktop'],
     SECS: ['0-5', '5-15', '15-60', '60-180', '180+'],

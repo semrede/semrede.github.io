@@ -28,6 +28,8 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `flyer/flyer.html`, `tools/flyer.mjs`: the printable flyer and its renderer
 - `tools/maps.sh`: refreshes the satellite views on /locations
 - `tickets/index.html`, `js/tickets.js`, `js/tickets-core.js`, `js/rsvp-count.js`, `css/tickets.css`: the tickets and the counters, at /tickets (`registration/index.html` only redirects there)
+- `check/index.html`, `js/check.js`: what a ticket's QR code opens at the door, at /check
+- `js/vendor/qrcode.js`: qrcode-generator 1.4.4 (MIT, Kazuhiko Arase), vendored, draws the QR codes on the tickets
 - `locations/index.html`, `css/locations.css`: the venues and travel info, at /locations
 - `login/index.html`, `js/login-page.js`: log in, register, or manage your account, at /login
 - `messages/index.html`, `js/messages.js`, `js/dm.js`: private messages, at /messages
@@ -252,9 +254,9 @@ The event is free, but there is room for 100 people, so entry is by ticket.
 `/tickets` (formerly `/registration`, which now redirects) uses NIP-52: two
 date-based calendar events (kind 31922) published once by the admin key with
 `node nostr-admin.mjs calendar`, and one RSVP per person and part (kind 31925,
-status `accepted` for going, `declined` once they press "I'm going" again to
-cancel; there is no "interested" any more, and old `tentative` answers are not
-counted). RSVPs are addressable, so changing the answer replaces the old one.
+status `accepted` for going; old `tentative` and `declined` answers are not
+counted). "I'm going" cannot be undone on the page, and the group size can
+only grow: tickets are not given back, only the team can revoke them. RSVPs are addressable, so changing the answer replaces the old one.
 Saturday is listed first.
 
 "I'm going" to either part asks for tickets: one for the person answering and
@@ -298,6 +300,18 @@ and the admin or a moderator approves them one by one; their tickets number on
 from 101. Holders who stop going are flagged there and can be revoked. The rules
 live in `js/tickets-core.js`, which both pages load, and the limit in `TICKETS`
 in `js/nostr-config.js`.
+
+### At the door
+
+Once a ticket is issued, `/tickets` shows it as a ticket: the number, the event,
+the holder and a QR code, one per person in the group. The QR code is a link,
+`https://semrede.com/check?t=<number>&p=<npub>`, so any phone camera opens it.
+`/check` merges the team's ticket lists the same way and answers Valid (with
+the rest of the group), Revoked, Wrong account (the number belongs to someone
+else) or Not found. A missing ticket is only called that after a few seconds,
+since the moderators' lists arrive after the moderator set. "Let in" is kept in
+that phone's localStorage, so the same ticket shown twice at one door says
+"Already let in". `/check` never sends a visit beacon.
 
 Answers are public, which is what makes the counters possible: `/tickets` shows
 the tickets left, and `js/rsvp-count.js` does the same on the home page with a

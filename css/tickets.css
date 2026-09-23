@@ -35,7 +35,7 @@
 .reg-btn:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
 .reg-btn.chosen { background: var(--teal); border-color: var(--teal); color: var(--ink); }
 .reg-btn:disabled { opacity: .45; cursor: not-allowed; }
-.reg-undo { align-self: center; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #7d877f; }
+.reg-btn.chosen:disabled { opacity: 1; cursor: default; }
 
 .reg-comment-row { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
 .reg-comment-row label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
@@ -67,6 +67,21 @@
 .ticket-card p { margin: 0; color: #c3c5b9; font-size: 13px; line-height: 1.7; }
 .ticket-card a { color: var(--yellow); text-decoration: underline; text-underline-offset: 2px; }
 
+/* One ticket per person, as shown at the door. */
+.ticket-stubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.ticket-stub {
+  display: flex; align-items: stretch; justify-content: space-between; gap: 16px;
+  padding: 16px 16px 16px 20px; background: #f3ecd8; color: #10100c;
+  border-left: 6px solid var(--orange);
+}
+.stub-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.stub-event { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: #6b5a33; }
+.stub-number { font: 800 44px/1 var(--display); color: #c2410c; }
+.stub-meta { font-size: 12px; color: #2a2a22; overflow-wrap: anywhere; }
+.stub-seat { margin-top: auto; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #6b5a33; }
+.ticket-card .stub-qr { flex: none; display: block; width: 132px; height: 132px; text-decoration: none; }
+.stub-qr svg { display: block; width: 100%; height: 100%; }
+
 .reg-name-row { display: flex; flex-direction: column; gap: 8px; padding-bottom: 6px; }
 .reg-name-row label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
 .reg-name-row .inline-row { gap: 10px; }
@@ -97,4 +112,25 @@
   .reg-btn { flex: 1; padding: 10px 8px; font-size: 11px; }
   .reg-party-row .reg-btn { min-width: 0; }
   .ticket-number { font-size: 40px; }
+  .ticket-stubs { grid-template-columns: 1fr; }
+  .ticket-stub { padding: 12px 12px 12px 14px; }
+  .ticket-card .stub-qr { width: 148px; height: 148px; }
 }
+
+/* /check, at the door: the verdict has to be readable at arm's length. */
+.check-result {
+  display: flex; flex-direction: column; gap: 12px; margin: 26px 0 22px; padding: 26px 24px;
+  border: 3px solid #34403a; background: linear-gradient(160deg, #0b1716, #050a09 70%);
+}
+.check-verdict { font: 800 clamp(48px, 12vw, 96px)/1 var(--display); text-transform: uppercase; color: var(--paper); }
+.check-result.ok { border-color: var(--green); }
+.check-result.ok .check-verdict { color: var(--green); }
+.check-result.warn { border-color: var(--yellow); }
+.check-result.warn .check-verdict { color: var(--yellow); }
+.check-result.bad { border-color: var(--orange); }
+.check-result.bad .check-verdict { color: var(--orange); }
+.check-number { font: 800 40px/1 var(--display); color: var(--orange); }
+.check-holder { display: flex; align-items: center; gap: 14px; }
+.check-holder strong { display: block; font-size: 16px; }
+.check-detail { margin: 0; color: #c3c5b9; font-size: 14px; line-height: 1.6; }
+.check-result .inline-row { align-items: center; gap: 16px; }

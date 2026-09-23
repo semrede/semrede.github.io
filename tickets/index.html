@@ -83,7 +83,7 @@
         <div class="reg-party-row">
           <span class="reg-party-label">How many tickets?</span>
           <div class="reg-buttons" id="reg-party"></div>
-          <p class="hint">You and up to three people coming with you. No names needed: all the tickets are held by your account, and you show them at the entrance.</p>
+          <p class="hint">You and up to three people coming with you. No names needed: all the tickets are held by your account, and you show them at the entrance. Pick the number before pressing "I'm going": tickets cannot be given back, only added.</p>
         </div>
 
         <div id="reg-parts"></div>
@@ -103,7 +103,7 @@
     <section class="reg-help">
       <strong>How the tickets work</strong>
       <p>"I'm going" to either part asks for your tickets: one for you and one for each person coming with you, up to four. Every ticket gets its own number, in the order people ask, and the organizers send them to you as a private message, usually within a day. After ticket 100 there is a waiting list, and the organizers let people in from it as they can.</p>
-      <p><strong class="reg-inline">Your tickets are tied to your NOSTR account on this site</strong> (the key this browser made for you, with no email and no password), not to names. At the event you show them, on this page or in the message from the organizers, for yourself and for whoever comes with you.</p>
+      <p><strong class="reg-inline">Your tickets are tied to your NOSTR account on this site</strong> (the key this browser made for you, with no email and no password), not to names. At the entrance you open this page: every ticket has its own QR code, and the door scans one per person, for you and for whoever comes with you.</p>
       <p>The account can go with you: on <a href="/login">your account page</a>, show and copy your key, then paste it at /login on your phone or any other device, and the same tickets are there. Keep a copy somewhere safe: a lost key is a lost ticket.</p>
     </section>
 
@@ -131,6 +131,7 @@
   <script src="/js/stats-schema.js"></script>
   <script src="/js/stats.js"></script>
   <script src="/js/identity-ui.js"></script>
+  <script src="/js/vendor/qrcode.js"></script>
   <script src="/js/tickets-core.js"></script>
   <script src="/js/tickets.js"></script>
 </body>

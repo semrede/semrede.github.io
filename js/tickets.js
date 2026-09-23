@@ -1,9 +1,8 @@
 /* /tickets: asking for tickets is a NIP-52 RSVP (kind 31925) to one of the
- * two calendar events of SemRede 2026. There is one button per part: "I'm
- * going" publishes status accepted, and pressing it again publishes declined.
- * Older "interested" (tentative) answers are simply not counted. Changing the
- * answer replaces the old one (the RSVP is addressable, one per person and
- * event through its d tag). The
+ * two calendar events of SemRede 2026. There is one button per part, "I'm
+ * going", and it cannot be undone here: once pressed it stays, and the group
+ * size can only grow. Older "interested" (tentative) and "not this time"
+ * (declined) answers are simply not counted. The
  * ['tickets', 'N'] tag says how many people come, the asker included; the
  * others need no name and no account, their tickets are held by this key.
  *
@@ -105,10 +104,14 @@
     });
   }
 
+  // Once going, the size can grow but not shrink: tickets are not given back.
   function renderParty() {
     var current = party();
+    var floor = Math.max(core.wants(auth.pubkey), core.standing(auth.pubkey).numbers.length);
     els.party.querySelectorAll('button').forEach(function (b) {
-      b.classList.toggle('chosen', Number(b.dataset.n) === current);
+      var n = Number(b.dataset.n);
+      b.classList.toggle('chosen', n === current);
+      b.disabled = n < floor;
     });
   }
 
@@ -129,20 +132,26 @@
 
     if (has) {
       kicker.textContent = mine.numbers.length === 1 ? 'Your ticket' : 'Your ' + mine.numbers.length + ' tickets';
-      big.textContent = mine.numbers.map(core.label).join(' ');
-    } else if (mine.queue === 'queued') {
-      kicker.textContent = mine.need === 1 ? 'Ticket requested' : mine.need + ' tickets requested';
-      big.textContent = '...';
+      els.mine.appendChild(kicker);
+      var stubs = document.createElement('div');
+      stubs.className = 'ticket-stubs';
+      mine.numbers.forEach(function (n, i) { stubs.appendChild(ticketStub(n, i + 1, mine.numbers.length)); });
+      els.mine.appendChild(stubs);
     } else {
-      kicker.textContent = 'Waiting list';
-      big.textContent = String(mine.position);
+      if (mine.queue === 'queued') {
+        kicker.textContent = mine.need === 1 ? 'Ticket requested' : mine.need + ' tickets requested';
+        big.textContent = '...';
+      } else {
+        kicker.textContent = 'Waiting list';
+        big.textContent = String(mine.position);
+      }
+      els.mine.append(kicker, big);
     }
-    els.mine.append(kicker, big);
 
     var text = document.createElement('p');
     if (has) {
       text.append('Held by ' + (ownName() ? ownName() + ' / ' : '') + auth.callsign +
-        '. Show this page or the message from the organizers at the entrance. ',
+        '. At the entrance, show this page: the door scans one QR code per person. ',
         link('/messages', 'Your messages'), ' / ', link('/login', 'Back up your key'));
     }
     if (mine.queue === 'queued') {
@@ -156,6 +165,71 @@
         link('/messages', 'your messages'), '.');
     }
     els.mine.appendChild(text);
+  }
+
+  // One ticket as it is shown at the door: the number, the event, who holds
+  // it, and a QR code linking to /check for this number and this account.
+  function ticketStub(n, index, total) {
+    var stub = document.createElement('article');
+    stub.className = 'ticket-stub';
+
+    var main = document.createElement('div');
+    main.className = 'stub-main';
+    var event = document.createElement('span');
+    event.className = 'stub-event';
+    event.textContent = 'SemRede 2026';
+    var number = document.createElement('strong');
+    number.className = 'stub-number';
+    number.textContent = core.label(n);
+    var when = document.createElement('span');
+    when.className = 'stub-meta';
+    when.textContent = 'Coimbra, October 26 to 31';
+    var holder = document.createElement('span');
+    holder.className = 'stub-meta';
+    holder.textContent = (ownName() ? ownName() + ' / ' : '') + auth.callsign;
+    var seat = document.createElement('span');
+    seat.className = 'stub-seat';
+    seat.textContent = 'Ticket ' + index + ' of ' + total;
+    main.append(event, number, when, holder, seat);
+
+    var qr = document.createElement('a');
+    qr.className = 'stub-qr';
+    qr.href = core.checkUrl(n, auth.pubkey);
+    qr.title = 'Scanned at the door';
+    qr.setAttribute('aria-label', 'QR code for ticket ' + core.label(n));
+    qr.appendChild(qrSvg(qr.href));
+
+    stub.append(main, qr);
+    return stub;
+  }
+
+  // Dark modules on white with the standard four-module quiet zone, which is
+  // what phone scanners expect whatever the page colours are.
+  function qrSvg(text) {
+    var q = window.qrcode(0, 'M');
+    q.addData(text);
+    q.make();
+    var count = q.getModuleCount();
+    var size = count + 8;
+    var d = '';
+    for (var r = 0; r < count; r++) {
+      for (var c = 0; c < count; c++) {
+        if (q.isDark(r, c)) d += 'M' + (c + 4) + ' ' + (r + 4) + 'h1v1h-1z';
+      }
+    }
+    var NS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+    svg.setAttribute('shape-rendering', 'crispEdges');
+    var bg = document.createElementNS(NS, 'rect');
+    bg.setAttribute('width', size);
+    bg.setAttribute('height', size);
+    bg.setAttribute('fill', '#fff');
+    var path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', '#000');
+    svg.append(bg, path);
+    return svg;
   }
 
   function link(href, text) {
@@ -197,17 +271,10 @@
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'reg-btn' + (going ? ' chosen' : '');
-      b.textContent = "I'm going";
-      b.title = going ? 'Press again if you are not coming after all' : '';
-      b.disabled = !auth.pubkey;
-      b.addEventListener('click', function () { going ? cancel(ev.slug) : choose(ev.slug, 'accepted'); });
+      b.textContent = going ? "You're going" : "I'm going";
+      b.disabled = !auth.pubkey || going;
+      b.addEventListener('click', function () { choose(ev.slug, 'accepted'); });
       buttons.appendChild(b);
-      if (going) {
-        var undo = document.createElement('span');
-        undo.className = 'reg-undo';
-        undo.textContent = 'Press again to cancel';
-        buttons.appendChild(undo);
-      }
 
       card.append(head, about, numbers, buttons);
       els.parts.appendChild(card);
@@ -247,21 +314,10 @@
     publishRsvp(slug, value, els.comment.value.trim().slice(0, COMMENT_MAX));
   }
 
-  // Cancelling the last part a ticket holder is going to gives the tickets
-  // up, so that one asks first.
-  function cancel(slug) {
-    var others = cfg.EVENTS.some(function (e) {
-      var r = myRsvp(e.slug);
-      return e.slug !== slug && r && r.status === 'accepted';
-    });
-    if (!others && core.standing(auth.pubkey).numbers.length &&
-        !confirm('You are not coming after all? Your tickets go back to the organizers, who can give them to someone else.')) return;
-    publishRsvp(slug, 'declined', els.comment.value.trim().slice(0, COMMENT_MAX));
-  }
-
   // A new size is written on every part they are going to, since that is
   // where it lives.
   function chooseParty(n) {
+    if (n < core.wants(auth.pubkey)) return;
     partyChoice = n;
     var going = cfg.EVENTS.filter(function (e) {
       var r = myRsvp(e.slug);
@@ -292,7 +348,7 @@
       return net.publish(signed);
     }).then(function (ok) {
       if (!ok) throw new Error('No relay accepted your answer');
-      status(value === 'declined' ? 'Marked as not coming.' : 'Saved. Thank you.', 'ok');
+      status('Saved. Thank you.', 'ok');
     }).catch(function (err) {
       status(err.message || 'Could not save your answer', 'bad');
     });
@@ -302,7 +358,7 @@
     var comment = els.comment.value.trim().slice(0, COMMENT_MAX);
     var answered = cfg.EVENTS.map(function (e) { return e.slug; }).filter(function (slug) {
       var r = myRsvp(slug);
-      return r && r.status !== 'declined';
+      return r && r.status === 'accepted';
     });
     if (!answered.length) return status('Pick a part of the event first.', 'bad');
     commentTouched = false;

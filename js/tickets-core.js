@@ -271,6 +271,32 @@
     return out;
   }
 
+  // For the door: is ticket n held by this account on the team's lists?
+  //   valid     a live number held by that account
+  //   revoked   it was, and the team took it back
+  //   mismatch  the number exists but belongs to somebody else
+  //   unknown   no such number (yet: the lists may still be arriving)
+  function check(n, pubkey) {
+    var e = allEntries.filter(function (m) { return m.n === n && m.pubkey === pubkey; })[0];
+    if (!e) {
+      var taken = allEntries.some(function (m) { return m.n === n && m.status !== 'revoked'; });
+      return { status: taken ? 'mismatch' : 'unknown' };
+    }
+    if (e.status === 'revoked') return { status: 'revoked', entry: e };
+    return {
+      status: 'valid',
+      entry: e,
+      clash: clashes().has(n),
+      numbers: held(pubkey).map(function (m) { return m.n; }).sort(function (a, b) { return a - b; })
+    };
+  }
+
+  // What the QR code on a ticket holds: a link any phone opens, carrying the
+  // ticket number and the holder's account, which /check looks up.
+  function checkUrl(n, pubkey) {
+    return 'https://semrede.com/check?t=' + n + '&p=' + NT.nip19.npubEncode(pubkey);
+  }
+
   function label(n) {
     return '#' + String(n).padStart(3, '0');
   }
@@ -363,7 +389,7 @@
       (one ? 'This is your entry ticket' : 'These are ' + numbers.length + ' entry tickets, one per person in your group,') +
         ' for SemRede 2026 in Coimbra, October 26 to 31.',
       'They are tied to your NOSTR account on semrede.com, ' + npub + ', and to nothing else: no name, no email.',
-      'Show this message, or https://semrede.com/tickets opened with this account, at the entrance. Whoever comes on these tickets comes with you, or you show them for them.',
+      'At the entrance, open https://semrede.com/tickets with this account: every ticket there has a QR code, and the door scans one per person. Whoever comes on these tickets comes with you, or you show them for them.',
       'The account lives in this browser. To have it on your phone or another computer too, open https://semrede.com/login, copy your key (Show, then Copy) and paste it at /login on the other device. Keep a copy somewhere safe: a lost key is a lost ticket.',
       '',
       '---',
@@ -373,7 +399,7 @@
       (one ? 'Este é o teu bilhete de entrada' : 'Estes são ' + numbers.length + ' bilhetes de entrada, um por cada pessoa do teu grupo,') +
         ' para o SemRede 2026 em Coimbra, de 26 a 31 de outubro.',
       'Estão ligados à tua conta NOSTR em semrede.com, ' + npub + ', e a mais nada: sem nome, sem email.',
-      'Mostra esta mensagem, ou https://semrede.com/tickets aberto com esta conta, à entrada. Quem vem com estes bilhetes vem contigo, ou mostras tu os bilhetes por eles.',
+      'À entrada, abre https://semrede.com/tickets com esta conta: cada bilhete lá tem um código QR, e a porta lê um por pessoa. Quem vem com estes bilhetes vem contigo, ou mostras tu os bilhetes por eles.',
       'A conta vive neste browser. Para a teres também no telemóvel ou noutro computador, abre https://semrede.com/login, copia a tua chave (Mostrar, depois Copiar) e cola-a em /login no outro aparelho. Guarda uma cópia num sítio seguro: chave perdida é bilhete perdido.'
     ].join('\n');
   }
@@ -480,6 +506,8 @@
     standing: standing,
     label: label,
     labels: labels,
+    check: check,
+    checkUrl: checkUrl,
     watch: watch,
     onChange: function (fn) { listeners.push(fn); },
     isIssuer: isIssuer,
