@@ -121,7 +121,7 @@ async function main() {
     }
   } else if (cmd === 'calendar') {
     // Two NIP-52 date-based calendar events (kind 31922). People RSVP to these
-    // from /registration, and the counters are the RSVPs.
+    // from /tickets, and the counters are the RSVPs.
     const sk = loadKey();
     const parts = [
       { d: 'semrede-2026-eva', title: 'SemRede 2026: the week at Eva Farm',

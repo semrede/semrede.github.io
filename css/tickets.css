@@ -1,4 +1,4 @@
-/* /registration: the counters and the answer cards. */
+/* /tickets: the counters, your ticket and the answer cards. */
 
 .reg-main { padding-bottom: 70px; }
 .reg-lead { margin: 12px 0 0; max-width: 700px; color: #c3c5b9; font-size: 14px; line-height: 1.7; }
@@ -54,6 +54,36 @@
 .reg-help strong { display: block; margin-bottom: 6px; color: var(--paper); font: 800 18px var(--display); text-transform: uppercase; }
 .reg-help p { margin: 0; line-height: 1.7; }
 
+/* Your ticket, or where you stand. */
+.ticket-card {
+  display: grid; grid-template-columns: 1fr; gap: 10px;
+  margin: 0 0 22px; padding: 20px 24px; border: 2px dashed var(--yellow);
+  background: linear-gradient(160deg, #17160b, #0a0905 70%);
+}
+.ticket-card.ticket { border-style: solid; border-color: var(--orange); }
+.ticket-kicker { grid-column: 1 / -1; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--yellow); }
+.ticket-number { font: 800 clamp(44px, 8vw, 76px)/1 var(--display); color: var(--orange); word-spacing: .15em; }
+.ticket-card p { margin: 0; color: #c3c5b9; font-size: 13px; line-height: 1.7; }
+.ticket-card a { color: var(--yellow); text-decoration: underline; text-underline-offset: 2px; }
+
+.reg-name-row { display: flex; flex-direction: column; gap: 8px; padding-bottom: 6px; }
+.reg-name-row label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
+.reg-name-row .inline-row { gap: 10px; }
+.reg-name-row input {
+  flex: 1; min-width: 0; padding: 10px 12px; background: #0d1918; border: 1px solid #2a3f3c;
+  color: var(--paper); font: 13px var(--mono);
+}
+.reg-name-row input:focus { outline: none; border-color: var(--teal); }
+.reg-help + .reg-help { margin-top: 14px; }
+.reg-help strong.reg-inline { display: inline; margin: 0; font: inherit; font-weight: 700; text-transform: none; color: var(--yellow); }
+
+.reg-party-row { display: flex; flex-direction: column; gap: 8px; padding: 14px 0 4px; border-bottom: 1px solid #1c2b28; }
+.reg-party-label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
+.reg-party-row .reg-buttons { margin-top: 0; }
+.reg-party-row .reg-btn { min-width: 52px; }
+.reg-party-row .hint { margin: 0; }
+.reg-help p + p { margin-top: 8px; }
+
 @media (max-width: 800px) {
   .reg-counts { grid-template-columns: 1fr; gap: 10px; margin: 18px 0 16px; }
   .count-box { flex-direction: row; gap: 12px; padding: 14px; justify-content: flex-start; }
@@ -61,6 +91,9 @@
   .count-label { text-align: left; }
   .count-extra { margin-left: auto; }
   .reg-body { padding: 18px 16px 22px; }
+  .ticket-card { grid-template-columns: 1fr; padding: 16px; }
   .reg-buttons { gap: 8px; }
   .reg-btn { flex: 1; padding: 10px 8px; font-size: 11px; }
+  .reg-party-row .reg-btn { min-width: 0; }
+  .ticket-number { font-size: 40px; }
 }

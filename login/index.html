@@ -33,7 +33,7 @@
       <a href="/chat">Chat</a>
       <a href="/forum">Forum</a>
       <a class="nav-admin" href="/admin">Admin</a>
-      <a class="nav-cta" href="/registration">Register</a>
+      <a class="nav-cta" href="/tickets">Tickets</a>
       <div class="account-bar">
         <a class="acct-btn" href="/login">Log in</a>
         <a class="acct-mail" href="/messages" title="Messages" aria-label="Messages"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 6.5l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="acct-badge" hidden></span></a>
@@ -50,7 +50,7 @@
 
     <div class="account-grid">
     <div class="side-card" id="login-card">
-      <h2>Join the <em>room</em></h2>
+      <h2 id="login-title">Join the <em>room</em></h2>
 
       <button class="big-btn btn-teal" id="btn-extension" type="button">Log in with extension</button>
       <p class="hint" id="extension-hint">Uses your NOSTR browser extension (Alby, nos2x, Nostr Connect). Your key never touches this site.</p>
@@ -135,9 +135,9 @@
       <div class="side-note">
         <strong>How this works</strong>
         <ul>
-          <li><strong>No email, no phone number, no personal data.</strong> An account here is a pair of keys made in your browser. You choose a name, and that is all we ever see.</li>
+          <li><strong>No email, no phone number, no personal data.</strong> An account here is a pair of keys made in your browser, the first time you open a page that needs one. You choose a name, and that is all we ever see.</li>
           <li>You can stay anonymous. Use any name you like, and nothing ties the account to you unless you write it yourself.</li>
-          <li>Your account is a NOSTR key. The same key works in the chat, the forum, registration and private messages, and in any other NOSTR app.</li>
+          <li>Your account is a NOSTR key. The same key works in the chat, the forum, the tickets and private messages, and in any other NOSTR app.</li>
           <li>An extension keeps the key out of this site. An account made here is stored in this browser only, so back it up.</li>
           <li>Posts in the chat and the forum are public. Messages are encrypted, but the relays still see who writes to whom.</li>
         </ul>

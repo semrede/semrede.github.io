@@ -2,112 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SemRede Registration</title>
-  <meta name="description" content="Register for SemRede 2026 in Coimbra. The event is free; registration tells us how many people to prepare for.">
-  <meta property="og:title" content="SemRede 2026 registration">
-  <meta property="og:description" content="Free event, October 26 to 31 in Coimbra. Tell us which parts you are coming to.">
-  <meta property="og:image" content="https://semrede.com/img/hero-landscape.jpg">
-  <meta property="og:url" content="https://semrede.com/registration">
-  <meta name="theme-color" content="#030706">
-  <meta name="color-scheme" content="dark">
-  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/fonts.css">
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="/css/chat.css">
-  <link rel="stylesheet" href="/css/account.css">
-  <link rel="stylesheet" href="/css/registration.css">
-  <script src="/js/session.js"></script>
-  <script src="/js/i18n-pt.js"></script>
-  <script src="/js/i18n.js"></script>
+  <title>SemRede Tickets</title>
+  <link rel="canonical" href="https://semrede.com/tickets">
+  <meta http-equiv="refresh" content="0; url=/tickets">
+  <script>location.replace('/tickets' + location.search + location.hash);</script>
 </head>
-<body class="chat-body forum-body">
-  <div class="scanlines" aria-hidden="true"></div>
-
-
-  <header class="site-header container">
-    <a class="brand" href="/" aria-label="SemRede home">
-      <img class="brand-mark" src="/img/logo-mark.png" width="46" height="46" alt="">
-      <span class="wordmark">SemRede</span>
-    </a>
-    <nav>
-      <a href="/schedule">Schedule</a>
-      <a href="/locations">Locations</a>
-      <a href="/showcase">Showcase</a>
-      <a href="/chat">Chat</a>
-      <a href="/forum">Forum</a>
-      <a class="nav-admin" href="/admin">Admin</a>
-      <a class="nav-cta" href="/registration" aria-current="page">Register</a>
-      <div class="account-bar">
-        <a class="acct-btn" href="/login">Log in</a>
-        <a class="acct-mail" href="/messages" title="Messages" aria-label="Messages"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 6.5l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="acct-badge" hidden></span></a>
-        <a class="acct-me" href="/login" title="Your account" aria-label="Your account"><span class="avatar"></span></a>
-      </div>
-    </nav>
-  </header>
-
-  <main class="container reg-main">
-    <section class="chat-intro">
-      <div class="section-kicker">10 / Registration</div>
-      <h1>Register</h1>
-      <p class="reg-lead"><strong>The event is free.</strong> Register anyway: we need a number to plan food, water, space and beds.</p>
-      <p class="reg-lead">The Saturday grill is the one thing you pay for, and it is paid in <a href="/crypto">CryptoEscudos you mine yourself</a>. Bring about 5000 CESC.</p>
-    </section>
-
-    <section class="reg-counts" id="reg-counts"></section>
-
-    <div class="reg-card">
-      <div class="room-bar">
-        <img class="room-mark" src="/img/logo-mark.png" width="34" height="34" alt="">
-        <div class="room-title">
-          <strong>Which parts are you coming to?</strong>
-          <span>Change your answer whenever you want</span>
-        </div>
-        <div class="relay-status" title="Connected NOSTR relays">
-          <span class="relay-dots" id="relay-dots"></span>
-        </div>
-      </div>
-
-      <div class="reg-body">
-        <p class="muted-note" id="reg-locked"><a class="text-btn" href="/login?next=/registration">Log in</a> to register. It takes one click and needs no email.</p>
-
-        <div id="reg-parts"></div>
-
-        <div class="reg-comment-row" id="reg-comment-row" hidden>
-          <label for="reg-comment">Anything we should know? (public)</label>
-          <textarea id="reg-comment" rows="3" maxlength="500" placeholder="Arriving Tuesday, bringing a LoRa setup, travelling with two kids, vegan..."></textarea>
-          <div class="inline-row">
-            <button type="button" class="small-btn" id="reg-save">Save comment</button>
-            <span class="reg-status" id="reg-status" role="status"></span>
-          </div>
-          <p class="hint">Your answer and this comment are public NOSTR events, like a post. Anyone can read them and count them, which is how the numbers above work. For anything private, <a href="/messages">write to the organizers</a>.</p>
-        </div>
-      </div>
-    </div>
-
-    <section class="reg-help">
-      <strong>Questions?</strong>
-      <p>Write to the organizers from <a href="/messages">your messages</a>: that conversation is encrypted and only they can read it. For questions other people may also have, use the <a href="/forum">forum</a>.</p>
-    </section>
-  </main>
-
-  <footer class="site-footer container">
-    <span>Coimbra / Portugal</span>
-    <span><a href="/share">Share the flyer</a> / <a href="/privacy">Privacy</a></span>
-    <span>October 26 to 31, 2026</span>
-    <span class="lang-switch"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></span>
-  </footer>
-
-  <script src="/js/vendor/nostr.bundle.js"></script>
-  <script src="/js/nostr-config.js"></script>
-  <script src="/js/nostr-login.js"></script>
-  <script src="/js/nostr-common.js"></script>
-  <script src="/js/moderation.js"></script>
-  <script src="/js/dm.js"></script>
-  <script src="/js/account-bar.js"></script>
-  <script src="/js/nav-menu.js"></script>
-  <script src="/js/stats-schema.js"></script>
-  <script src="/js/stats.js"></script>
-  <script src="/js/registration.js"></script>
+<body>
+  <p>Registration is now <a href="/tickets">Tickets</a>.</p>
 </body>
 </html>

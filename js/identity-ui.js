@@ -9,7 +9,7 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {
-    loginCard: $('login-card'), meCard: $('me-card'), loginError: $('login-error'), meError: $('me-error'),
+    loginCard: $('login-card'), loginTitle: $('login-title'), meCard: $('me-card'), loginError: $('login-error'), meError: $('me-error'),
     btnExtension: $('btn-extension'), extensionHint: $('extension-hint'),
     createForm: $('create-form'), newName: $('new-name'), importForm: $('import-form'), importKey: $('import-key'),
     meAvatar: $('me-avatar'), meName: $('me-name'), meCallsign: $('me-callsign'),
@@ -34,7 +34,13 @@
 
   function refresh() {
     var loggedIn = !!auth.pubkey;
-    if (els.loginCard) els.loginCard.hidden = loggedIn;
+    // A key kept in this browser (usually the one made on the first visit) can
+    // still be swapped for an extension or an existing nsec, so the login card
+    // stays, minus the "create" form.
+    var swappable = loggedIn && auth.mode === 'local';
+    if (els.loginCard) els.loginCard.hidden = loggedIn && !swappable;
+    if (els.createForm) els.createForm.hidden = loggedIn;
+    if (els.loginTitle) els.loginTitle.innerHTML = swappable ? 'Use <em>another key</em>' : 'Join the <em>room</em>';
     if (els.meCard) els.meCard.hidden = !loggedIn;
     if (els.composer) els.composer.hidden = !loggedIn;
     if (els.locked) els.locked.hidden = loggedIn;
@@ -44,12 +50,16 @@
       els.meName.textContent = net.displayName(auth.pubkey);
       els.meCallsign.textContent = auth.callsign + (auth.mode === 'extension' ? ' / extension' : ' / this browser');
       net.fillAvatar(els.meAvatar, auth.pubkey);
-      if (document.activeElement !== els.nameInput) els.nameInput.value = (p && p.name) || '';
       els.npubValue.textContent = shortKey(auth.npub());
       els.backup.hidden = auth.mode !== 'local';
       els.nsecValue.textContent = MASK;
       els.nsecValue.dataset.shown = '';
       els.nsecReveal.textContent = 'Show';
+    }
+    // /tickets has the name field without the rest of the account card.
+    if (loggedIn && els.nameInput && document.activeElement !== els.nameInput) {
+      var own = net.profiles.get(auth.pubkey);
+      els.nameInput.value = (own && own.name) || '';
     }
     listeners.forEach(function (fn) { fn(loggedIn); });
   }
@@ -75,6 +85,13 @@
       });
   }
 
+  // Swapping away from a browser key loses it unless it was saved, and with
+  // it any ticket and private messages it holds.
+  function confirmReplace() {
+    if (!auth.pubkey || auth.mode !== 'local') return true;
+    return confirm('This browser already has a key for you. Any ticket or messages it holds stay with it, so save it first (Show, above). Use the other key?');
+  }
+
   function copy(text, btn) {
     navigator.clipboard.writeText(text).then(function () {
       var old = btn.textContent;
@@ -85,6 +102,7 @@
 
   function wire() {
     if (els.btnExtension) els.btnExtension.addEventListener('click', function () {
+      if (!confirmReplace()) return;
       auth.loginWithExtension().catch(function (err) {
         showError(els.loginError, err.message === 'No NOSTR extension found'
           ? 'No NOSTR extension found in this browser. Create an account instead, or install Alby or nos2x.'
@@ -107,6 +125,7 @@
 
     if (els.importForm) els.importForm.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (!confirmReplace()) return;
       try {
         auth.importKey(els.importKey.value);
         els.importKey.value = '';
@@ -132,7 +151,7 @@
     if (els.nsecCopy) els.nsecCopy.addEventListener('click', function () { copy(auth.nsec(), els.nsecCopy); });
     if (els.npubCopy) els.npubCopy.addEventListener('click', function () { copy(auth.npub(), els.npubCopy); });
     if (els.logout) els.logout.addEventListener('click', function () {
-      if (auth.mode === 'local' && !confirm('This account only exists in this browser. Log out only if you saved your key. Log out?')) return;
+      if (auth.mode === 'local' && !confirm('This account only exists in this browser. Log out only if you saved your key, or you lose it together with any ticket it holds. Log out?')) return;
       auth.logout();
     });
 

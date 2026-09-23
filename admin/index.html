@@ -34,7 +34,7 @@
       <a href="/chat">Chat</a>
       <a href="/forum">Forum</a>
       <a class="nav-admin" href="/admin">Admin</a>
-      <a class="nav-cta" href="/registration">Register</a>
+      <a class="nav-cta" href="/tickets">Tickets</a>
       <div class="account-bar">
         <a class="acct-btn" href="/login">Log in</a>
         <a class="acct-mail" href="/messages" title="Messages" aria-label="Messages"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 6.5l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="acct-badge" hidden></span></a>
@@ -123,6 +123,23 @@
 
       <section class="admin-card">
         <div class="room-bar">
+          <div class="room-title"><strong>Tickets</strong><span id="tickets-summary">Counting...</span></div>
+        </div>
+        <div class="admin-body">
+          <p class="hint">While the admin key has this page open, everyone who says "I'm going" gets the next number and a private message with it, up to the limit. Moderators send the same tickets with the button below. After the limit, people wait here until the admin or a moderator approves them. Tickets go out from your own key.</p>
+          <div class="inline-row">
+            <button type="button" class="small-btn" id="tickets-send" hidden></button>
+            <span class="reg-status" id="tickets-status" role="status"></span>
+          </div>
+          <h3 class="admin-h3">Waiting list</h3>
+          <div id="waiting-list"></div>
+          <h3 class="admin-h3">Issued</h3>
+          <div id="ticket-list"></div>
+        </div>
+      </section>
+
+      <section class="admin-card">
+        <div class="room-bar">
           <div class="room-title"><strong>Visits</strong><span>How much of this is being read</span></div>
         </div>
         <div class="admin-body">
@@ -148,6 +165,7 @@
   <script src="/js/dm.js"></script>
   <script src="/js/account-bar.js"></script>
   <script src="/js/nav-menu.js"></script>
+  <script src="/js/tickets-core.js"></script>
   <script src="/js/admin.js"></script>
 </body>
 </html>

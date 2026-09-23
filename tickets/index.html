@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SemRede Tickets</title>
+  <meta name="description" content="100 free, numbered tickets for SemRede 2026 in Coimbra. Ask for up to four and they arrive in your messages.">
+  <meta property="og:title" content="SemRede 2026 tickets">
+  <meta property="og:description" content="100 free, numbered tickets. October 26 to 31 in Coimbra.">
+  <meta property="og:image" content="https://semrede.com/img/hero-landscape.jpg">
+  <meta property="og:url" content="https://semrede.com/tickets">
+  <meta name="theme-color" content="#030706">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/fonts.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/chat.css">
+  <link rel="stylesheet" href="/css/account.css">
+  <link rel="stylesheet" href="/css/tickets.css">
+  <script src="/js/session.js"></script>
+  <script src="/js/i18n-pt.js"></script>
+  <script src="/js/i18n.js"></script>
+</head>
+<body class="chat-body forum-body">
+  <div class="scanlines" aria-hidden="true"></div>
+
+
+  <header class="site-header container">
+    <a class="brand" href="/" aria-label="SemRede home">
+      <img class="brand-mark" src="/img/logo-mark.png" width="46" height="46" alt="">
+      <span class="wordmark">SemRede</span>
+    </a>
+    <nav>
+      <a href="/schedule">Schedule</a>
+      <a href="/locations">Locations</a>
+      <a href="/showcase">Showcase</a>
+      <a href="/chat">Chat</a>
+      <a href="/forum">Forum</a>
+      <a class="nav-admin" href="/admin">Admin</a>
+      <a class="nav-cta" href="/tickets" aria-current="page">Tickets</a>
+      <div class="account-bar">
+        <a class="acct-btn" href="/login">Log in</a>
+        <a class="acct-mail" href="/messages" title="Messages" aria-label="Messages"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 6.5l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="acct-badge" hidden></span></a>
+        <a class="acct-me" href="/login" title="Your account" aria-label="Your account"><span class="avatar"></span></a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container reg-main">
+    <section class="chat-intro">
+      <div class="section-kicker">10 / Tickets</div>
+      <h1>Tickets</h1>
+      <p class="reg-lead"><strong>100 free, numbered tickets.</strong> The event costs nothing, but there is food, water, space and beds for 100 people, so entry is by ticket. Ask for up to four, for you and whoever comes with you, and the numbered tickets arrive in your messages.</p>
+      <p class="reg-lead">The Saturday grill is the one thing you pay for, and it is paid in <a href="/crypto">CryptoEscudos you mine yourself</a>. Bring about 5000 CESC.</p>
+    </section>
+
+    <section class="reg-counts" id="reg-counts"></section>
+
+    <section class="ticket-card" id="my-ticket" hidden></section>
+
+    <div class="reg-card">
+      <div class="room-bar">
+        <img class="room-mark" src="/img/logo-mark.png" width="34" height="34" alt="">
+        <div class="room-title">
+          <strong>Which parts are you coming to?</strong>
+          <span>Change your answer whenever you want</span>
+        </div>
+        <div class="relay-status" title="Connected NOSTR relays">
+          <span class="relay-dots" id="relay-dots"></span>
+        </div>
+      </div>
+
+      <div class="reg-body">
+        <form id="name-form" class="reg-name-row">
+          <label for="me-name-input">Your name (optional)</label>
+          <div class="inline-row">
+            <input id="me-name-input" type="text" maxlength="32" autocomplete="nickname" placeholder="e.g. Maria from Porto">
+            <button type="submit" class="small-btn">Save</button>
+          </div>
+          <p class="form-error" id="me-error" role="alert"></p>
+        </form>
+
+        <div class="reg-party-row">
+          <span class="reg-party-label">How many tickets?</span>
+          <div class="reg-buttons" id="reg-party"></div>
+          <p class="hint">You and up to three people coming with you. No names needed: all the tickets are held by your account, and you show them at the entrance.</p>
+        </div>
+
+        <div id="reg-parts"></div>
+
+        <div class="reg-comment-row" id="reg-comment-row">
+          <label for="reg-comment">Anything we should know? (public)</label>
+          <textarea id="reg-comment" rows="3" maxlength="500" placeholder="Arriving Tuesday, bringing a LoRa setup, travelling with two kids, vegan..."></textarea>
+          <div class="inline-row">
+            <button type="button" class="small-btn" id="reg-save">Save comment</button>
+            <span class="reg-status" id="reg-status" role="status"></span>
+          </div>
+          <p class="hint">Your answer and this comment are public NOSTR events, like a post. Anyone can read them and count them, which is how the numbers above work. For anything private, <a href="/messages">write to the organizers</a>.</p>
+        </div>
+      </div>
+    </div>
+
+    <section class="reg-help">
+      <strong>How the tickets work</strong>
+      <p>"I'm going" to either part asks for your tickets: one for you and one for each person coming with you, up to four. Every ticket gets its own number, in the order people ask, and the organizers send them to you as a private message, usually within a day. After ticket 100 there is a waiting list, and the organizers let people in from it as they can.</p>
+      <p><strong class="reg-inline">Your tickets are tied to your NOSTR account on this site</strong> (the key this browser made for you, with no email and no password), not to names. At the event you show them, on this page or in the message from the organizers, for yourself and for whoever comes with you.</p>
+      <p>The account can go with you: on <a href="/login">your account page</a>, show and copy your key, then paste it at /login on your phone or any other device, and the same tickets are there. Keep a copy somewhere safe: a lost key is a lost ticket.</p>
+    </section>
+
+    <section class="reg-help">
+      <strong>Questions?</strong>
+      <p>Write to the organizers from <a href="/messages">your messages</a>: that conversation is encrypted and only they can read it. For questions other people may also have, use the <a href="/forum">forum</a>.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer container">
+    <span>Coimbra / Portugal</span>
+    <span><a href="/share">Share the flyer</a> / <a href="/privacy">Privacy</a></span>
+    <span>October 26 to 31, 2026</span>
+    <span class="lang-switch"><button type="button" data-lang="en">EN</button><button type="button" data-lang="pt">PT</button></span>
+  </footer>
+
+  <script src="/js/vendor/nostr.bundle.js"></script>
+  <script src="/js/nostr-config.js"></script>
+  <script src="/js/nostr-login.js"></script>
+  <script src="/js/nostr-common.js"></script>
+  <script src="/js/moderation.js"></script>
+  <script src="/js/dm.js"></script>
+  <script src="/js/account-bar.js"></script>
+  <script src="/js/nav-menu.js"></script>
+  <script src="/js/stats-schema.js"></script>
+  <script src="/js/stats.js"></script>
+  <script src="/js/identity-ui.js"></script>
+  <script src="/js/tickets-core.js"></script>
+  <script src="/js/tickets.js"></script>
+</body>
+</html>

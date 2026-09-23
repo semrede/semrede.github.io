@@ -27,7 +27,7 @@ Static website for [https://semrede.com](https://semrede.com), hosted on GitHub 
 - `fonts/`, `css/fonts.css`, `tools/fonts.mjs`: the self-hosted web fonts
 - `flyer/flyer.html`, `tools/flyer.mjs`: the printable flyer and its renderer
 - `tools/maps.sh`: refreshes the satellite views on /locations
-- `registration/index.html`, `js/registration.js`, `js/rsvp-count.js`, `css/registration.css`: registration and the counters, at /registration
+- `tickets/index.html`, `js/tickets.js`, `js/tickets-core.js`, `js/rsvp-count.js`, `css/tickets.css`: the tickets and the counters, at /tickets (`registration/index.html` only redirects there)
 - `locations/index.html`, `css/locations.css`: the venues and travel info, at /locations
 - `login/index.html`, `js/login-page.js`: log in, register, or manage your account, at /login
 - `messages/index.html`, `js/messages.js`, `js/dm.js`: private messages, at /messages
@@ -192,9 +192,17 @@ page stays fast and keeps working behind content blockers. Refresh them with
 
 ## Account and login
 
-The header has a "Log in" button on the right. It leads to `/login`, the only
-page with the login options: a NIP-07 extension, a new key made in the browser,
-or an nsec you paste. Once logged in, the same page shows the account: display
+Nobody has to log in. The first time a visitor opens a page that loads the
+NOSTR bundle, `js/nostr-login.js` makes a key in the browser, silently
+(`semrede_nostr_auto = 1` while it is that key). Nothing is published until
+they post, answer or write to someone, so the chat, the forum and the tickets
+work on the first click.
+
+The header has a "Log in" button on the right for the pages that never load the
+bundle. It leads to `/login`, the only page with the login options: a NIP-07
+extension, a new key made in the browser, or an nsec you paste. With a browser
+key, `/login` shows the account and still offers the extension or an nsec as
+"Use another key", with a warning that a ticket stays with the old key. Once logged in, the same page shows the account: display
 name, key backup and log out. The chat, the forum and the messages page only
 link to it, so there is one place to learn how accounts work.
 
@@ -238,20 +246,64 @@ signed by the visitor. The browser crops it square, scales it to 512px and
 re-encodes it as WebP first, so nothing large or with camera metadata is sent.
 Only the resulting URL is written to the profile.
 
-## Registration
+## Tickets
 
-The event is free, and `/registration` exists so the organizers know how many
-people to prepare for. It uses NIP-52: two date-based calendar events (kind
-31922) published once by the admin key with `node nostr-admin.mjs calendar`,
-and one RSVP per person and part (kind 31925, status `accepted` for going,
-`tentative` for interested, `declined` for not coming). RSVPs are addressable,
-so changing the answer replaces the old one.
+The event is free, but there is room for 100 people, so entry is by ticket.
+`/tickets` (formerly `/registration`, which now redirects) uses NIP-52: two
+date-based calendar events (kind 31922) published once by the admin key with
+`node nostr-admin.mjs calendar`, and one RSVP per person and part (kind 31925,
+status `accepted` for going, `tentative` for interested, `declined` for not
+coming). RSVPs are addressable, so changing the answer replaces the old one.
+Saturday is listed first.
 
-Answers are public, which is what makes the counters possible: the page counts
-RSVPs, and `js/rsvp-count.js` does the same on the home page with a plain relay
-socket, without loading the NOSTR library. The optional comment is the RSVP
-content and is public too; the page says so and points to `/messages` for
-anything private.
+"I'm going" to either part asks for tickets: one for the person answering and
+one for each person coming with them, up to `TICKETS.PER_PERSON` (4). The number
+travels as a `['tickets', 'N']` tag on the RSVP; companions need no name and no
+account, since every ticket is held by the key that asked. Tickets are tied to
+that NOSTR account only, which the holder can copy to other devices through
+`/login` (show and copy the nsec, paste it on the other device), and they show
+them at the entrance: the `/tickets` page or the private message. A party is
+served as a whole and in order of asking; if it does not fit in what is left,
+it and everyone after it wait, so a small party never jumps the line. Asking for
+fewer later leaves the extra tickets live and flags them in `/admin`, where the
+team revokes them one number at a time.
+
+The admin key and every
+moderator on the team can issue tickets, and each of them keeps their own public
+list, a kind 30078 event with `d = semrede-tickets-2026`:
+
+    ['cap', '100']
+    ['ticket', '<number>', <pubkey>, '<issued_at>', 'pending' | 'sent' | 'revoked']
+
+Every page merges the lists of the current team (the admin key plus the
+`semrede-moderators` set), the same way pinned and closed threads are merged,
+and ignores lists from anyone else. An entry is one number given to one person;
+it is revoked when any list says so, which is how a moderator revokes a ticket
+somebody else issued. Numbers are never reused: the next one is the highest in
+any list plus one.
+
+While the admin key has `/admin` open, its browser gives everyone going who has
+no ticket the next number, in the order they asked. Moderators do the same with
+the "Send N tickets" button there; only the admin key sends by itself, so two
+open tabs do not number the same people at once. Each ticket goes out as a
+NIP-17 private message (English and Portuguese) from the issuer's own key. The
+issuer's list is written with the ticket as `pending` before the message goes
+out and as `sent` after, so a tab closed halfway sends the same number again
+rather than a new one. One message carries all of a person's numbers. If two of the team still manage to give one number to two
+people, `/admin` marks it "number given twice".
+
+After 100, people going wait on a list shown in `/admin`, in order of asking,
+and the admin or a moderator approves them one by one; their tickets number on
+from 101. Holders who stop going are flagged there and can be revoked. The rules
+live in `js/tickets-core.js`, which both pages load, and the limit in `TICKETS`
+in `js/nostr-config.js`.
+
+Answers are public, which is what makes the counters possible: `/tickets` shows
+the tickets left, and `js/rsvp-count.js` does the same on the home page with a
+plain relay socket, without loading the NOSTR library. A ticket is taken once
+issued or once somebody is going and waiting for theirs. The optional comment is
+the RSVP content and is public too; the page says so and points to `/messages`
+for anything private.
 
 The two coordinates are in `js/nostr-config.js` under `EVENTS`. Re-running
 `calendar` republishes the same two events (same `d` tags), it does not create

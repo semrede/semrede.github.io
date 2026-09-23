@@ -28,7 +28,7 @@
     // do: counting those would tell the stats key when somebody opened their
     // own inbox or the numbers themselves, which is nobody's business.
     PATHS: ['/', '/chat', '/crypto', '/forum', '/locations', '/privacy',
-            '/registration', '/schedule', '/share', '/showcase'],
+            '/registration', '/schedule', '/share', '/showcase', '/tickets'],
 
     SKIP_PATHS: ['/login', '/messages', '/admin', '/stats'],
 

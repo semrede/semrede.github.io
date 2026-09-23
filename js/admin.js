@@ -12,6 +12,7 @@
   var net = window.SemRedeNet;
   var auth = window.SemRedeNostr;
   var mod = window.SemRedeMod;
+  var core = window.SemRedeTickets;
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {
@@ -20,6 +21,8 @@
     muteList: $('mute-list'), muteForm: $('mute-form'), muteKey: $('mute-key'), muteError: $('mute-error'),
     threadForm: $('thread-form'), threadId: $('thread-id'), threadError: $('thread-error'),
     pinnedList: $('pinned-list'), closedList: $('closed-list'),
+    ticketsSummary: $('tickets-summary'), ticketsStatus: $('tickets-status'), ticketsSend: $('tickets-send'),
+    waitingList: $('waiting-list'), ticketList: $('ticket-list'),
     relayDots: $('relay-dots')
   };
 
@@ -161,6 +164,74 @@
     closed.forEach(function (id) {
       els.closedList.appendChild(threadRow(id, 'Reopen', function () { return mod.setClosed(id, false); }));
     });
+
+    renderTickets();
+  }
+
+  // ---------- tickets ----------
+
+  // The admin and every moderator can send, approve and revoke; each of them
+  // signs their own list and their own messages (js/tickets-core.js).
+  function renderTickets() {
+    var s = core.state();
+    var issuer = core.isIssuer();
+    els.ticketsSummary.textContent = s.loaded
+      ? s.active + ' of ' + s.cap + ' issued, ' + s.queuedSeats + ' to send, ' + s.waitingSeats + ' waiting'
+      : 'Counting...';
+
+    var toSend = s.queuedSeats + core.myPending();
+    els.ticketsSend.hidden = !issuer || !s.loaded || !toSend;
+    els.ticketsSend.textContent = 'Send ' + toSend + (toSend === 1 ? ' ticket' : ' tickets');
+
+    els.waitingList.textContent = '';
+    if (!s.waiting.length) els.waitingList.appendChild(emptyNote('Nobody is waiting.'));
+    s.waiting.forEach(function (r, i) {
+      els.waitingList.appendChild(personRow(r.pubkey, 'Approve',
+        issuer ? function () { return ticketAction(core.approve(r.pubkey), 'Tickets sent.'); } : null,
+        (i + 1) + ' in line, ' + r.need + (r.need === 1 ? ' ticket' : ' tickets') + ', asked ' + net.ago(core.askedAt(r.pubkey))));
+    });
+
+    // Somebody holding more than they now ask for (a smaller group, or not
+    // coming any more): the extra numbers are revoked by hand, below.
+    var over = new Map();
+    s.over.forEach(function (o) { over.set(o.pubkey, o); });
+
+    els.ticketList.textContent = '';
+    if (!s.tickets.length) els.ticketList.appendChild(emptyNote('No tickets yet.'));
+    s.tickets.slice().reverse().forEach(function (t) {
+      var note = core.label(t.n) + ', ' + t.status;
+      if (t.by) note += ' by ' + net.displayName(t.by);
+      if (s.clashes.has(t.n)) note += ', number given twice';
+      var o = t.status !== 'revoked' && over.get(t.pubkey);
+      if (o) note += ', holds ' + o.have + ' and asks for ' + o.want;
+      els.ticketList.appendChild(personRow(t.pubkey, 'Revoke',
+        issuer && t.status !== 'revoked' ? function () {
+          if (!confirm('Revoke ticket ' + core.label(t.n) + '? The number is not given to anyone else.')) return Promise.resolve();
+          return ticketAction(core.revoke(t.n, t.pubkey), 'Revoked.');
+        } : null, note));
+    });
+  }
+
+  function ticketAction(promise, done) {
+    els.ticketsStatus.textContent = 'Working...';
+    return promise.then(function () { els.ticketsStatus.textContent = done; },
+      function (err) { els.ticketsStatus.textContent = err.message || 'Something failed'; });
+  }
+
+  // The automatic part, for the admin key only: with several of the team
+  // sending by themselves, two open tabs could number the same person at the
+  // same moment. It waits a few seconds after the page opens, so the RSVPs,
+  // the ticket lists and the mute list have all arrived first.
+  var autoReady = false;
+  var autoTimer = null;
+  function autoIssue() {
+    if (!autoReady || !mod.isAdmin(auth.pubkey)) return;
+    clearTimeout(autoTimer);
+    autoTimer = setTimeout(function () {
+      var s = core.state();
+      if (!s.queued.length && !core.myPending()) return;
+      ticketAction(core.issueQueued(), 'Tickets sent.');
+    }, 1500);
   }
 
   function emptyNote(text) {
@@ -217,10 +288,18 @@
     net.onProfile(render);
     net.onMuteChange(render);
     auth.ready.then(render);
+    core.onChange(function () { render(); autoIssue(); });
+    els.ticketsSend.addEventListener('click', function () {
+      els.ticketsSend.disabled = true;
+      ticketAction(core.issueQueued(), 'Tickets sent.').finally(function () { els.ticketsSend.disabled = false; render(); });
+    });
+    document.addEventListener('semrede-login', autoIssue);
+    setTimeout(function () { autoReady = true; autoIssue(); }, 10000);
   }
 
   wire();
   mod.watch();
+  core.watch();
   render();
   net.relayStatus(els.relayDots, null);
 })();

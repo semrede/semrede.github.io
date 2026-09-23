@@ -28,16 +28,9 @@ window.SemRedeConfig = {
   // the same categories carry over from one year to the next.
   // Registration: NIP-52 date-based calendar events (kind 31922) published by
   // the admin key with tools/nostr-admin.mjs calendar. People answer with
-  // RSVPs (kind 31925), which is also what the counters read.
+  // RSVPs (kind 31925), which is also what the counters read. Saturday comes
+  // first: it is the day most people come for.
   EVENTS: [
-    {
-      slug: 'eva',
-      name: 'The week at Eva Farm',
-      dates: 'Monday to Friday, October 26 to 30',
-      about: 'Five days of hands-on sessions, talks, meals and community time.',
-      coord: '31922:a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3:semrede-2026-eva',
-      id: '2c01a19321604cc326770d2ea8a76d956631adafef4f3da58937fc03bc9bb276'
-    },
     {
       slug: 'embaixada',
       name: 'Open day at Edif\u00edcio Embaixada',
@@ -45,8 +38,27 @@ window.SemRedeConfig = {
       about: 'Talks, demos, community fair and the closing celebration, in the centre of Coimbra.',
       coord: '31922:a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3:semrede-2026-embaixada',
       id: '9efc9a1ecf299c5dc9647d071650c920486635c39a25f7c30021bb8b8cbb6c92'
+    },
+    {
+      slug: 'eva',
+      name: 'The week at Eva Farm',
+      dates: 'Monday to Friday, October 26 to 30',
+      about: 'Five days of hands-on sessions, talks, meals and community time.',
+      coord: '31922:a98d7aeb75d99c10a945cd1fe308446434344c0ef9b3589d74f87acd1550f4c3:semrede-2026-eva',
+      id: '2c01a19321604cc326770d2ea8a76d956631adafef4f3da58937fc03bc9bb276'
     }
   ],
+
+  // Tickets: saying "I'm going" to either part asks for them, one per person
+  // coming, up to PER_PERSON, all held by the asker's key. The admin and the
+  // moderators number them and send them as private messages; the lists are
+  // public kind 30078 events with this d tag (js/tickets-core.js). Past CAP,
+  // people wait to be approved, and those tickets number on from CAP + 1.
+  TICKETS: {
+    CAP: 100,
+    PER_PERSON: 4,
+    D: 'semrede-tickets-2026'
+  },
 
   // Visit statistics. A beacon is a kind 30078 event signed by a throwaway key,
   // p-tagged to the admin key, with its content encrypted to it (NIP-44).

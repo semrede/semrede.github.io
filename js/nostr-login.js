@@ -13,6 +13,12 @@
  *   semrede_nostr_pubkey   hex pubkey (extension and local identities)
  *   semrede_nostr_privkey  hex secret key (local identities only)
  *   semrede_nostr_mode     "extension" | "local"
+ *   semrede_nostr_auto     "1" while the local key is the one made on the
+ *                          first visit and nobody chose another
+ *
+ * A visitor without a session gets a key at once, silently: nothing is
+ * published until they act, so the chat, the forum and the tickets work
+ * without a login step. /login still offers an extension or an nsec instead.
  */
 (function () {
   'use strict';
@@ -26,6 +32,7 @@
   var K_PUB = 'semrede_nostr_pubkey';
   var K_PRIV = 'semrede_nostr_privkey';
   var K_MODE = 'semrede_nostr_mode';
+  var K_AUTO = 'semrede_nostr_auto';
 
   function store(key, value) {
     try {
@@ -132,6 +139,8 @@
     pubkey: null,
     callsign: null,
     mode: null,
+    // True while the key is the one made automatically on the first visit.
+    auto: false,
     extensionAvailable: false,
 
     npub: function () { return api.pubkey ? NT.nip19.npubEncode(api.pubkey) : null; },
@@ -182,6 +191,7 @@
       extensionSigner = window.nostr;
       return window.nostr.getPublicKey().then(function (pubkey) {
         store(K_PRIV, null);
+        setAuto(false);
         setSigner(extensionSigner);
         finish(pubkey, 'extension');
         return pubkey;
@@ -190,6 +200,7 @@
 
     createAccount: function () {
       var sk = NT.generateSecretKey();
+      setAuto(false);
       return useLocalKey(bytesToHex(sk));
     },
 
@@ -205,6 +216,7 @@
       } else {
         throw new Error('Paste a key that starts with nsec1');
       }
+      setAuto(false);
       return useLocalKey(hex);
     },
 
@@ -212,6 +224,7 @@
       store(K_PUB, null);
       store(K_PRIV, null);
       store(K_MODE, null);
+      setAuto(false);
       if (window.nostr && window.nostr._semredePolyfill) {
         window.nostr = extensionSigner || undefined;
       }
@@ -224,6 +237,11 @@
 
     deriveCallsign: deriveCallsign
   };
+
+  function setAuto(yes) {
+    api.auto = yes;
+    store(K_AUTO, yes ? '1' : null);
+  }
 
   function useLocalKey(privHex) {
     var pubkey = NT.getPublicKey(hexToBytes(privHex));
@@ -275,8 +293,21 @@
     api.signerState = 'pending';
     S.save(storedPub, 'extension');
   } else {
-    api.signerReady = signerReady = rejectedSigner('Not logged in');
+    // First visit (or after a logout): make a key right away. Nothing leaves
+    // the browser until the visitor posts, answers or writes to someone.
+    var freshPriv = bytesToHex(NT.generateSecretKey());
+    var freshPub = NT.getPublicKey(hexToBytes(freshPriv));
+    store(K_PRIV, freshPriv);
+    setAuto(true);
+    api.pubkey = freshPub;
+    api.callsign = deriveCallsign(freshPub);
+    api.mode = 'local';
+    store(K_PUB, freshPub);
+    store(K_MODE, 'local');
+    S.save(freshPub, 'local');
+    installLocalSigner(freshPub, freshPriv);
   }
+  if (storedPriv) api.auto = load(K_AUTO) === '1';
 
   // Asynchronous part: find the signer. For a local key this only notes whether
   // an extension is around (for the login page) and makes sure a late extension
