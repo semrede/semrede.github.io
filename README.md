@@ -204,7 +204,14 @@ The header has a "Log in" button on the right for the pages that never load the
 bundle. It leads to `/login`, the only page with the login options: a NIP-07
 extension, a new key made in the browser, or an nsec you paste. With a browser
 key, `/login` shows the account and still offers the extension or an nsec as
-"Use another key", with a warning that a ticket stays with the old key. Once logged in, the same page shows the account: display
+"Use another key". Nobody is asked anything when the browser key was never
+used; once it has signed something, leaving it asks for confirmation first, and
+the warning only mentions tickets when the relays show that key asked for them.
+
+`window.nostr` belongs to the visitor's extension and the site never writes to
+it: the browser key signs through a private handle in `js/nostr-login.js`.
+Writing the browser key's signer there used to hide the extension, which made
+"Log in with extension" fail for everyone who had a browser key. Once logged in, the same page shows the account: display
 name, key backup and log out. The chat, the forum and the messages page only
 link to it, so there is one place to learn how accounts work.
 

@@ -15,6 +15,13 @@
  *   semrede_nostr_mode     "extension" | "local"
  *   semrede_nostr_auto     "1" while the local key is the one made on the
  *                          first visit and nobody chose another
+ *   semrede_nostr_used     "1" once the local key has signed anything, so
+ *                          swapping it for another only warns when there is
+ *                          something to lose
+ *
+ * window.nostr belongs to the visitor's extension and is never written here:
+ * the local key signs through the private handle below. Replacing it once hid
+ * the extension from "Log in with extension" for everyone with a browser key.
  *
  * A visitor without a session gets a key at once, silently: nothing is
  * published until they act, so the chat, the forum and the tickets work
@@ -33,6 +40,7 @@
   var K_PRIV = 'semrede_nostr_privkey';
   var K_MODE = 'semrede_nostr_mode';
   var K_AUTO = 'semrede_nostr_auto';
+  var K_USED = 'semrede_nostr_used';
 
   function store(key, value) {
     try {
@@ -60,7 +68,7 @@
   var deriveCallsign = S.deriveCallsign;
 
   function hasExtension() {
-    return !!(window.nostr && !window.nostr._semredePolyfill);
+    return !!(window.nostr && !window.nostr._semredePolyfill && typeof window.nostr.getPublicKey === 'function');
   }
 
   // Poll for a NIP-07 extension; they inject window.nostr shortly after load.
@@ -71,8 +79,9 @@
   }
 
   // NIP-07 compatible signer backed by a local key. The site signs through the
-  // handle we keep here, never through window.nostr: an extension that injects
-  // itself late would otherwise take over and sign with a different key.
+  // handle we keep here, never through window.nostr: that one is the
+  // extension's, and an extension that injects itself late would otherwise
+  // take over and sign with a different key.
   function makeLocalSigner(pubkeyHex, privkeyHex) {
     var sk = hexToBytes(privkeyHex);
     return {
@@ -93,6 +102,7 @@
           tags: Array.isArray(event.tags) ? event.tags : [],
           content: event.content || ''
         };
+        store(K_USED, '1');
         return Promise.resolve(NT.finalizeEvent(template, sk));
       }
     };
@@ -100,7 +110,6 @@
 
   function installLocalSigner(pubkeyHex, privkeyHex) {
     signer = makeLocalSigner(pubkeyHex, privkeyHex);
-    window.nostr = signer;          // kept for other NOSTR code in the page
     setSigner(signer);
     return signer;
   }
@@ -141,6 +150,9 @@
     mode: null,
     // True while the key is the one made automatically on the first visit.
     auto: false,
+    // True once this browser key has signed something (a post, an answer, a
+    // message, a name). Always false for an extension.
+    used: function () { return api.mode === 'local' && load(K_USED) === '1'; },
     extensionAvailable: false,
 
     npub: function () { return api.pubkey ? NT.nip19.npubEncode(api.pubkey) : null; },
@@ -186,21 +198,32 @@
       });
     },
 
+    // Waits up to two seconds for the extension, since some inject late.
     loginWithExtension: function () {
-      if (!hasExtension()) return Promise.reject(new Error('No NOSTR extension found'));
-      extensionSigner = window.nostr;
-      return window.nostr.getPublicKey().then(function (pubkey) {
-        store(K_PRIV, null);
-        setAuto(false);
-        setSigner(extensionSigner);
-        finish(pubkey, 'extension');
-        return pubkey;
+      return new Promise(function (resolve, reject) {
+        detectExtension(10, function (found) {
+          if (!found) return reject(new Error('No NOSTR extension found'));
+          resolve(window.nostr);
+        });
+      }).then(function (ext) {
+        return ext.getPublicKey().then(function (pubkey) {
+          if (!/^[0-9a-f]{64}$/.test(pubkey || '')) throw new Error('The extension did not share a key');
+          extensionSigner = ext;
+          store(K_PRIV, null);
+          store(K_USED, null);
+          setAuto(false);
+          api.extensionAvailable = true;
+          setSigner(extensionSigner);
+          finish(pubkey, 'extension');
+          return pubkey;
+        });
       });
     },
 
     createAccount: function () {
       var sk = NT.generateSecretKey();
       setAuto(false);
+      store(K_USED, null);
       return useLocalKey(bytesToHex(sk));
     },
 
@@ -217,6 +240,8 @@
         throw new Error('Paste a key that starts with nsec1');
       }
       setAuto(false);
+      // An existing key has a history of its own; warn before replacing it.
+      store(K_USED, '1');
       return useLocalKey(hex);
     },
 
@@ -224,10 +249,8 @@
       store(K_PUB, null);
       store(K_PRIV, null);
       store(K_MODE, null);
+      store(K_USED, null);
       setAuto(false);
-      if (window.nostr && window.nostr._semredePolyfill) {
-        window.nostr = extensionSigner || undefined;
-      }
       signer = null;
       api.signerState = 'none';
       api.signerReady = signerReady = rejectedSigner('Not logged in');
@@ -310,15 +333,12 @@
   if (storedPriv) api.auto = load(K_AUTO) === '1';
 
   // Asynchronous part: find the signer. For a local key this only notes whether
-  // an extension is around (for the login page) and makes sure a late extension
-  // has not taken over window.nostr. For an extension session it waits for the
-  // extension and checks it is still the same account.
+  // an extension is around, for the login page. For an extension session it
+  // waits for the extension and checks it is still the same account.
   api.ready = new Promise(function (resolve) {
     if (api.mode === 'local') {
-      detectExtension(3, function (found) {
+      detectExtension(10, function (found) {
         api.extensionAvailable = found;
-        if (found) extensionSigner = window.nostr;
-        window.nostr = signer;
         resolve(api.pubkey);
       });
       return;

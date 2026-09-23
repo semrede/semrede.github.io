@@ -170,6 +170,7 @@
       drop(K_PROFILE);
       drop(K_MOD);
       drop('semrede_nostr_auto');
+      drop('semrede_nostr_used');
       pubkey = api.pubkey = null;
       mode = api.mode = null;
       callsign = api.callsign = null;

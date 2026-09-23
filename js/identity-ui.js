@@ -85,11 +85,32 @@
       });
   }
 
-  // Swapping away from a browser key loses it unless it was saved, and with
-  // it any ticket and private messages it holds.
-  function confirmReplace() {
-    if (!auth.pubkey || auth.mode !== 'local') return true;
-    return confirm('This browser already has a key for you. Any ticket or messages it holds stay with it, so save it first (Show, above). Use the other key?');
+  // Leaving a browser key behind loses it unless it was saved. Nobody is asked
+  // anything when the key was never used, and tickets are only mentioned when
+  // the relays show that this key really asked for some.
+  function askedForTickets() {
+    var coords = (window.SemRedeConfig.EVENTS || []).map(function (e) { return e.coord; });
+    return net.pool.querySync(net.RELAYS, { kinds: [31925], authors: [auth.pubkey], '#a': coords }, { maxWait: 3000 })
+      .then(function (events) {
+        var latest = {};
+        events.forEach(function (ev) {
+          var a = (ev.tags.filter(function (t) { return t[0] === 'a'; })[0] || [])[1];
+          if (!latest[a] || latest[a].created_at < ev.created_at) latest[a] = ev;
+        });
+        return Object.keys(latest).some(function (a) {
+          return latest[a].tags.some(function (t) { return t[0] === 'status' && t[1] === 'accepted'; });
+        });
+      }, function () { return false; });
+  }
+
+  // Resolves true when it is fine to go ahead.
+  function confirmLeaving(action) {
+    if (!auth.pubkey || auth.mode !== 'local' || !auth.used()) return Promise.resolve(true);
+    return askedForTickets().then(function (tickets) {
+      return confirm(tickets
+        ? 'The key this browser holds asked for tickets, and the tickets belong to that key. Save it first (Show, above), or they are lost. ' + action
+        : 'The key this browser holds has already been used here. Save it first (Show, above) if you want to keep it. ' + action);
+    });
   }
 
   function copy(text, btn) {
@@ -102,12 +123,16 @@
 
   function wire() {
     if (els.btnExtension) els.btnExtension.addEventListener('click', function () {
-      if (!confirmReplace()) return;
-      auth.loginWithExtension().catch(function (err) {
+      var button = els.btnExtension;
+      button.disabled = true;
+      confirmLeaving('Use the extension instead?').then(function (ok) {
+        if (!ok) return;
+        return auth.loginWithExtension();
+      }).catch(function (err) {
         showError(els.loginError, err.message === 'No NOSTR extension found'
-          ? 'No NOSTR extension found in this browser. Create an account instead, or install Alby or nos2x.'
-          : 'The extension did not share a key.');
-      });
+          ? 'No NOSTR extension found in this browser. Install Alby or nos2x, or log in with your nsec below.'
+          : 'The extension did not share a key. Unlock it and allow this site, then try again.');
+      }).then(function () { button.disabled = false; });
     });
 
     if (els.createForm) els.createForm.addEventListener('submit', function (e) {
@@ -125,13 +150,17 @@
 
     if (els.importForm) els.importForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (!confirmReplace()) return;
-      try {
-        auth.importKey(els.importKey.value);
-        els.importKey.value = '';
-      } catch (err) {
-        showError(els.loginError, err.message);
-      }
+      var value = els.importKey.value.trim();
+      if (!/^(nsec1[0-9a-z]+|[0-9a-f]{64})$/i.test(value)) return showError(els.loginError, 'Paste a key that starts with nsec1');
+      confirmLeaving('Use the key you pasted instead?').then(function (ok) {
+        if (!ok) return;
+        try {
+          auth.importKey(value);
+          els.importKey.value = '';
+        } catch (err) {
+          showError(els.loginError, err.message);
+        }
+      });
     });
 
     if (els.nameForm) els.nameForm.addEventListener('submit', function (e) {
@@ -151,8 +180,7 @@
     if (els.nsecCopy) els.nsecCopy.addEventListener('click', function () { copy(auth.nsec(), els.nsecCopy); });
     if (els.npubCopy) els.npubCopy.addEventListener('click', function () { copy(auth.npub(), els.npubCopy); });
     if (els.logout) els.logout.addEventListener('click', function () {
-      if (auth.mode === 'local' && !confirm('This account only exists in this browser. Log out only if you saved your key, or you lose it together with any ticket it holds. Log out?')) return;
-      auth.logout();
+      confirmLeaving('Log out?').then(function (ok) { if (ok) auth.logout(); });
     });
 
     document.addEventListener('semrede-login', function () {
