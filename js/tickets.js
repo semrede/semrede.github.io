@@ -1,7 +1,9 @@
 /* /tickets: asking for tickets is a NIP-52 RSVP (kind 31925) to one of the
- * two calendar events of SemRede 2026. "I'm going" is status accepted, "I'm
- * interested" is tentative, and changing the answer replaces the old one (the
- * RSVP is addressable, one per person and event through its d tag). The
+ * two calendar events of SemRede 2026. There is one button per part: "I'm
+ * going" publishes status accepted, and pressing it again publishes declined.
+ * Older "interested" (tentative) answers are simply not counted. Changing the
+ * answer replaces the old one (the RSVP is addressable, one per person and
+ * event through its d tag). The
  * ['tickets', 'N'] tag says how many people come, the asker included; the
  * others need no name and no account, their tickets are held by this key.
  *
@@ -55,15 +57,14 @@
   }
 
   function tally(slug) {
-    var going = 0, interested = 0;
+    var going = 0;
     core.rsvps.forEach(function (person, pubkey) {
       if (net.isMuted(pubkey)) return;
       var r = person[slug];
       if (!r) return;
       if (r.status === 'accepted') going += r.party || 1;
-      else if (r.status === 'tentative') interested++;
     });
-    return { going: going, interested: interested };
+    return { going: going };
   }
 
   function ownName() {
@@ -100,10 +101,6 @@
       var box = document.createElement('div');
       box.className = 'count-box';
       box.append(bigNumber(s.loaded ? counts.going : null), label(ev.slug === 'eva' ? 'at Eva Farm' : 'at Embaixada'));
-      var extra = document.createElement('span');
-      extra.className = 'count-extra';
-      extra.textContent = s.loaded ? '+ ' + counts.interested + ' interested' : '';
-      box.appendChild(extra);
       els.counts.appendChild(box);
     });
   }
@@ -190,21 +187,27 @@
       var numbers = document.createElement('p');
       numbers.className = 'reg-numbers';
       numbers.textContent = s.loaded
-        ? counts.going + (counts.going === 1 ? ' person going' : ' people going') + ', ' + counts.interested + ' interested'
+        ? counts.going + (counts.going === 1 ? ' person going' : ' people going')
         : 'Counting...';
 
       var buttons = document.createElement('div');
       buttons.className = 'reg-buttons';
-      [['accepted', "I'm going"], ['tentative', "I'm interested"], ['declined', 'Not this time']].forEach(function (pair) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        var current = myRsvp(ev.slug);
-        b.className = 'reg-btn' + (current && current.status === pair[0] ? ' chosen' : '');
-        b.textContent = pair[1];
-        b.disabled = !auth.pubkey;
-        b.addEventListener('click', function () { choose(ev.slug, pair[0]); });
-        buttons.appendChild(b);
-      });
+      var current = myRsvp(ev.slug);
+      var going = !!(current && current.status === 'accepted');
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'reg-btn' + (going ? ' chosen' : '');
+      b.textContent = "I'm going";
+      b.title = going ? 'Press again if you are not coming after all' : '';
+      b.disabled = !auth.pubkey;
+      b.addEventListener('click', function () { going ? cancel(ev.slug) : choose(ev.slug, 'accepted'); });
+      buttons.appendChild(b);
+      if (going) {
+        var undo = document.createElement('span');
+        undo.className = 'reg-undo';
+        undo.textContent = 'Press again to cancel';
+        buttons.appendChild(undo);
+      }
 
       card.append(head, about, numbers, buttons);
       els.parts.appendChild(card);
@@ -242,6 +245,18 @@
     if (!auth.pubkey) return;
     if (value === 'accepted') saveTypedName();
     publishRsvp(slug, value, els.comment.value.trim().slice(0, COMMENT_MAX));
+  }
+
+  // Cancelling the last part a ticket holder is going to gives the tickets
+  // up, so that one asks first.
+  function cancel(slug) {
+    var others = cfg.EVENTS.some(function (e) {
+      var r = myRsvp(e.slug);
+      return e.slug !== slug && r && r.status === 'accepted';
+    });
+    if (!others && core.standing(auth.pubkey).numbers.length &&
+        !confirm('You are not coming after all? Your tickets go back to the organizers, who can give them to someone else.')) return;
+    publishRsvp(slug, 'declined', els.comment.value.trim().slice(0, COMMENT_MAX));
   }
 
   // A new size is written on every part they are going to, since that is

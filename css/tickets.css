@@ -35,6 +35,7 @@
 .reg-btn:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
 .reg-btn.chosen { background: var(--teal); border-color: var(--teal); color: var(--ink); }
 .reg-btn:disabled { opacity: .45; cursor: not-allowed; }
+.reg-undo { align-self: center; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #7d877f; }
 
 .reg-comment-row { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
 .reg-comment-row label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }

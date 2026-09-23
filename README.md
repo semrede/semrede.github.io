@@ -252,8 +252,9 @@ The event is free, but there is room for 100 people, so entry is by ticket.
 `/tickets` (formerly `/registration`, which now redirects) uses NIP-52: two
 date-based calendar events (kind 31922) published once by the admin key with
 `node nostr-admin.mjs calendar`, and one RSVP per person and part (kind 31925,
-status `accepted` for going, `tentative` for interested, `declined` for not
-coming). RSVPs are addressable, so changing the answer replaces the old one.
+status `accepted` for going, `declined` once they press "I'm going" again to
+cancel; there is no "interested" any more, and old `tentative` answers are not
+counted). RSVPs are addressable, so changing the answer replaces the old one.
 Saturday is listed first.
 
 "I'm going" to either part asks for tickets: one for the person answering and
