@@ -180,6 +180,78 @@
     return new Date(seconds * 1000).toISOString().slice(0, 10);
   };
 
+  // ---- summaries ----
+  //
+  // Once a day, a week or a month is over its numbers stop changing, so they
+  // are published once as a summary note and read back instead of being
+  // recounted from hundreds of beacons. Same kind as a beacon, encrypted to one
+  // reader per copy, replaceable by its d tag:
+  //
+  //   semrede-stats-2026-09-22-<pk8>          a day (the old live day, too)
+  //   semrede-stats-week-2026-09-21-<pk8>     the week starting that Monday
+  //   semrede-stats-month-2026-09-<pk8>       a month
+  //
+  // The grain and the period are in the d tag, so a reader can tell what a
+  // note is without decrypting it.
+  S.GRAINS = ['day', 'week', 'month'];
+  S.SUM_TAG = 'semrede-stats-summary';
+
+  S.summaryD = function (grain, key, pubkey) {
+    return S.AGG_D_PREFIX + (grain === 'day' ? '' : grain + '-') + key + '-' + pubkey.slice(0, 8);
+  };
+
+  var SUM_D_RE = /^semrede-stats-(?:(week|month)-)?(\d{4}-\d{2}(?:-\d{2})?)-[0-9a-f]{8}$/;
+
+  // { grain, key } or null.
+  S.parseSummaryD = function (d) {
+    var m = SUM_D_RE.exec(String(d || ''));
+    if (!m) return null;
+    var grain = m[1] || 'day';
+    if ((grain === 'month') !== (m[2].length === 7)) return null;
+    return { grain: grain, key: m[2] };
+  };
+
+  S.addDays = function (day, n) {
+    var d = new Date(day + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+  };
+
+  // The Monday of that day's week, which is what a week is called here.
+  S.mondayOf = function (day) {
+    var d = new Date(day + 'T00:00:00Z');
+    return S.addDays(day, -((d.getUTCDay() + 6) % 7));
+  };
+
+  // Every day of a week or a month, in order.
+  S.daysIn = function (grain, key) {
+    if (grain === 'day') return [key];
+    var first = grain === 'week' ? key : key + '-01';
+    var out = [];
+    for (var d = first; grain === 'week' ? out.length < 7 : d.slice(0, 7) === key; d = S.addDays(d, 1)) out.push(d);
+    return out;
+  };
+
+  // Several days (or weeks, or months) added together. Summing visits is right
+  // by definition: a visit is one tab on one day. Tables were already folded
+  // for k-anonymity per day, so the sums stay folded.
+  S.merge = function (list) {
+    var out = { v: S.VERSION, views: 0, visits: 0, firstTime: 0, engaged: 0, beacons: 0, capped: 0, ungrouped: 0,
+      paths: {}, refs: {}, langs: {}, screens: {}, secs: {}, days: 0 };
+    list.forEach(function (d) {
+      ['views', 'visits', 'firstTime', 'engaged', 'beacons', 'capped', 'ungrouped'].forEach(function (k) {
+        out[k] += Number(d[k]) || 0;
+      });
+      out.days += Number(d.days) || 1;
+      ['paths', 'refs', 'langs', 'screens', 'secs'].forEach(function (k) {
+        Object.keys(d[k] || {}).forEach(function (name) {
+          out[k][name] = (out[k][name] || 0) + (Number(d[k][name]) || 0);
+        });
+      });
+    });
+    return out;
+  };
+
   root.SemRedeStatsSchema = S;
   if (typeof module !== 'undefined' && module.exports) module.exports = S;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

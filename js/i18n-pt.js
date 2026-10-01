@@ -715,6 +715,9 @@ window.SemRedeDict.pt = {
     'No beacons found yet. They appear here as people read the site.': 'Ainda n\u00e3o foram encontradas mensagens. Aparecem aqui \u00e0 medida que as pessoas leem o site.',
     'No numbers yet. They appear once somebody who can read the beacons opens this page.': 'Ainda n\u00e3o h\u00e1 n\u00fameros. Aparecem quando algu\u00e9m que possa ler as mensagens abrir esta p\u00e1gina.',
     'Looking for beacons...': 'A procurar mensagens...',
+    'Loading the summaries...': 'A carregar os resumos...',
+    'Looking for today\'s beacons...': 'A procurar as mensagens de hoje...',
+    'There were too many beacons for one visit. Open the page again to read the rest.': 'Havia mensagens a mais para uma visita. Abre a p\u00e1gina outra vez para ler o resto.',
     'Counted in this browser just now, straight from the beacons.': 'Contado neste browser agora mesmo, diretamente das mensagens.',
     'The relays did not answer. Try again in a moment.': 'Os relays n\u00e3o responderam. Tenta outra vez daqui a pouco.',
 

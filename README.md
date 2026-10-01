@@ -587,8 +587,21 @@ Details that matter if this is ever touched again:
 - A published day that is **bigger** than what this browser counted is kept: the
   browser only sees thirty days, only what the relays still hold, and only what
   it had time to decrypt.
-- Publishing is throttled through `localStorage` to one send per day per ten
-  minutes, so opening the page repeatedly does not spam the relays.
+- Publishing a live count is throttled through `localStorage` to one send per
+  day per ten minutes, so opening the page repeatedly does not spam the relays.
+- **Summaries.** Once a day is over (plus an hour of grace for late beacons),
+  the counting browser publishes it as a final summary note, and the same for
+  every week (Monday to Sunday, UTC) and month whose days are all summarized.
+  They use the same kind and encryption as the live days, one copy per
+  moderator and reader, with `d = semrede-stats-<day>-<pk8>`,
+  `semrede-stats-week-<monday>-<pk8>` or `semrede-stats-month-<YYYY-MM>-<pk8>`,
+  `final: true` in the content and a `t = semrede-stats-summary` tag. Opening
+  the page reads those first (decrypted notes are cached in
+  `semrede_stats_notes`), and the counting browser then reads beacons only from
+  the oldest day in the window that has no summary yet, which is normally
+  today. A day is only closed after a read that got every beacon since then,
+  and a closed day with no beacons gets an empty summary so it is not read
+  again. Old days inside a summarized month are not decrypted at all.
 - A signer that cannot decrypt is now said out loud on the page. An extension
   without NIP-44, or one that is locked, used to leave the card looking simply
   empty, which is indistinguishable from "no visitors". It now says which of the
