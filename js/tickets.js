@@ -83,7 +83,7 @@
   // relays that answer first often hold only some of the RSVPs, and counting
   // from them showed less than half of the people going (groups included).
   // Tickets left is safe earlier, as it comes mostly from the ticket lists.
-  var COUNT_KEY = 'semrede_ticket_count';
+  var COUNT_KEY = 'semrede_ticket_count2';   // 2: earlier saves could be partial
   var savedJson = '';
 
   function lastCount() {

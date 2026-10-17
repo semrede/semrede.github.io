@@ -31,7 +31,7 @@
   var painted = false;
   var finished = 0;         // relays that have answered in full
 
-  var COUNT_KEY = 'semrede_ticket_count';
+  var COUNT_KEY = 'semrede_ticket_count2';   // 2: earlier saves could be partial
   function lastCount() {
     try {
       var c = JSON.parse(localStorage.getItem(COUNT_KEY) || 'null');
