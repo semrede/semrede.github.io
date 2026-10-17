@@ -9,6 +9,10 @@
  * The number is painted every time an answer arrives rather than once at the
  * end: relays disagree about what they hold, and the first one to finish is
  * often the one with nothing.
+ *
+ * The last number this browser saw is shown at once, shared with /tickets
+ * (js/tickets.js). While it is up, the count only moves once two relays have
+ * finished, so a returning visitor does not watch it jump about.
  */
 (function () {
   'use strict';
@@ -25,6 +29,27 @@
   var ledgers = new Map();  // issuer -> newest ticket list
   var team = null;          // newest moderator list by the admin key
   var painted = false;
+  var finished = 0;         // relays that have answered in full
+
+  var COUNT_KEY = 'semrede_ticket_count';
+  function lastCount() {
+    try {
+      var c = JSON.parse(localStorage.getItem(COUNT_KEY) || 'null');
+      return c && c.cap === cfg.TICKETS.CAP && typeof c.left === 'number' ? c : null;
+    } catch (e) { return null; }
+  }
+  function saveCount(left) {
+    var c = lastCount() || {};
+    c.cap = cfg.TICKETS.CAP;
+    c.left = left;
+    try { localStorage.setItem(COUNT_KEY, JSON.stringify(c)); } catch (e) { /* full or private */ }
+  }
+  function paint(left) {
+    box.querySelector('[data-rsvp-number]').textContent = String(left);
+    box.hidden = false;
+  }
+  var cached = lastCount();
+  if (cached) paint(cached.left);
 
   function tagValue(ev, name) {
     for (var i = 0; i < ev.tags.length; i++) if (ev.tags[i][0] === name) return ev.tags[i][1];
@@ -84,9 +109,10 @@
     var taken = 0;
     held.forEach(function (n) { taken += n; });
     wants.forEach(function (want, pk) { taken += Math.max(0, want - (held.get(pk) || 0)); });
-    box.querySelector('[data-rsvp-number]').textContent = String(Math.max(0, cfg.TICKETS.CAP - taken));
-    box.hidden = false;
+    var left = Math.max(0, cfg.TICKETS.CAP - taken);
+    paint(left);
     painted = true;
+    if (finished >= 2) saveCount(left);
   }
 
   // Several relays, because they do not hold the same events: asking two of
@@ -98,13 +124,15 @@
     var ws;
     try { ws = new WebSocket(url); } catch (e) { waiting--; return; }
     var sub = 'count' + Math.random().toString(36).slice(2, 8);
-    var finished = false;
+    var done = false;
 
-    function finish() {
-      if (finished) return;      // EOSE then close used to count twice, which
-      finished = true;           // ended the count before the slow relays answered
+    // answered: an EOSE, not an error or a dropped socket.
+    function finish(answered) {
+      if (done) return;          // EOSE then close used to count twice, which
+      done = true;               // ended the count before the slow relays answered
       waiting--;
-      if (waiting <= 0) show();
+      if (answered === true) finished++;
+      if (waiting <= 0 || (cached && finished >= 2)) show();
     }
 
     ws.onopen = function () {
@@ -118,9 +146,9 @@
       if (data[0] === 'EVENT' && data[2]) {
         if (data[2].kind === 30078 || data[2].kind === 30000) noteLedger(data[2]);
         else note(data[2]);
-        show();                  // every answer moves the number
+        if (!cached) show();     // every answer moves the number
       } else if (data[0] === 'EOSE') {
-        finish();
+        finish(true);
         try { ws.close(); } catch (e) {}
       }
     };

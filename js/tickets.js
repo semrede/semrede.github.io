@@ -71,10 +71,49 @@
     return (p && p.name) || '';
   }
 
+  // ---------- the last count ----------
+
+  // The numbers this browser saw last time, shown until the relays answer, so
+  // a returning visitor sees a count at once instead of "...". The home page
+  // counter (js/rsvp-count.js) reads and writes the same entry. A count from
+  // before the limit changed is of no use and is ignored.
+  var COUNT_KEY = 'semrede_ticket_count';
+  var savedJson = '';
+
+  function lastCount() {
+    try {
+      var c = JSON.parse(localStorage.getItem(COUNT_KEY) || 'null');
+      return c && c.cap === cfg.TICKETS.CAP ? c : null;
+    } catch (e) { return null; }
+  }
+
+  function saveCount(s) {
+    var going = {};
+    cfg.EVENTS.forEach(function (ev) { going[ev.slug] = tally(ev.slug).going; });
+    var c = Object.assign(lastCount() || {}, { cap: s.cap, left: s.left, waiting: s.waitingSeats, going: going });
+    var json = JSON.stringify(c);
+    if (json === savedJson) return;
+    savedJson = json;
+    try { localStorage.setItem(COUNT_KEY, json); } catch (e) { /* full or private */ }
+  }
+
+  // What to show: the live numbers once loaded, else the last ones, else null.
+  function counts(s) {
+    if (s.loaded) {
+      var going = {};
+      cfg.EVENTS.forEach(function (ev) { going[ev.slug] = tally(ev.slug).going; });
+      return { left: s.left, waiting: s.waitingSeats, going: going };
+    }
+    var c = lastCount();
+    if (!c || !c.going) return null;
+    return { left: c.left, waiting: c.waiting || 0, going: c.going };
+  }
+
   // ---------- rendering ----------
 
   function render() {
     var s = core.state();
+    if (s.loaded) saveCount(s);
     renderCounts(s);
     renderParty();
     renderMine(s);
@@ -86,20 +125,20 @@
     els.counts.textContent = '';
     var total = document.createElement('div');
     total.className = 'count-box total';
-    total.append(bigNumber(s.loaded ? s.left : null), label('of ' + s.cap + ' tickets left'));
-    if (s.loaded && s.waitingSeats) {
+    var shown = counts(s);
+    total.append(bigNumber(shown ? shown.left : null), label('of ' + s.cap + ' tickets left'));
+    if (shown && shown.waiting) {
       var wait = document.createElement('span');
       wait.className = 'count-extra';
-      wait.textContent = s.waitingSeats + ' on the waiting list';
+      wait.textContent = shown.waiting + ' on the waiting list';
       total.appendChild(wait);
     }
     els.counts.appendChild(total);
 
     cfg.EVENTS.forEach(function (ev) {
-      var counts = tally(ev.slug);
       var box = document.createElement('div');
       box.className = 'count-box';
-      box.append(bigNumber(s.loaded ? counts.going : null), label(ev.slug === 'eva' ? 'at Eva Farm' : 'at Embaixada'));
+      box.append(bigNumber(shown && typeof shown.going[ev.slug] === 'number' ? shown.going[ev.slug] : null), label(ev.slug === 'eva' ? 'at Eva Farm' : 'at Embaixada'));
       els.counts.appendChild(box);
     });
   }
@@ -241,8 +280,8 @@
 
   function renderParts(s) {
     els.parts.textContent = '';
+    var shown = counts(s);
     cfg.EVENTS.forEach(function (ev) {
-      var counts = tally(ev.slug);
       var card = document.createElement('article');
       card.className = 'reg-part';
 
@@ -260,8 +299,9 @@
 
       var numbers = document.createElement('p');
       numbers.className = 'reg-numbers';
-      numbers.textContent = s.loaded
-        ? counts.going + (counts.going === 1 ? ' person going' : ' people going')
+      var people = shown ? shown.going[ev.slug] : null;
+      numbers.textContent = typeof people === 'number'
+        ? people + (people === 1 ? ' person going' : ' people going')
         : 'Counting...';
 
       var buttons = document.createElement('div');
