@@ -734,7 +734,7 @@
       var age = Date.now() / 1000 - newest.at;
       var freshness = document.createElement('p');
       freshness.className = 'muted-note stats-fresh';
-      var stamp = when.toLocaleTimeString(document.documentElement.lang === 'pt' ? 'pt-PT' : 'en-GB',
+      var stamp = when.toLocaleTimeString({ pt: 'pt-PT', es: 'es-ES' }[document.documentElement.lang] || 'en-GB',
         { hour: '2-digit', minute: '2-digit' });
       if (age > 90 * 60) {
         freshness.classList.add('stale');

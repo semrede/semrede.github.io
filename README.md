@@ -462,15 +462,19 @@ not run it unless you want a new room id.
 
 ## Languages
 
-The pages are written in English and stay that way. `js/i18n-pt.js` holds a
-Portuguese dictionary keyed by the English text, and `js/i18n.js` lays it over
+The pages are written in English and stay that way. `js/i18n-pt.js` and
+`js/i18n-es.js` hold Portuguese and Spanish dictionaries keyed by the English
+text, and `js/i18n.js` lays the right one over
 the page at runtime, so there is one copy of every page and translations are
 written on top of it.
 
-- The language is picked from `?lang=pt` first, then the choice saved in the
-  browser (`localStorage semrede_lang`, set by the EN / PT buttons in the
-  footer), then `navigator.languages`. Anything that is not Portuguese gets
-  English.
+- The language is picked from `?lang=pt` or `?lang=es` first, then the choice
+  saved in the browser (`localStorage semrede_lang`, set by the EN / PT / ES
+  buttons in the footer), then `navigator.languages`, so a browser set to any
+  kind of Spanish gets Spanish. Anything that is neither Portuguese nor Spanish
+  gets English.
+- The two dictionaries have the same keys: a string added to one belongs in
+  the other too.
 - Text built by the scripts (chat messages, forum lists, counters) is
   translated as well: a `MutationObserver` keeps watching the page.
 - Strings that carry a number go in the `patterns` list at the end of the
@@ -479,11 +483,12 @@ written on top of it.
   little by little. `tools/` has no build step for this: edit the file and
   reload.
 - Dates and times follow the language, because `js/nostr-common.js` formats
-  them with `pt-PT` when `<html lang>` is `pt`.
+  them with `pt-PT` or `es-ES` when `<html lang>` is `pt` or `es`.
 
 To add another language, copy `js/i18n-pt.js` to `js/i18n-<code>.js`, set
-`window.SemRedeDict.<code>`, include it in the pages next to the Portuguese one
-and add the code to `pick()` in `js/i18n.js`.
+`window.SemRedeDict.<code>`, include it in the pages next to the other
+dictionaries, add a button to the footer `.lang-switch` and add the code to
+`pick()` in `js/i18n.js`.
 
 ## What is loaded, and from where
 

@@ -136,7 +136,8 @@
 
   // Dates follow whatever language the translation overlay settled on.
   function locale() {
-    return document.documentElement.lang === 'pt' ? 'pt-PT' : 'en-GB';
+    var lang = document.documentElement.lang;
+    return lang === 'pt' ? 'pt-PT' : lang === 'es' ? 'es-ES' : 'en-GB';
   }
 
   function timeLabel(ts) {

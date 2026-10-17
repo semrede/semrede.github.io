@@ -1,11 +1,11 @@
 /* Translation overlay.
  *
  * The pages are written in English and stay that way. A dictionary keyed by the
- * English text (js/i18n-pt.js) is laid over the page at runtime, so nothing has
+ * English text (js/i18n-pt.js, js/i18n-es.js) is laid over the page at runtime, so nothing has
  * to be duplicated or kept in sync: a string that has no translation simply
  * stays in English.
  *
- * Language: ?lang=pt wins, then a choice saved in this browser, then the
+ * Language: ?lang=pt or ?lang=es wins, then a choice saved in this browser, then the
  * browser's own languages. English is the default.
  *
  * Text that the scripts build later (chat messages, forum lists, counters) is
@@ -32,6 +32,7 @@
     for (var i = 0; i < list.length; i++) {
       var code = String(list[i]).toLowerCase();
       if (code.indexOf('pt') === 0) return 'pt';
+      if (code.indexOf('es') === 0) return 'es';
       if (code.indexOf('en') === 0) return 'en';
     }
     return 'en';
@@ -55,7 +56,7 @@
 
   document.documentElement.lang = lang;
 
-  // The EN / PT buttons in the footer. Delegated, because the footer is not
+  // The EN / PT / ES buttons in the footer. Delegated, because the footer is not
   // parsed yet when this runs.
   document.addEventListener('click', function (e) {
     var button = e.target.closest && e.target.closest('.lang-switch [data-lang]');
