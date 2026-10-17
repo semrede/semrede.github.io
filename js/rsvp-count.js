@@ -112,7 +112,7 @@
     var left = Math.max(0, cfg.TICKETS.CAP - taken);
     paint(left);
     painted = true;
-    if (finished >= 2) saveCount(left);
+    if (waiting <= 0 && finished >= 2) saveCount(left);   // complete counts only
   }
 
   // Several relays, because they do not hold the same events: asking two of

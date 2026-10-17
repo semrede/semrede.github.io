@@ -175,7 +175,7 @@
   function renderTickets() {
     var s = core.state();
     var issuer = core.isIssuer();
-    els.ticketsSummary.textContent = s.loaded
+    els.ticketsSummary.textContent = s.complete
       ? s.active + ' of ' + s.cap + ' issued, ' + s.queuedSeats + ' to send, ' + s.waitingSeats + ' waiting'
       : 'Counting...';
 

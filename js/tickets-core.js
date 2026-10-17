@@ -58,9 +58,11 @@
   // an entry is { n, pubkey, at, status, by }
   var tickets = new Map();
   var allEntries = [];
-  // some: enough relays have answered to show the numbers, which keep moving
-  // as the rest arrive. all: every relay has, or had its chance to; only then
-  // is anything issued.
+  // some: enough relays have answered to show what comes from the ticket
+  // lists (tickets left, your own tickets), which keeps moving as the rest
+  // arrive. all: every relay has, or had its chance to. The first relays to
+  // answer often hold only some of the RSVPs, so counts of people going, the
+  // waiting list and anything issued wait for all.
   var loaded = { some: false, all: false };
   var listeners = [];
   var watching = false;
