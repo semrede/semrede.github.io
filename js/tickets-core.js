@@ -58,7 +58,10 @@
   // an entry is { n, pubkey, at, status, by }
   var tickets = new Map();
   var allEntries = [];
-  var loaded = { rsvps: false, ledger: false };
+  // some: enough relays have answered to show the numbers, which keep moving
+  // as the rest arrive. all: every relay has, or had its chance to; only then
+  // is anything issued.
+  var loaded = { some: false, all: false };
   var listeners = [];
   var watching = false;
   var scheduled = false;
@@ -226,7 +229,8 @@
 
     return {
       cap: CAP,
-      loaded: loaded.rsvps && loaded.ledger,
+      loaded: loaded.some || loaded.all,
+      complete: loaded.all,
       tickets: allEntries.slice(),
       // Two people with one number: only possible when two of the team issue
       // at the same second. /admin shows it so it can be sorted out by hand.
@@ -313,16 +317,39 @@
     if (watching) return;
     watching = true;
     var coords = cfg.EVENTS.map(function (e) { return e.coord; });
-    net.pool.subscribeMany(net.RELAYS, { kinds: [RSVP_KIND], '#a': coords, limit: 2000 }, {
-      onevent: addRsvp,
-      oneose: function () { loaded.rsvps = true; emit(); }
+    // One subscription per relay, so each relay's EOSE is seen on its own.
+    // Waiting for all of them made every visitor wait for the slowest relay
+    // (seconds just to connect to some) when half of them hold the same
+    // events and answer in well under a second.
+    var answered = 0;
+    var needed = Math.ceil(net.RELAYS.length / 2);
+    function answer() {
+      answered++;
+      if (answered >= needed) loaded.some = true;
+      if (answered >= net.RELAYS.length) loaded.all = true;
+      emit();
+    }
+    // Shared, so an event that several relays hold is checked and handled once.
+    var seen = new Set();
+    function alreadyHave(id) {
+      if (seen.has(id)) return true;
+      seen.add(id);
+      return false;
+    }
+    net.RELAYS.forEach(function (url) {
+      var done = false;
+      net.pool.subscribeMap([
+        { url: url, filter: { kinds: [RSVP_KIND], '#a': coords, limit: 2000 } },
+        // By d tag, not by author: the team can change while the page is open.
+        { url: url, filter: { kinds: [LEDGER_KIND], '#d': [D] } }
+      ], {
+        onevent: function (ev) { if (ev.kind === LEDGER_KIND) applyLedger(ev); else addRsvp(ev); },
+        oneose: function () { if (!done) { done = true; answer(); } },
+        alreadyHaveEvent: alreadyHave
+      });
     });
-    // By d tag, not by author: the team can change while the page is open.
-    net.pool.subscribeMany(net.RELAYS, { kinds: [LEDGER_KIND], '#d': [D] }, {
-      onevent: applyLedger,
-      oneose: function () { loaded.ledger = true; emit(); }
-    });
-    setTimeout(function () { loaded.rsvps = loaded.ledger = true; emit(); }, 8000);
+    setTimeout(function () { loaded.some = true; emit(); }, 3000);
+    setTimeout(function () { loaded.some = loaded.all = true; emit(); }, 8000);
     net.watchMuteList();
     net.onMuteChange(emit);
     if (mod) {
@@ -470,7 +497,7 @@
   // approve().
   function issueQueued() {
     var s = state();
-    if (!s.loaded || !isIssuer()) return Promise.resolve();
+    if (!s.complete || !isIssuer()) return Promise.resolve();
     if (!s.queued.length && !myPending().length) return Promise.resolve();
     return issue(s.queued);
   }

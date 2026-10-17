@@ -180,7 +180,7 @@
       : 'Counting...';
 
     var toSend = s.queuedSeats + core.myPending();
-    els.ticketsSend.hidden = !issuer || !s.loaded || !toSend;
+    els.ticketsSend.hidden = !issuer || !s.complete || !toSend;
     els.ticketsSend.textContent = 'Send ' + toSend + (toSend === 1 ? ' ticket' : ' tickets');
 
     els.waitingList.textContent = '';

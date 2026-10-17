@@ -79,7 +79,7 @@
       var group = r.numbers.length > 1 ? 'Group of ' + r.numbers.length + ': ' + core.labels(r.numbers) + '.' : 'One person.';
       return show('ok', 'Valid', group + (r.clash ? ' Careful: this number was given twice, ask the organizers.' : ''));
     }
-    if (!s.loaded || !patience) return show('checking', 'Checking...', 'Reading the ticket lists from the relays.');
+    if (!s.complete || !patience) return show('checking', 'Checking...', 'Reading the ticket lists from the relays.');
     if (r.status === 'revoked') return show('bad', 'Revoked', 'The organizers took this ticket back.');
     if (r.status === 'mismatch') return show('bad', 'Wrong account', 'This number belongs to somebody else.');
     show('bad', 'Not found', 'No ticket with this number was given to this account.');
