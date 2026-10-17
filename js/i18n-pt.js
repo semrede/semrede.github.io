@@ -184,6 +184,7 @@ window.SemRedeDict.pt = {
     'Rides & logistics': 'Boleias e logística',
     'part of the forum.': 'no fórum.',
     'What to bring': 'O que levar',
+    'A sleeping bag, even if you do not camp: there are beds for only 100 of the 200 people.': 'Um saco-cama, mesmo que não acampes: só há camas para 100 das 200 pessoas.',
     'Tent and sleeping gear if you camp, plus something warm: October nights in central Portugal get cold.': 'Tenda e saco-cama se acampares, e roupa quente: as noites de outubro no centro do país são frias.',
     'Boots or shoes you do not mind getting muddy, a torch, a water bottle.': 'Botas ou sapatos que possam apanhar lama, uma lanterna, um cantil.',
     'Whatever you want to show or work on: radios, antennas, boards, tools, seeds.': 'O que quiseres mostrar ou trabalhar: rádios, antenas, placas, ferramentas, sementes.',
