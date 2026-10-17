@@ -257,7 +257,7 @@ Only the resulting URL is written to the profile.
 
 ## Tickets
 
-The event is free, but there is room for 100 people, so entry is by ticket.
+The event is free, but there is room for 200 people, so entry is by ticket.
 `/tickets` (formerly `/registration`, which now redirects) uses NIP-52: two
 date-based calendar events (kind 31922) published once by the admin key with
 `node nostr-admin.mjs calendar`, and one RSVP per person and part (kind 31925,
@@ -282,7 +282,7 @@ The admin key and every
 moderator on the team can issue tickets, and each of them keeps their own public
 list, a kind 30078 event with `d = semrede-tickets-2026`:
 
-    ['cap', '100']
+    ['cap', '200']
     ['ticket', '<number>', <pubkey>, '<issued_at>', 'pending' | 'sent' | 'revoked']
 
 Every page merges the lists of the current team (the admin key plus the
@@ -302,9 +302,9 @@ out and as `sent` after, so a tab closed halfway sends the same number again
 rather than a new one. One message carries all of a person's numbers. If two of the team still manage to give one number to two
 people, `/admin` marks it "number given twice".
 
-After 100, people going wait on a list shown in `/admin`, in order of asking,
+After 200, people going wait on a list shown in `/admin`, in order of asking,
 and the admin or a moderator approves them one by one; their tickets number on
-from 101. Holders who stop going are flagged there and can be revoked. The rules
+from 201. Holders who stop going are flagged there and can be revoked. The rules
 live in `js/tickets-core.js`, which both pages load, and the limit in `TICKETS`
 in `js/nostr-config.js`.
 

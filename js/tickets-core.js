@@ -10,7 +10,7 @@
  * tickets. Each of them keeps their own public list, a kind 30078 event:
  *
  *   ['d', TICKETS.D]
- *   ['cap', '100']
+ *   ['cap', '200']
  *   ['ticket', '<number>', <pubkey>, '<issued_at>', 'pending' | 'sent' | 'revoked']
  *
  * and every page merges the lists of the current team, the same way the forum

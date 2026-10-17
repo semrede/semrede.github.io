@@ -55,7 +55,7 @@ window.SemRedeConfig = {
   // public kind 30078 events with this d tag (js/tickets-core.js). Past CAP,
   // people wait to be approved, and those tickets number on from CAP + 1.
   TICKETS: {
-    CAP: 100,
+    CAP: 200,
     PER_PERSON: 4,
     D: 'semrede-tickets-2026'
   },
